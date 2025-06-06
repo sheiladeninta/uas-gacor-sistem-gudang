@@ -8,6 +8,12 @@ from flask_graphql import GraphQLView
 from datetime import timedelta
 import os
 from dotenv import load_dotenv
+from werkzeug.security import check_password_hash, generate_password_hash
+import logging
+
+# Konfigurasi logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -40,41 +46,65 @@ app.add_url_rule(
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
+    logger.debug(f"Received registration request: {data}")
     
     # Validasi input
     if not all(k in data for k in ('user_id', 'nama', 'password')):
+        logger.error("Missing required fields")
         return jsonify({'error': 'Data tidak lengkap'}), 400
     
     # Cek apakah user_id sudah terdaftar
     if User.query.filter_by(user_id=data['user_id']).first():
+        logger.error(f"User ID already exists: {data['user_id']}")
         return jsonify({'error': 'User ID sudah terdaftar'}), 400
     
-    # Buat user baru
-    new_user = User(
-        user_id=data['user_id'],
-        nama=data['nama'],
-        password=data['password']
-    )
-    
     try:
+        # Hash password sebelum disimpan
+        hashed_password = generate_password_hash(data['password'])
+        logger.debug(f"Generated hashed password: {hashed_password}")
+        
+        # Buat user baru
+        new_user = User(
+            user_id=data['user_id'],
+            nama=data['nama'],
+            password=hashed_password
+        )
+        
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({'message': 'User berhasil dibuat'}), 201
+        
+        logger.info(f"User registered successfully: {data['user_id']}")
+        return jsonify({'message': 'Registrasi berhasil'}), 201
     except Exception as e:
         db.session.rollback()
+        logger.error(f"Registration error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
+    logger.debug(f"Received login request: {data}")
     
     # Validasi input
     if not all(k in data for k in ('user_id', 'password')):
+        logger.error("Missing required fields")
         return jsonify({'error': 'User ID dan password diperlukan'}), 400
     
     user = User.query.filter_by(user_id=data['user_id']).first()
+    logger.debug(f"Found user: {user}")
     
-    if not user or user.password != data['password']:
+    if not user:
+        logger.error(f"User not found: {data['user_id']}")
+        return jsonify({'error': 'User ID atau password salah'}), 401
+    
+    # Debug password check
+    logger.debug(f"Stored hashed password: {user.password}")
+    logger.debug(f"Checking password: {data['password']}")
+    password_check = check_password_hash(user.password, data['password'])
+    logger.debug(f"Password check result: {password_check}")
+    
+    if not password_check:
+        logger.error(f"Invalid password for user: {data['user_id']}")
         return jsonify({'error': 'User ID atau password salah'}), 401
     
     # Buat token
@@ -82,13 +112,16 @@ def login():
         identity={'user_id': user.user_id, 'nama': user.nama}
     )
     
-    return jsonify({
+    response_data = {
         'token': access_token,
         'user': {
             'user_id': user.user_id,
             'nama': user.nama
         }
-    }), 200
+    }
+    logger.debug(f"Login successful: {response_data}")
+    
+    return jsonify(response_data), 200
 
 @app.route('/profile', methods=['GET'])
 @jwt_required()
