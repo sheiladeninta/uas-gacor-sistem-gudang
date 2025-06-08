@@ -1,8 +1,11 @@
+import collections
+import collections.abc
+collections.Mapping = collections.abc.Mapping
+collections.Iterable = collections.abc.Iterable
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_graphql import GraphQLView
 from flask_cors import CORS
-from flask import send_from_directory
 import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
 from datetime import datetime
@@ -367,10 +370,13 @@ def get_order_status(order_number):
 def health_check():
     return jsonify({'status': 'healthy', 'service': 'order-service'})
 
-
-@app.route('/frontend/<path:filename>')
-def serve_frontend(filename):
-    return send_from_directory('frontend', filename)
+# CORS headers untuk frontend
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 if __name__ == '__main__':
     with app.app_context():
