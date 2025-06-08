@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .tab:hover {
+            background: rgba(79, 172, 254, 0.1);
+            color: #4facfe;
+        }
+        .tab.active {
+            color: #4facfe;
+            background: white;
+        }
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 1rem;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(56, 239, 125, 0.3);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.3);
+        }
+        .order-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid #4facfe;
+        }
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .order-number {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #4facfe;
+        }
+        .status-badge {
+            padding: 6px 16px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-processing { background: #cce5ff; color: #004085; }
+        .status-shipped { background: #e2e3e5; color: #383d41; }
+        .status-delivered { background: #d1ecf1; color: #0c5460; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+        .item-list {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .item:last-child {
+            border-bottom: none;
+        }
+        .item-name {
+            font-weight: 600;
+            color: #495057;
+        }
+        .item-quantity {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .items-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        .item-input {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #e9ecef;
+        }
+        .item-input-row {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr 1fr 1fr;
+            gap: 10px;
+            align-items: end;
+        }
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .item-input-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Order Management System</h1>
+            <p>Manage restaurant orders and track inventory requests</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('create-order')">Create Order</button>
+            <button class="tab" onclick="showTab('view-orders')">View Orders</button>
+            <button class="tab" onclick="showTab('track-order')">Track Order</button>
+        </div>
+
+        <!-- Create Order Tab -->
+        <div id="create-order" class="tab-content active">
+            <h2>Create New Order</h2>
+            <form id="orderForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="restaurantId">Restaurant ID</label>
+                        <input type="text" id="restaurantId" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="restaurantName">Restaurant Name</label>
+                        <input type="text" id="restaurantName" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="requestedDate">Requested Date</label>
+                        <input type="datetime-local" id="requestedDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes (Optional)</label>
+                        <textarea id="notes" class="form-control" rows="3" placeholder="Additional notes for this order..."></textarea>
+                    </div>
+                </div>
+
+                <div class="items-section">
+                    <h3>Order Items</h3>
+                    <div id="itemsList">
+                        <div class="item-input">
+                            <div class="item-input-row">
+                                <div class="form-group">
+                                    <label>Item Code</label>
+                                    <input type="text" class="form-control item-code" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Item Name</label>
+                                    <input type="text" class="form-control item-name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity</label>
+                                    <input type="number" class="form-control item-quantity" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Unit</label>
+                                    <select class="form-control item-unit" required>
+                                        <option value="">Select Unit</option>
+                                        <option value="kg">Kilogram</option>
+                                        <option value="g">Gram</option>
+                                        <option value="l">Liter</option>
+                                        <option value="ml">Milliliter</option>
+                                        <option value="pcs">Pieces</option>
+                                        <option value="box">Box</option>
+                                        <option value="pack">Pack</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-danger" onclick="removeItem(this)">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="addItem()">Add Another Item</button>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Order</button>
+            </form>
+        </div>
+
+        <!-- View Orders Tab -->
+        <div id="view-orders" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>All Orders</h2>
+                <button class="btn btn-primary" onclick="loadOrders()">Refresh</button>
+            </div>
+            
+            <div class="form-row" style="margin-bottom: 20px;">
+                <div class="form-group">
+                    <label for="filterRestaurant">Filter by Restaurant ID</label>
+                    <input type="text" id="filterRestaurant" class="form-control" placeholder="Enter restaurant ID...">
+                </div>
+                <div class="form-group">
+                    <label for="filterStatus">Filter by Status</label>
+                    <select id="filterStatus" class="form-control">
+                        <option value="">All Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="APPROVED">Approved</option>
+                        <option value="PROCESSING">Processing</option>
+                        <option value="SHIPPED">Shipped</option>
+                        <option value="DELIVERED">Delivered</option>
+                        <option value="REJECTED">Rejected</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="btn btn-warning" onclick="applyFilters()">Apply Filters</button>
+            
+            <div id="ordersList" class="loading">
+                <div class="spinner"></div>
+                <p>Loading orders...</p>
+            </div>
+        </div>
+
+        <!-- Track Order Tab -->
+        <div id="track-order" class="tab-content">
+            <h2>Track Order Status</h2>
+            <div class="form-group">
+                <label for="trackOrderNumber">Order Number</label>
+                <input type="text" id="trackOrderNumber" class="form-control" placeholder="Enter order number (e.g., ORD-20241208-0001)">
+            </div>
+            <button class="btn btn-primary" onclick="trackOrder()">Track Order</button>
+            
+            <div id="trackResult"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5002';
+        
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Load orders when view-orders tab is opened
+            if (tabName === 'view-orders') {
+                loadOrders();
+            }
+        }
+
+        // Add item functionality
+        function addItem() {
+            const itemsList = document.getElementById('itemsList');
+            const newItem = document.createElement('div');
+            newItem.className = 'item-input';
+            newItem.innerHTML = `
+                <div class="item-input-row">
+                    <div class="form-group">
+                        <label>Item Code</label>
+                        <input type="text" class="form-control item-code" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Item Name</label>
+                        <input type="text" class="form-control item-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" class="form-control item-quantity" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Unit</label>
+                        <select class="form-control item-unit" required>
+                            <option value="">Select Unit</option>
+                            <option value="kg">Kilogram</option>
+                            <option value="g">Gram</option>
+                            <option value="l">Liter</option>
+                            <option value="ml">Milliliter</option>
+                            <option value="pcs">Pieces</option>
+                            <option value="box">Box</option>
+                            <option value="pack">Pack</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-danger" onclick="removeItem(this)">Remove</button>
+                    </div>
+                </div>
+            `;
+            itemsList.appendChild(newItem);
+        }
+
+        // Remove item functionality
+        function removeItem(button) {
+            const itemsList = document.getElementById('itemsList');
+            if (itemsList.children.length > 1) {
+                button.closest('.item-input').remove();
+            } else {
+                alert('At least one item is required for an order.');
+            }
+        }
+
+        // Create order functionality
+        document.getElementById('orderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const restaurantId = document.getElementById('restaurantId').value;
+            const restaurantName = document.getElementById('restaurantName').value;
+            const requestedDate = document.getElementById('requestedDate').value;
+            const notes = document.getElementById('notes').value;
+            
+            // Collect items
+            const items = [];
+            document.querySelectorAll('.item-input').forEach(itemDiv => {
+                const code = itemDiv.querySelector('.item-code').value;
+                const name = itemDiv.querySelector('.item-name').value;
+                const quantity = parseInt(itemDiv.querySelector('.item-quantity').value);
+                const unit = itemDiv.querySelector('.item-unit').value;
+                
+                if (code && name && quantity && unit) {
+                    items.push({
+                        item_code: code,
+                        item_name: name,
+                        requested_quantity: quantity,
+                        unit: unit
+                    });
+                }
+            });
+            
+            if (items.length === 0) {
+                alert('Please add at least one item to the order.');
+                return;
+            }
+            
+            try {
+                const response = await axios.post(`${API_BASE_URL}/api/orders`, {
+                    restaurant_id: restaurantId,
+                    restaurant_name: restaurantName,
+                    requested_date: new Date(requestedDate).toISOString().slice(0, 19).replace('T', ' '),
+                    notes: notes,
+                    items: items
+                });
+                
+                if (response.data.success) {
+                    showAlert('success', `Order created successfully! Order Number: ${response.data.order_number}`);
+                    document.getElementById('orderForm').reset();
+                    // Keep only one item input
+                    const itemsList = document.getElementById('itemsList');
+                    while (itemsList.children.length > 1) {
+                        itemsList.removeChild(itemsList.lastChild);
+                    }
+                } else {
+                    showAlert('error', 'Failed to create order: ' + response.data.message);
+                }
+            } catch (error) {
+                console.error('Error creating order:', error);
+                showAlert('error', 'Failed to create order. Please check your connection.');
+            }
+        });
+
+        // Load orders functionality
+        async function loadOrders(restaurantId = '', status = '') {
+            const ordersList = document.getElementById('ordersList');
+            ordersList.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading orders...</p>
+                </div>
+            `;
+            
+            try {
+                let query = `
+                    query GetOrders($restaurantId: String, $status: String) {
+                        orders(restaurantId: $restaurantId, status: $status) {
+                            id
+                            orderNumber
+                            restaurantId
+                            restaurantName
+                            status
+                            totalItems
+                            notes
+                            requestedDate
+                            createdAt
+                            updatedAt
+                            items {
+                                itemCode
+                                itemName
+                                requestedQuantity
+                                approvedQuantity
+                                unit
+                            }
+                        }
+                    }
+                `;
+                
+                const variables = {};
+                if (restaurantId) variables.restaurantId = restaurantId;
+                if (status) variables.status = status;
+                
+                const response = await axios.post(`${API_BASE_URL}/graphql`, {
+                    query: query,
+                    variables: variables
+                });
+                
+                const orders = response.data.data.orders;
+                displayOrders(orders);
+                
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                ordersList.innerHTML = `
+                    <div class="alert alert-error">
+                        Failed to load orders. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        // Display orders
+        function displayOrders(orders) {
+            const ordersList = document.getElementById('ordersList');
+            
+            if (orders.length === 0) {
+                ordersList.innerHTML = `
+                    <div class="alert alert-success">
+                        No orders found matching your criteria.
+                    </div>
+                `;
+                return;
+            }
+            
+            ordersList.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-number">${order.orderNumber}</div>
+                            <div style="color: #6c757d; margin-top: 5px;">
+                                ${order.restaurantName} (ID: ${order.restaurantId})
+                            </div>
+                        </div>
+                        <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
+                    </div>
+                    
+                    <div style="margin-bottom: 10px;">
+                        <strong>Requested Date:</strong> ${new Date(order.requestedDate).toLocaleString()}
+                    </div>
+                    
+                    <div style="margin-bottom: 10px;">
+                        <strong>Total Items:</strong> ${order.totalItems}
+                    </div>
+                    
+                    ${order.notes ? `<div style="margin-bottom: 15px;"><strong>Notes:</strong> ${order.notes}</div>` : ''}
+                    
+                    <div class="item-list">
+                        <strong>Items:</strong>
+                        ${order.items.map(item => `
+                            <div class="item">
+                                <div>
+                                    <div class="item-name">${item.itemName}</div>
+                                    <div style="font-size: 0.9rem; color: #6c757d;">Code: ${item.itemCode}</div>
+                                </div>
+                                <div class="item-quantity">
+                                    ${item.requestedQuantity} ${item.unit}
+                                    ${item.approvedQuantity > 0 ? `<br><small style="color: #28a745;">Approved: ${item.approvedQuantity} ${item.unit}</small>` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div style="margin-top: 15px; text-align: right;">
+                        <small style="color: #6c757d;">
+                            Created: ${new Date(order.createdAt).toLocaleString()} | 
+                            Updated: ${new Date(order.updatedAt).toLocaleString()}
+                        </small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const restaurantId = document.getElementById('filterRestaurant').value;
+            const status = document.getElementById('filterStatus').value;
+            loadOrders(restaurantId, status);
+        }
+
+        // Track order
+        async function trackOrder() {
+            const orderNumber = document.getElementById('trackOrderNumber').value.trim();
+            const trackResult = document.getElementById('trackResult');
+            
+            if (!orderNumber) {
+                showAlert('error', 'Please enter an order number.');
+                return;
+            }
+            
+            trackResult.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Tracking order...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await axios.get(`${API_BASE_URL}/api/orders/${orderNumber}/status`);
+                
+                if (response.data.success) {
+                    const order = response.data;
+                    trackResult.innerHTML = `
+                        <div class="order-card" style="margin-top: 20px;">
+                            <div class="order-header">
+                                <div>
+                                    <div class="order-number">${order.order_number}</div>
+                                    <div style="color: #6c757d; margin-top: 5px;">
+                                        ${order.restaurant_name} (ID: ${order.restaurant_id})
+                                    </div>
+                                </div>
+                                <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <strong>Created:</strong> ${new Date(order.created_at).toLocaleString()}<br>
+                                <strong>Last Updated:</strong> ${new Date(order.updated_at).toLocaleString()}
+                            </div>
+                            
+                            <div class="item-list">
+                                <strong>Items:</strong>
+                                ${order.items.map(item => `
+                                    <div class="item">
+                                        <div>
+                                            <div class="item-name">${item.item_name}</div>
+                                            <div style="font-size: 0.9rem; color: #6c757d;">Code: ${item.item_code}</div>
+                                        </div>
+                                        <div class="item-quantity">
+                                            ${item.requested_quantity} ${item.unit}
+                                            ${item.approved_quantity > 0 ? `<br><small style="color: #28a745;">Approved: ${item.approved_quantity} ${item.unit}</small>` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    trackResult.innerHTML = `
+                        <div class="alert alert-error" style="margin-top: 20px;">
+                            Order not found. Please check the order number and try again.
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error tracking order:', error);
+                trackResult.innerHTML = `
+                    <div class="alert alert-error" style="margin-top: 20px;">
+                        Failed to track order. Please check your connection and try again.
+                    </div>
+                `;
+            }
+        }
+
+        // Show alert
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'error'}`;
+            alertDiv.textContent = message;
+            
+            const container = document.querySelector('.tab-content.active');
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            // Remove alert after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Set default datetime to current time + 1 hour
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            now.setHours(now.getHours() + 1);
+            const dateTimeString = now.toISOString().slice(0, 16);
+            document.getElementById('requestedDate').value = dateTimeString;
+        });
+    </script>
+</body>
+</html>
