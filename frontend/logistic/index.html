@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistic Management Service</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Basic Styling */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-radius: 10px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+        }
+
+        .service-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 10px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        #logistic-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        /* View Items Section */
+        #view-items-section {
+            display: none;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 15px;
+        }
+
+        .items-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-card h3 {
+            font-size: 1.5rem;
+        }
+
+        .item-card p {
+            font-size: 1rem;
+            color: #666;
+        }
+
+        /* Create Order Section */
+        #create-order-section {
+            display: none;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 15px;
+        }
+
+        #orderForm label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        #orderForm input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+        }
+
+        #orderForm button {
+            background: #4facfe;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+
+        #orderForm button:hover {
+            background: #00f2fe;
+        }
+
+        /* Back Button Style */
+        button {
+            background: #ff6347;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background: #ff4500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Logistic Management</h1>
+            <p>Manage item details, specifications, and categorize products.</p>
+        </header>
+
+        <section id="logistic-dashboard">
+            <!-- Card to view items -->
+            <div class="service-card" onclick="showViewItems()">
+                <h2>View Items</h2>
+                <p>Browse all items in the catalog.</p>
+            </div>
+
+            <!-- Card to create order -->
+            <div class="service-card" onclick="showCreateOrder()">
+                <h2>Create Order</h2>
+                <p>Manage and create new orders for logistics.</p>
+            </div>
+        </section>
+
+        <!-- View Items Section -->
+        <section id="view-items-section">
+            <h2>Items in Catalog</h2>
+            <div id="items-list" class="items-list"></div>
+            <button onclick="showDashboard()">Back to Dashboard</button>
+        </section>
+
+        <!-- Create Order Section -->
+        <section id="create-order-section">
+            <h2>Create Order</h2>
+            <form id="orderForm">
+                <label for="item_id">Item ID:</label>
+                <input type="number" id="item_id" name="item_id" required>
+
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" required>
+
+                <label for="reference">Reference:</label>
+                <input type="text" id="reference" name="reference" required>
+
+                <button type="submit">Create Order</button>
+            </form>
+            <button onclick="showDashboard()">Back to Dashboard</button>
+        </section>
+
+        <div class="footer">
+            <p>&copy; 2024 Logistic Management System. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        // Function to show View Items Section
+        function showViewItems() {
+            document.getElementById('logistic-dashboard').style.display = 'none';
+            document.getElementById('view-items-section').style.display = 'block';
+            loadItems();
+        }
+
+        // Function to show Create Order Section
+        function showCreateOrder() {
+            document.getElementById('logistic-dashboard').style.display = 'none';
+            document.getElementById('create-order-section').style.display = 'block';
+        }
+
+        // Function to go back to the Dashboard
+        function showDashboard() {
+            document.getElementById('logistic-dashboard').style.display = 'grid';
+            document.getElementById('view-items-section').style.display = 'none';
+            document.getElementById('create-order-section').style.display = 'none';
+        }
+
+        // Load all items from the Logistic Service API
+        async function loadItems() {
+            try {
+                const response = await axios.get('http://localhost:5003/logistic/all-items'); // Modify with the correct API endpoint
+                const items = response.data;
+                const itemsList = document.getElementById('items-list');
+                itemsList.innerHTML = '';  // Clear loading state
+
+                // Display all items
+                items.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'item-card';
+                    itemElement.innerHTML = `
+                        <h3>${item.name}</h3>
+                        <p>Item Code: ${item.item_code}</p>
+                        <p>Quantity: ${item.quantity}</p>
+                        <p>Location: ${item.location}</p>
+                    `;
+                    itemsList.appendChild(itemElement);
+                });
+            } catch (error) {
+                console.error('Error fetching items:', error);
+            }
+        }
+
+        // Handle form submission for creating an order
+        document.getElementById('orderForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const item_id = document.getElementById('item_id').value;
+            const quantity = document.getElementById('quantity').value;
+            const reference = document.getElementById('reference').value;
+
+            // Menggunakan template literal untuk membuat string mutation
+            const mutation = `
+                mutation {
+                    createOrder(itemId: ${item_id}, quantity: ${quantity}, reference: "${reference}") {
+                        order {
+                            orderId
+                            itemId
+                            quantity
+                            reference
+                            status
+                            createdAt
+                        }
+                    }
+                }
+            `;
+
+            try {
+                // Mengirimkan query mutation ke server GraphQL
+                const response = await axios.post('http://localhost:5003/graphql', {
+                    query: mutation
+                });
+
+                console.log('Order created:', response.data);
+                if (response.data.errors) {
+                    console.log('GraphQL Errors:', response.data.errors);  // Menangani error jika ada
+                    alert('Error creating order: ' + response.data.errors[0].message);
+                } else {
+                    alert('Order created successfully!');
+                    showDashboard(); // Kembali ke dashboard setelah berhasil membuat order
+                }
+            } catch (error) {
+                console.error('Error creating order:', error);
+                alert('Error creating order');
+            }
+        });
+
+        // Initial setup to show the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            showDashboard();
+        });
+    </script>
+</body>
+</html>

@@ -198,9 +198,9 @@
                 </div>
             </div>
 
-            <div class="service-card item-card" onclick="navigateToService('items')">
+            <div class="service-card logistic-card" onclick="navigateToService('logistic')">
                 <span class="service-icon">🏷️</span>
-                <div class="service-title">Item Management</div>
+                <div class="service-title">Logistic Management</div>
                 <div class="service-description">
                     Manage product catalog, item details, specifications, and categorization.
                 </div>
@@ -251,10 +251,10 @@
                 name: 'Inventory Service',
                 path: '/inventory/'
             },
-            items: {
+            logistic: {
                 url: 'http://localhost:5003',
-                name: 'Item Service',
-                path: '/items/'
+                name: 'Logistic Management Service',
+                path: '/logistic/'
             },
             qc: {
                 url: 'http://localhost:5004',
@@ -282,10 +282,10 @@
             const statsGrid = document.getElementById('statsGrid');
             
             try {
-                const stats = await Promise.allSettled([
+                const stats = await Promise.allSettled([ 
                     checkServiceHealth('orders'),
                     checkServiceHealth('inventory'),
-                    checkServiceHealth('items'),
+                    checkServiceHealth('logistic'),
                     checkServiceHealth('qc'),
                     checkServiceHealth('users')
                 ]);

@@ -9,7 +9,7 @@ class Config:
     if not os.path.exists(os.path.dirname(db_path)):
         os.makedirs(os.path.dirname(db_path))
 
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{db_path}"  # Gunakan URL encoding untuk path yang mengandung spasi
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///instance/inventory-service.db' # Gunakan URL encoding untuk path yang mengandung spasi
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key')  # Ganti dengan SECRET_KEY yang aman jika di produksi
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'mysecretkey'  # Ganti dengan SECRET_KEY yang aman jika di produksi
     print(f"Database path: {db_path}")  # Untuk memastikan path database
