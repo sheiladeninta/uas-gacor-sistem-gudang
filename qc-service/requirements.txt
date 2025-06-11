@@ -1,0 +1,6 @@
+flask==2.1.2
+graphene==2.1.9
+flask-graphql==2.0.1
+graphql-core==2.3.2
+flask-sqlalchemy==2.5.1
+graphene-sqlalchemy==2.1.2
