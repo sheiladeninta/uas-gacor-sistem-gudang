@@ -9,7 +9,7 @@ from graphene import ObjectType, String, Schema, Int, Field, List, Mutation
 from datetime import datetime
 import requests
 import os
-from models import db, Item, Order
+from models import db, Item, Order, LogisticRequest  # Pastikan model LogisticRequest sudah ada
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -86,8 +86,8 @@ class CreateOrder(Mutation):
         return CreateOrder(order=order)
 
     def create_inventory_inbound_log(self, item_id, quantity, reference):
-        # Integrate with Inventory Service
-        inventory_service_url = 'http://localhost:5003/graphql'  # URL of Inventory Service
+        # Integrasi dengan Inventory Service
+        inventory_service_url = 'http://localhost:5003/graphql'  # URL dari Inventory Service
 
         mutation = '''
         mutation {
@@ -111,11 +111,13 @@ class CreateOrder(Mutation):
         ''' % (item_id, quantity, reference)
 
         try:
+            # Mengirimkan permintaan ke Inventory Service
             response = requests.post(inventory_service_url, json={'query': mutation})
-            response.raise_for_status()  # If the request fails, it will raise an exception
+            response.raise_for_status()  # Jika permintaan gagal, akan raise exception
             print("Inventory inbound log created successfully")
         except Exception as e:
             print(f"Error creating inventory log: {e}")
+
 
 # Mutation to create an order
 class Mutation(ObjectType):
@@ -147,18 +149,21 @@ def serve_logistic_static(path):
 with app.app_context():
     db.create_all()  # Create tables for the models if they do not exist
 
-# Create a route for creating an order manually via REST
 @app.route('/logistic/create-order', methods=['POST'])
 def create_order():
     data = request.get_json()
+    
+    # Mengambil data dari body request
     item_id = data.get('item_id')
     quantity = data.get('quantity')
     reference = data.get('reference')
 
+    # Cek apakah item ada di database
     item = Item.query.get(item_id)
     if not item:
         return jsonify({'error': 'Item not found'}), 404
 
+    # Membuat order baru
     order = Order(
         item_id=item_id,
         quantity=quantity,
@@ -166,16 +171,64 @@ def create_order():
         created_at=datetime.utcnow(),
         status="pending"
     )
-    db.session.add(order)
-    db.session.commit()
+    
+    try:
+        db.session.add(order)
+        db.session.commit()  # Menyimpan ke database
+        print(f"Order Created: {order.order_id}")  # Log di server
 
-    # Setelah order dibuat, bisa integrasi dengan inventory service
-    return jsonify({'message': 'Order created successfully', 'order_id': order.order_id}), 201
+        # Mengintegrasi dengan Inventory Service untuk membuat log inbound
+        create_inventory_inbound_log(item_id, quantity, reference)
+
+        return jsonify({'message': 'Order created successfully', 'order_id': order.order_id}), 201
+
+    except Exception as e:
+        db.session.rollback()  # Rollback jika terjadi error
+        print(f"Error creating order: {e}")
+        return jsonify({'error': 'Error creating order'}), 500
+
 
 @app.route('/logistic/view-orders', methods=['GET'])
 def view_orders():
     orders = Order.query.all()
     return jsonify([order.to_dict() for order in orders])  # Pastikan ada to_dict() atau serialize function di model Order
+
+@app.route('/api/logistic/requests', methods=['GET'])
+def get_logistic_requests():
+    requests = LogisticRequest.query.all()
+    return jsonify([req.serialize() for req in requests])
+
+@app.route('/api/logistic/request', methods=['POST'])
+def create_logistic_request():
+    data = request.get_json()
+
+    # Membuat permintaan baru
+    new_request = LogisticRequest(
+        item_id=data['item_id'],
+        quantity=data['quantity'],
+        reference=data['reference'],
+        created_by=data['created_by'],
+    )
+
+    db.session.add(new_request)
+    db.session.commit()
+
+    # Kirim permintaan ke Inventory Service
+    response = requests.post('http://inventory-service-url/api/inventory/logs', json={
+        'item_id': data['item_id'],
+        'log_type': 'request',
+        'quantity': data['quantity'],
+        'reference': data['reference'],
+        'created_by': data['created_by'],
+        'status': 'pending'
+    })
+
+    if response.status_code == 201:
+        return jsonify({"message": "Request created and sent to Inventory Service"}), 201
+    else:
+        db.session.rollback()
+        return jsonify({"error": "Failed to send request to Inventory Service"}), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)  # Run the application on port 5002

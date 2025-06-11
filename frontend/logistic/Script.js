@@ -1,62 +1,69 @@
-// Service configuration for logistic service
-const SERVICES = {
-    'view-items': {
-        url: 'http://localhost:5003/graphql',  // Change to your logistic service URL
-        path: '/logistic/view-items'
-    },
-    'create-order': {
-        url: 'http://localhost:5003/graphql',  // Same as above
-        path: '/logistic/create-order'
-    }
-};
+// Fungsi untuk muat order
+document.getElementById('loadOrdersBtn').addEventListener('click', function() {
+    fetch('/api/logistic/requests')  // API untuk mendapatkan requests
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector('#ordersTable tbody');
+            tableBody.innerHTML = '';  // Clear previous data
 
-// Function to navigate to a specific service's page
-// Navigasi ke halaman yang sesuai berdasarkan kartu yang diklik
-function navigateToService(serviceName) {
-    if (serviceName === 'view-items') {
-        // Arahkan ke halaman untuk melihat semua item
-        window.location.href = 'view-items.html';
-    } else if (serviceName === 'create-order') {
-        // Arahkan ke halaman untuk membuat order
-        window.location.href = 'create-order.html';
-    }
-}
+            data.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.orderId}</td>
+                    <td>${order.itemId}</td>
+                    <td>${order.quantity}</td>
+                    <td>${order.reference}</td>
+                    <td>${order.status}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => console.error('Error fetching orders:', error));
+});
 
-// Function untuk handle create order
-async function createOrder() {
-    // Ambil data yang diperlukan dari form atau input
-    const item_id = document.getElementById('item_id').value;
-    const quantity = document.getElementById('quantity').value;
-    const reference = document.getElementById('reference').value;
+// Fungsi untuk muat requests
+document.getElementById('loadRequestsBtn').addEventListener('click', function() {
+    fetch('/api/logistic/requests')  // API untuk mendapatkan requests
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector('#requestsTable tbody');
+            tableBody.innerHTML = '';  // Clear previous data
 
-    const mutation = `
-    mutation {
-        createOrder(itemId: ${item_id}, quantity: ${quantity}, reference: "${reference}") {
-            order {
-                orderId
-                itemId
-                quantity
-                reference
-                status
-                createdAt
-            }
-        }
-    }
-    `;
-    
-    try {
-        const response = await axios.post('http://localhost:5003/graphql', {
-            query: mutation
-        });
+            data.forEach(request => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${request.id}</td>
+                    <td>${request.itemId}</td>
+                    <td>${request.quantity}</td>
+                    <td>${request.reference}</td>
+                    <td>${request.status}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => console.error('Error fetching requests:', error));
+});
 
-        console.log('Order created:', response.data);
+// Fungsi untuk membuat order baru
+document.getElementById('createOrderForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const newOrder = {
+        item_id: document.getElementById('item_id').value,
+        quantity: document.getElementById('quantity').value,
+        reference: document.getElementById('reference').value
+    };
+
+    fetch('/logistic/create-order', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newOrder)
+    })
+    .then(response => response.json())
+    .then(data => {
         alert('Order created successfully!');
-    } catch (error) {
-        console.error('Error creating order:', error);
-        alert('Error creating order');
-    }
-}
-
-
-
-// This function can also be expanded to fetch real-time data from your service for "view-items" or "create-order".
+    })
+    .catch(error => console.error('Error creating order:', error));
+});

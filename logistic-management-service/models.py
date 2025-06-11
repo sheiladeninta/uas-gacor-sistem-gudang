@@ -48,3 +48,32 @@ class Order(db.Model):
             'status': self.status,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S')  # Format datetime if needed
         }
+
+
+# Model LogisticRequest
+class LogisticRequest(db.Model):
+    __tablename__ = 'logistic_requests'
+    id = db.Column(db.Integer, primary_key=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('item.item_id'))  # Memperbaiki referensi ke 'item_id' di tabel Item
+    quantity = db.Column(db.Integer)
+    reference = db.Column(db.String(100))  # Referensi seperti nomor permintaan
+    status = db.Column(db.String(50), default='pending')  # Statusnya 'pending' untuk permintaan baru
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_by = db.Column(db.Integer)
+
+    # Relasi dengan Item (mengarah ke Item)
+    item = db.relationship('Item', backref=db.backref('logistic_requests', lazy=True))
+
+    def __repr__(self):
+        return f'<LogisticRequest {self.reference} - Item {self.item_id}>'
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'item_id': self.item_id,
+            'quantity': self.quantity,
+            'reference': self.reference,
+            'status': self.status,
+            'created_at': self.created_at.isoformat(),
+            'created_by': self.created_by
+        }

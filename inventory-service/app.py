@@ -50,22 +50,23 @@ class InventoryStatusType(ObjectType):
     last_updated = String()
 
 class Query(ObjectType):
-    all_inventory = List(InventoryItemType)
-    inventory_item = Field(InventoryItemType, id=Int(required=True))
-    all_inventory_logs = List(InventoryLogType)
-    inventory_status = Field(InventoryStatusType, item_id=Int(required=True))
+    allInventory = List(InventoryItemType)
+    inventoryItem = Field(InventoryItemType, id=Int(required=True))
+    allInventoryLogs = List(InventoryLogType)
+    inventoryStatus = Field(InventoryStatusType, item_id=Int(required=True))
 
-    def resolve_all_inventory(self, info):
+    def resolve_allInventory(self, info):
         return InventoryItem.query.all()
 
-    def resolve_inventory_item(self, info, id):
+    def resolve_inventoryItem(self, info, id):
         return InventoryItem.query.get(id)
 
-    def resolve_all_inventory_logs(self, info):
+    def resolve_allInventoryLogs(self, info):
         return InventoryLog.query.all()
 
-    def resolve_inventory_status(self, info, item_id):
+    def resolve_inventoryStatus(self, info, item_id):
         return InventoryStatus.query.filter_by(item_id=item_id).first()
+
 
 
 # app.py
@@ -152,6 +153,7 @@ def serve_index():
 def serve_static_files(path):
     return send_from_directory(app.static_folder, path)
 
+# Endpoint untuk inbound inventory (barang masuk)
 @app.route('/inventory/inbound', methods=['POST'])
 def inbound_inventory():
     data = request.get_json()
@@ -161,7 +163,6 @@ def inbound_inventory():
     reference = data.get('reference')
     created_by = data.get('created_by')
 
-    # Cek jika item_id valid
     item = InventoryItem.query.get(item_id)
     if not item:
         return jsonify({"error": "Item not found"}), 404
@@ -190,7 +191,7 @@ def inbound_inventory():
 
     return jsonify({"message": "Inventory updated successfully"}), 200
 
-
+# Endpoint untuk outbound inventory (barang keluar)
 @app.route('/inventory/outbound', methods=['POST'])
 def outbound_inventory():
     data = request.get_json()
@@ -200,7 +201,6 @@ def outbound_inventory():
     reference = data.get('reference')
     created_by = data.get('created_by')
 
-    # Cek jika item_id valid
     item = InventoryItem.query.get(item_id)
     if not item:
         return jsonify({"error": "Item not found"}), 404
@@ -227,6 +227,150 @@ def outbound_inventory():
     db.session.commit()
 
     return jsonify({"message": "Inventory updated successfully"}), 200
+
+
+# Endpoint untuk menambahkan item
+@app.route('/api/inventory', methods=['POST'])
+def add_inventory_item():
+    data = request.get_json()
+    new_item = InventoryItem(
+        item_code=data['item_code'],
+        name=data['name'],
+        quantity=data['quantity'],
+        description=data['description'],
+        unit=data['unit'],
+        min_stor=data['min_stor'],
+        location=data['location']
+    )
+    db.session.add(new_item)
+    db.session.commit()
+    return jsonify({"message": "Item added successfully!"}), 201
+
+# Endpoint untuk mendapatkan semua item inventory
+@app.route('/api/inventory', methods=['GET', 'POST'])
+def manage_inventory():
+    if request.method == 'GET':
+        # Mengambil semua item dari database dan mengonversinya ke format JSON menggunakan serialize()
+        items = InventoryItem.query.all()
+        return jsonify([item.serialize() for item in items])  # Gunakan serialize() untuk mengubah objek menjadi JSON
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        new_item = InventoryItem(
+            item_code=data['item_code'],
+            name=data['name'],
+            quantity=data['quantity'],
+            description=data['description'],
+            unit=data['unit'],
+            min_stor=data['min_stor'],
+            location=data['location']
+        )
+        db.session.add(new_item)
+        db.session.commit()
+        return jsonify(new_item.serialize()), 201
+
+
+# Endpoint untuk memperbarui item
+@app.route('/api/inventory/<int:item_id>', methods=['PUT'])
+def update_inventory_item(item_id):
+    item = InventoryItem.query.get_or_404(item_id)
+    data = request.get_json()
+    item.quantity = data['quantity']
+    db.session.commit()
+    return jsonify(item.serialize())
+
+# Endpoint untuk mendapatkan semua logs inventory
+@app.route('/api/inventory/logs', methods=['GET'])
+def get_inventory_logs():
+    logs = InventoryLog.query.all()
+    return jsonify([log.serialize() for log in logs])  # Menggunakan serialize() pada model InventoryLog
+
+# Endpoint untuk mendapatkan semua status inventory
+@app.route('/api/inventory/status', methods=['GET'])
+def get_inventory_status():
+    status = InventoryStatus.query.all()
+    return jsonify([status_item.serialize() for status_item in status])  # Menggunakan serialize() pada model InventoryStatus
+
+# Endpoint untuk menerima request barang dari logistic service
+@app.route('/api/inventory/request', methods=['POST'])
+def request_inventory():
+    data = request.get_json()
+    item_id = data.get('item_id')
+    quantity = data.get('quantity')
+    reference = data.get('reference')
+    created_by = data.get('created_by')  # ID of the user creating the request
+
+    # Cek apakah item tersedia
+    item = InventoryItem.query.get(item_id)
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+
+    # Membuat log permintaan
+    log = InventoryLog(
+        item_id=item_id,
+        log_type='request',  # Menandakan bahwa ini adalah permintaan
+        quantity=quantity,
+        reference=reference,
+        created_by=created_by,
+        created_at=datetime.utcnow(),
+        status='pending'  # Status awal adalah pending
+    )
+
+    db.session.add(log)
+    db.session.commit()
+
+    return jsonify({"message": "Request submitted successfully!", "log_id": log.log_id}), 201
+
+# Endpoint untuk approve request barang
+@app.route('/api/inventory/approve', methods=['POST'])
+def approve_inventory_request():
+    data = request.get_json()
+    log_id = data.get('log_id')
+    approved_quantity = data.get('approved_quantity')
+
+    if approved_quantity <= 0:
+        return jsonify({"error": "Approved quantity must be greater than zero"}), 400
+
+    # Mencari log yang sesuai
+    log = InventoryLog.query.get(log_id)
+    if not log:
+        return jsonify({"error": "Log not found"}), 404
+
+    if log.status != 'pending':
+        return jsonify({"error": "Request already processed"}), 400
+
+    # Memperbarui status log menjadi approved
+    log.status = 'approved'
+
+    # Update inventory status
+    inventory_status = InventoryStatus.query.get(log.item_id)
+    if inventory_status:
+        if inventory_status.current_stock >= approved_quantity:
+            # Update stok barang
+            inventory_status.current_stock -= approved_quantity
+            inventory_status.last_updated = datetime.utcnow()
+
+            # Menambahkan log outbound (pengiriman barang)
+            outbound_log = InventoryLog(
+                item_id=log.item_id,
+                log_type='outbound',
+                quantity=approved_quantity,
+                reference=log.reference,
+                created_by=log.created_by,
+                created_at=datetime.utcnow(),
+                status='approved'
+            )
+            db.session.add(outbound_log)
+
+            # Commit semua perubahan dalam satu batch
+            db.session.commit()
+
+            return jsonify({"message": "Request approved and inventory updated"}), 200
+        else:
+            return jsonify({"error": "Insufficient stock"}), 400
+    else:
+        return jsonify({"error": "Inventory status not found"}), 404
+
 
 # Create all tables if they don't exist
 with app.app_context():
