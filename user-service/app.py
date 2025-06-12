@@ -1,3 +1,7 @@
+import collections
+import collections.abc
+collections.Mapping = collections.abc.Mapping
+collections.Iterable = collections.abc.Iterable
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_graphql import GraphQLView
