@@ -221,7 +221,7 @@
         </div>
 
         <div class="main-nav">
-            <div class="service-card order-card" onclick="navigateToService('orders')">
+            <div class="service-card order-card" onclick="navigateToService('order')">
                 <span class="service-icon">📋</span>
                 <div class="service-title">Order Management</div>
                 <div class="service-description">
@@ -280,10 +280,10 @@
     <script>
         // Service configuration
         const SERVICES = {
-            orders: {
+            order: {
                 url: 'http://localhost:5002',
                 name: 'Order Service',
-                path: '/orders/'
+                path: '/order/'
             },
             inventory: {
                 url: 'http://localhost:5001',
@@ -342,7 +342,7 @@
             
             try {
                 const stats = await Promise.allSettled([
-                    checkServiceHealth('orders'),
+                    checkServiceHealth('order'),
                     checkServiceHealth('inventory'),
                     checkServiceHealth('items'),
                     checkServiceHealth('qc'),
