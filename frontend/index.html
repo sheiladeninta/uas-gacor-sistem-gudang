@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Warehouse Management System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+    <script>
+        // Cek status login
+        window.onload = function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'user/index.html';
+                return;
+            }
+            // Tampilkan nama user
+            const userName = localStorage.getItem('userName');
+            if (userName) {
+                document.getElementById('userName').textContent = userName;
+            }
+        }
+    </script>
     <style>
         * {
             margin: 0;
@@ -221,29 +236,29 @@
         </div>
 
         <div class="main-nav">
-            <div class="service-card order-card" onclick="navigateToService('orders')">
+            <a href="order-service.html" class="service-card order-card">
                 <span class="service-icon">📋</span>
                 <div class="service-title">Order Management</div>
                 <div class="service-description">
                     Create, track, and manage restaurant orders. Handle order status updates and inventory requests.
                 </div>
-            </div>
+            </a>
 
-            <div class="service-card inventory-card" onclick="navigateToService('inventory')">
+            <a href="#" class="service-card inventory-card" onclick="navigateToService('inventory')">
                 <span class="service-icon">📦</span>
                 <div class="service-title">Inventory Management</div>
                 <div class="service-description">
                     Monitor stock levels, track inventory movements, and manage warehouse capacity.
                 </div>
-            </div>
+            </a>
 
-            <div class="service-card item-card" onclick="navigateToService('items')">
+            <a href="#" class="service-card item-card" onclick="navigateToService('items')">
                 <span class="service-icon">🏷️</span>
                 <div class="service-title">Item Management</div>
                 <div class="service-description">
                     Manage product catalog, item details, specifications, and categorization.
                 </div>
-            </div>
+            </a>
 
             <div class="service-card qc-card" onclick="navigateToService('qc')">
                 <span class="service-icon">🔍</span>
@@ -325,6 +340,7 @@
         function handleLogout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            localStorage.removeItem('userName');
             window.location.href = '/user/';
         }
 
