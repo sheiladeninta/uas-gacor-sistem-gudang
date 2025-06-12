@@ -1,69 +1,119 @@
-// Fungsi untuk muat order
-document.getElementById('loadOrdersBtn').addEventListener('click', function() {
-    fetch('/api/logistic/requests')  // API untuk mendapatkan requests
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.querySelector('#ordersTable tbody');
-            tableBody.innerHTML = '';  // Clear previous data
+// URL API untuk Logistic Service dan Inventory Service
+const logisticServiceUrl = 'http://localhost:5002/graphql';
+const inventoryServiceUrl = 'http://localhost:5003/graphql';
 
-            data.forEach(order => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${order.orderId}</td>
-                    <td>${order.itemId}</td>
-                    <td>${order.quantity}</td>
-                    <td>${order.reference}</td>
-                    <td>${order.status}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        })
-        .catch(error => console.error('Error fetching orders:', error));
-});
-
-// Fungsi untuk muat requests
-document.getElementById('loadRequestsBtn').addEventListener('click', function() {
-    fetch('/api/logistic/requests')  // API untuk mendapatkan requests
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.querySelector('#requestsTable tbody');
-            tableBody.innerHTML = '';  // Clear previous data
-
-            data.forEach(request => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${request.id}</td>
-                    <td>${request.itemId}</td>
-                    <td>${request.quantity}</td>
-                    <td>${request.reference}</td>
-                    <td>${request.status}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        })
-        .catch(error => console.error('Error fetching requests:', error));
-});
-
-// Fungsi untuk membuat order baru
-document.getElementById('createOrderForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const newOrder = {
-        item_id: document.getElementById('item_id').value,
-        quantity: document.getElementById('quantity').value,
-        reference: document.getElementById('reference').value
-    };
-
-    fetch('/logistic/create-order', {
+// Memuat daftar item dari Inventory Service
+document.getElementById('loadItemsBtn').addEventListener('click', () => {
+    fetch(inventoryServiceUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(newOrder)
+        body: JSON.stringify({
+            query: `
+                query {
+                    allInventory {
+                        id
+                        itemCode
+                        name
+                        description
+                        unit
+                        minStor
+                        location
+                    }
+                }
+            `
+        })
     })
     .then(response => response.json())
     .then(data => {
-        alert('Order created successfully!');
+        const items = data.data.allInventory;
+        const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
+        itemsTable.innerHTML = ''; // Kosongkan tabel sebelumnya
+
+        items.forEach(item => {
+            let row = itemsTable.insertRow();
+            row.insertCell(0).textContent = item.itemCode;
+            row.insertCell(1).textContent = item.name;
+            row.insertCell(2).textContent = item.description;
+            row.insertCell(3).textContent = item.unit;
+            row.insertCell(4).textContent = item.minStor;
+            row.insertCell(5).textContent = item.location;
+        });
+    })
+    .catch(error => console.error('Error fetching items:', error));
+});
+
+// Menambahkan order baru ke Logistic Service
+document.getElementById('createOrderForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const itemId = document.getElementById('orderItemId').value;
+    const quantity = document.getElementById('orderQuantity').value;
+    const reference = document.getElementById('orderReference').value;
+
+    fetch(logisticServiceUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            query: `
+                mutation {
+                    createOrder(itemId: ${itemId}, quantity: ${quantity}, reference: "${reference}") {
+                        orderId
+                        itemId
+                        quantity
+                        reference
+                        status
+                        createdAt
+                    }
+                }
+            `
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Order created successfully');
+        console.log(data);
     })
     .catch(error => console.error('Error creating order:', error));
+});
+
+// Memuat daftar order dari Logistic Service
+document.getElementById('loadOrdersBtn').addEventListener('click', () => {
+    fetch(logisticServiceUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            query: `
+                query {
+                    allOrders {
+                        orderId
+                        itemId
+                        quantity
+                        reference
+                        status
+                    }
+                }
+            `
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const orders = data.data.allOrders;
+        const ordersTable = document.getElementById('ordersTable').getElementsByTagName('tbody')[0];
+        ordersTable.innerHTML = ''; // Kosongkan tabel sebelumnya
+
+        orders.forEach(order => {
+            let row = ordersTable.insertRow();
+            row.insertCell(0).textContent = order.orderId;
+            row.insertCell(1).textContent = order.itemId;
+            row.insertCell(2).textContent = order.quantity;
+            row.insertCell(3).textContent = order.reference;
+            row.insertCell(4).textContent = order.status;
+        });
+    })
+    .catch(error => console.error('Error fetching orders:', error));
 });

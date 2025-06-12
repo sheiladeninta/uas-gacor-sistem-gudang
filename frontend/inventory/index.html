@@ -1,120 +1,49 @@
 <!DOCTYPE html>
-<html lang="id">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Manajemen Gudang</title>
+    <title>Inventory Service</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@apollo/client@3.5.5/core.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/graphql-tag@2.12.5/lib/index.umd.min.js"></script>
 </head>
-
 <body>
-    <div class="dashboard-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>Inventory Service</h2>
+    <div class="container">
+        <h1>Inventory Service</h1>
+        
+        <!-- Tombol untuk melihat inventory dan menambah item -->
+        <div id="featureCards" class="card-container">
+            <div class="card">
+                <h2>Add Inventory Item</h2>
+                <button id="addItemButton">Add New Item</button>
             </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a href="#inventory" class="sidebar-link">Daftar Barang</a></li>
-                    <li><a href="#inventory-logs" class="sidebar-link">Log Permintaan Barang</a></li>
-                    <li><a href="#inventory-status" class="sidebar-link">Status Stok Barang</a></li>
-                    <li><a href="#approve-form" class="sidebar-link">Setujui Permintaan</a></li>
-                </ul>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <header>
-                <h1>Dashboard Manajemen Gudang</h1>
-            </header>
-
-            <!-- Content Sections -->
-            <div id="inventory" class="section">
-                <div class="card">
-                    <h2>Daftar Barang</h2>
-                    <button id="loadInventoryBtn">Muat Daftar Barang</button>
-                    <table id="inventoryTable">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Kode Barang</th>
-                                <th>Nama Barang</th>
-                                <th>Jumlah</th>
-                                <th>Deskripsi</th>
-                                <th>Satuan</th>
-                                <th>Stok Minimal</th>
-                                <th>Lokasi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data barang akan ditampilkan di sini -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="inventory-logs" class="section">
-                <div class="card">
-                    <h2>Log Permintaan Barang</h2>
-                    <button id="loadLogsBtn">Muat Log Permintaan</button>
-                    <table id="inventoryLogsTable">
-                        <thead>
-                            <tr>
-                                <th>ID Log</th>
-                                <th>ID Barang</th>
-                                <th>Tipe Log</th>
-                                <th>Jumlah</th>
-                                <th>Referensi</th>
-                                <th>Waktu Dibuat</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data log permintaan barang akan ditampilkan di sini -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="inventory-status" class="section">
-                <div class="card">
-                    <h2>Status Stok Barang</h2>
-                    <button id="loadStatusBtn">Muat Status Stok</button>
-                    <table id="inventoryStatusTable">
-                        <thead>
-                            <tr>
-                                <th>ID Barang</th>
-                                <th>Stok Saat Ini</th>
-                                <th>Terakhir Diupdate</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Data status stok akan ditampilkan di sini -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="approve-form" class="section">
-                <div class="card">
-                    <h2>Setujui Permintaan Barang</h2>
-                    <form id="approveItemForm">
-                        <label for="log_id">ID Log:</label>
-                        <input type="number" id="log_id" required><br>
-
-                        <label for="approved_quantity">Jumlah yang Disetujui:</label>
-                        <input type="number" id="approved_quantity" required><br>
-
-                        <button type="submit">Setujui Permintaan</button>
-                    </form>
-                </div>
+            <div class="card">
+                <h2>View Inventory</h2>
+                <button id="viewInventoryButton">View All Items</button>
             </div>
         </div>
+
+        <!-- Form untuk menambah item -->
+        <div id="addItemForm" style="display:none;">
+            <h2>Add New Item</h2>
+            <form id="itemForm">
+                <input type="text" id="itemCode" placeholder="Item Code" required><br><br>
+                <input type="text" id="name" placeholder="Name" required><br><br>
+                <input type="number" id="quantity" placeholder="Quantity" required><br><br>
+                <input type="text" id="description" placeholder="Description"><br><br>
+                <input type="text" id="unit" placeholder="Unit"><br><br>
+                <input type="number" id="minStor" placeholder="Min Stock"><br><br>
+                <input type="text" id="location" placeholder="Location"><br><br>
+                <button type="submit">Submit</button>
+                <button type="button" id="cancelButton">Cancel</button>
+            </form>
+        </div>
+
+        <!-- Daftar Inventory Items -->
+        <div id="inventoryItems"></div> 
     </div>
 
     <script src="script.js"></script>
 </body>
-
 </html>

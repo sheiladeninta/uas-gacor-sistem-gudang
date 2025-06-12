@@ -5,35 +5,42 @@ collections.Iterable = collections.abc.Iterable
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_graphql import GraphQLView
-from graphene import ObjectType, String, Schema, Int, Field, List, Mutation, Boolean
-from models import db, InventoryItem, InventoryLog, InventoryStatus
 from datetime import datetime
+from graphene import ObjectType, String, Int, Boolean, Field, List, Mutation, Schema
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 import requests
+from graphene import ObjectType, String, Int, Boolean, Field, List, Mutation  # Pastikan Boolean diimpor
 import os
+from models import db, InventoryItem, InventoryLog, InventoryStatus  # Import models dari models.py
 
 # Initialize the Flask app
-app = Flask(__name__, static_folder='../frontend')  # Adjust the static folder path
-CORS(app)  # Allow all origins (you can adjust this as needed)
+app = Flask(__name__, static_folder='../frontend')
+CORS(app)
+
+# Inisialisasi Migrate
+migrate = Migrate(app, db)
 
 # Database Configuration
 db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'inventory-service.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'  # Absolute path to the DB
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Disable tracking of modifications
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///inventory-service.db' 
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'your-secret-key'
 
 # Initialize the database with Flask
 db.init_app(app)
 
+
 # GraphQL Schema for Inventory Service
 class InventoryItemType(ObjectType):
     id = Int()
-    item_code = String(required=True)  # Tambahkan item_code
+    item_code = String(required=True)
     name = String()
     quantity = Int()
     description = String()
-    unit = String()  # Tambahkan unit
-    min_stor = Int()  # Tambahkan min_stor
-    location = String()  # Tambahkan location
+    unit = String()
+    min_stor = Int()
+    location = String()
 
 class InventoryLogType(ObjectType):
     id = Int()
@@ -49,56 +56,126 @@ class InventoryStatusType(ObjectType):
     current_stock = Int()
     last_updated = String()
 
+# Menambahkan LogisticRequestType
+class LogisticRequestType(ObjectType):
+    id = Int()
+    item_id = Int()
+    quantity = Int()
+    reference = String()
+    status = String()
+    created_at = String()
+
+
+# Query untuk Inventory dan Logistic
 class Query(ObjectType):
+    # Query untuk inventory
     allInventory = List(InventoryItemType)
-    inventoryItem = Field(InventoryItemType, id=Int(required=True))
+    inventoryItem = Field(InventoryItemType, id=Int(), itemCode=String())  # Perbaiki: Handle id dan itemCode
     allInventoryLogs = List(InventoryLogType)
     inventoryStatus = Field(InventoryStatusType, item_id=Int(required=True))
+    
+    # Query untuk logistic requests
+    allLogisticRequests = List(LogisticRequestType)
+    logisticRequest = Field(LogisticRequestType, id=Int(required=True))
 
     def resolve_allInventory(self, info):
-        return InventoryItem.query.all()
+        return InventoryItem.query.all()  # Mengambil semua inventory item
 
-    def resolve_inventoryItem(self, info, id):
-        return InventoryItem.query.get(id)
+    def resolve_inventoryItem(self, info, id=None, itemCode=None):  # Perbaiki: Handle id dan itemCode
+        if itemCode:
+            return InventoryItem.query.filter_by(item_code=itemCode).first()  # Cari berdasarkan itemCode
+        if id:
+            return InventoryItem.query.get(id)  # Cari berdasarkan ID jika ada
+        return None  # Jika tidak ada parameter yang diberikan, kembalikan None
 
     def resolve_allInventoryLogs(self, info):
-        return InventoryLog.query.all()
+        return InventoryLog.query.all()  # Mengambil semua log transaksi inventaris
 
     def resolve_inventoryStatus(self, info, item_id):
-        return InventoryStatus.query.filter_by(item_id=item_id).first()
+        return InventoryStatus.query.filter_by(item_id=item_id).first()  # Mengambil status inventaris berdasarkan item_id
+    
+    # Resolver untuk LogisticRequest
+    def resolve_allLogisticRequests(self, info):
+        logistic_service_url = 'http://localhost:5002/graphql'  # Ganti dengan URL `logistic-service`
+        query = '''
+        query {
+            all_logistic_requests {
+                id
+                itemId
+                quantity
+                reference
+                status
+                createdAt
+            }
+        }
+        '''
+        try:
+            response = requests.post(logistic_service_url, json={'query': query})
+            response.raise_for_status()
+            return response.json()['data']['all_logistic_requests']
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching logistic requests: {e}")
+            return []
+
+    def resolve_logisticRequest(self, info, id):
+        logistic_service_url = 'http://localhost:5002/graphql'  # Ganti dengan URL `logistic-service`
+        query = f'''
+        query {{
+            logistic_request(id: {id}) {{
+                id
+                itemId
+                quantity
+                reference
+                status
+                createdAt
+            }}
+        }}
+        '''
+        try:
+            response = requests.post(logistic_service_url, json={'query': query})
+            response.raise_for_status()
+            return response.json()['data']['logistic_request']
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching logistic request with ID {id}: {e}")
+            return None
 
 
-
-# app.py
-
+# Mutation untuk Inventory
 class CreateInventoryItem(Mutation):
     class Arguments:
-        item_code = String(required=True)  # Item code
+        itemCode = String(required=True)
         name = String(required=True)
         quantity = Int(required=True)
         description = String()
         unit = String()
-        min_stor = Int()
+        minStor = Int()
         location = String()
 
-    inventory_item = Field(InventoryItemType)
+    inventoryItem = Field(InventoryItemType)
 
-    def mutate(self, info, item_code, name, quantity, description=None, unit=None, min_stor=None, location=None):
-        # Inisialisasi objek InventoryItem dengan argumen yang diperlukan
+    def mutate(self, info, itemCode, name, quantity, description=None, unit=None, minStor=None, location=None):
         item = InventoryItem(
-            item_code=item_code,  # Pastikan item_code ada
-            name=name,
-            quantity=quantity,
-            description=description,
-            unit=unit,
-            min_stor=min_stor,
+            item_code=itemCode, 
+            name=name, 
+            quantity=quantity, 
+            description=description, 
+            unit=unit, 
+            min_stor=minStor, 
             location=location
         )
         db.session.add(item)
-        db.session.commit()
-        
-        # Return the created InventoryItem in the mutation result
-        return CreateInventoryItem(inventory_item=item)  # Return the item
+        db.session.commit()  # Commit untuk menyimpan item dan mendapatkan ID
+
+        inventoryStatus = InventoryStatus(
+            item_id=item.id,
+            current_stock=quantity,
+            last_updated=datetime.utcnow()
+        )
+        db.session.add(inventoryStatus)
+        db.session.commit()  # Commit untuk menyimpan status inventaris
+
+        return CreateInventoryItem(inventoryItem=item)
+
 
 class CreateInventoryLog(Mutation):
     class Arguments:
@@ -123,10 +200,55 @@ class CreateInventoryLog(Mutation):
         db.session.commit()
         return CreateInventoryLog(inventory_log=log)
 
+class UpdateInventoryItem(Mutation):
+    class Arguments:
+        id = Int(required=True)
+        name = String()
+        quantity = Int()
+        description = String()
+        unit = String()
+        minStor = Int()
+        location = String()
+
+    inventoryItem = Field(InventoryItemType)
+
+    def mutate(self, info, id, name=None, quantity=None, description=None, unit=None, minStor=None, location=None):
+        item = InventoryItem.query.get(id)
+        if item:
+            if name: item.name = name
+            if quantity: item.quantity = quantity
+            if description: item.description = description
+            if unit: item.unit = unit
+            if minStor: item.min_stor = minStor
+            if location: item.location = location
+            
+            db.session.commit()
+            return UpdateInventoryItem(inventoryItem=item)
+        else:
+            raise Exception("Item not found")
+
+class DeleteInventoryItem(Mutation):
+    class Arguments:
+        id = Int(required=True)
+
+    success = Boolean()  # Pastikan Boolean diimpor dan digunakan dengan benar
+
+    def mutate(self, info, id):
+        item = InventoryItem.query.get(id)
+        if item:
+            db.session.delete(item)
+            db.session.commit()
+            return DeleteInventoryItem(success=True)
+        else:
+            raise Exception("Item not found")
+
+
+# Menambahkan Mutation
 class Mutation(ObjectType):
     create_inventory_item = CreateInventoryItem.Field()
     create_inventory_log = CreateInventoryLog.Field()
 
+# Create GraphQL Schema
 schema = Schema(query=Query, mutation=Mutation)
 
 # Add GraphQL endpoint
@@ -135,16 +257,14 @@ app.add_url_rule(
     view_func=GraphQLView.as_view(
         'graphql',
         schema=schema,
-        graphiql=True  # Enable GraphiQL interface
+        graphiql=True
     )
 )
 
-# API for testing if the server is running
 @app.route('/test')
 def test():
     return jsonify({"message": "Server is running!"})
 
-# Serve static files from the 'frontend' directory
 @app.route('/')
 def serve_index():
     return send_from_directory(app.static_folder, 'index.html')
@@ -153,228 +273,9 @@ def serve_index():
 def serve_static_files(path):
     return send_from_directory(app.static_folder, path)
 
-# Endpoint untuk inbound inventory (barang masuk)
-@app.route('/inventory/inbound', methods=['POST'])
-def inbound_inventory():
-    data = request.get_json()
-
-    item_id = data.get('item_id')
-    quantity = data.get('quantity')
-    reference = data.get('reference')
-    created_by = data.get('created_by')
-
-    item = InventoryItem.query.get(item_id)
-    if not item:
-        return jsonify({"error": "Item not found"}), 404
-
-    # Update inventory_status
-    inventory_status = InventoryStatus.query.filter_by(item_id=item_id).first()
-    if inventory_status:
-        inventory_status.current_stock += quantity
-        inventory_status.last_updated = datetime.utcnow()
-    else:
-        inventory_status = InventoryStatus(item_id=item_id, current_stock=quantity, last_updated=datetime.utcnow())
-        db.session.add(inventory_status)
-
-    # Log transaksi inbound
-    log = InventoryLog(
-        item_id=item_id, 
-        log_type='inbound', 
-        quantity=quantity, 
-        reference=reference, 
-        created_by=created_by, 
-        created_at=datetime.utcnow()
-    )
-
-    db.session.add(log)
-    db.session.commit()
-
-    return jsonify({"message": "Inventory updated successfully"}), 200
-
-# Endpoint untuk outbound inventory (barang keluar)
-@app.route('/inventory/outbound', methods=['POST'])
-def outbound_inventory():
-    data = request.get_json()
-
-    item_id = data.get('item_id')
-    quantity = data.get('quantity')
-    reference = data.get('reference')
-    created_by = data.get('created_by')
-
-    item = InventoryItem.query.get(item_id)
-    if not item:
-        return jsonify({"error": "Item not found"}), 404
-
-    # Update inventory_status
-    inventory_status = InventoryStatus.query.filter_by(item_id=item_id).first()
-    if inventory_status and inventory_status.current_stock >= quantity:
-        inventory_status.current_stock -= quantity
-        inventory_status.last_updated = datetime.utcnow()
-    else:
-        return jsonify({"error": "Insufficient stock"}), 400
-
-    # Log transaksi outbound
-    log = InventoryLog(
-        item_id=item_id, 
-        log_type='outbound', 
-        quantity=quantity, 
-        reference=reference, 
-        created_by=created_by, 
-        created_at=datetime.utcnow()
-    )
-
-    db.session.add(log)
-    db.session.commit()
-
-    return jsonify({"message": "Inventory updated successfully"}), 200
-
-
-# Endpoint untuk menambahkan item
-@app.route('/api/inventory', methods=['POST'])
-def add_inventory_item():
-    data = request.get_json()
-    new_item = InventoryItem(
-        item_code=data['item_code'],
-        name=data['name'],
-        quantity=data['quantity'],
-        description=data['description'],
-        unit=data['unit'],
-        min_stor=data['min_stor'],
-        location=data['location']
-    )
-    db.session.add(new_item)
-    db.session.commit()
-    return jsonify({"message": "Item added successfully!"}), 201
-
-# Endpoint untuk mendapatkan semua item inventory
-@app.route('/api/inventory', methods=['GET', 'POST'])
-def manage_inventory():
-    if request.method == 'GET':
-        # Mengambil semua item dari database dan mengonversinya ke format JSON menggunakan serialize()
-        items = InventoryItem.query.all()
-        return jsonify([item.serialize() for item in items])  # Gunakan serialize() untuk mengubah objek menjadi JSON
-    
-    if request.method == 'POST':
-        data = request.get_json()
-        new_item = InventoryItem(
-            item_code=data['item_code'],
-            name=data['name'],
-            quantity=data['quantity'],
-            description=data['description'],
-            unit=data['unit'],
-            min_stor=data['min_stor'],
-            location=data['location']
-        )
-        db.session.add(new_item)
-        db.session.commit()
-        return jsonify(new_item.serialize()), 201
-
-
-# Endpoint untuk memperbarui item
-@app.route('/api/inventory/<int:item_id>', methods=['PUT'])
-def update_inventory_item(item_id):
-    item = InventoryItem.query.get_or_404(item_id)
-    data = request.get_json()
-    item.quantity = data['quantity']
-    db.session.commit()
-    return jsonify(item.serialize())
-
-# Endpoint untuk mendapatkan semua logs inventory
-@app.route('/api/inventory/logs', methods=['GET'])
-def get_inventory_logs():
-    logs = InventoryLog.query.all()
-    return jsonify([log.serialize() for log in logs])  # Menggunakan serialize() pada model InventoryLog
-
-# Endpoint untuk mendapatkan semua status inventory
-@app.route('/api/inventory/status', methods=['GET'])
-def get_inventory_status():
-    status = InventoryStatus.query.all()
-    return jsonify([status_item.serialize() for status_item in status])  # Menggunakan serialize() pada model InventoryStatus
-
-# Endpoint untuk menerima request barang dari logistic service
-@app.route('/api/inventory/request', methods=['POST'])
-def request_inventory():
-    data = request.get_json()
-    item_id = data.get('item_id')
-    quantity = data.get('quantity')
-    reference = data.get('reference')
-    created_by = data.get('created_by')  # ID of the user creating the request
-
-    # Cek apakah item tersedia
-    item = InventoryItem.query.get(item_id)
-    if not item:
-        return jsonify({"error": "Item not found"}), 404
-
-    # Membuat log permintaan
-    log = InventoryLog(
-        item_id=item_id,
-        log_type='request',  # Menandakan bahwa ini adalah permintaan
-        quantity=quantity,
-        reference=reference,
-        created_by=created_by,
-        created_at=datetime.utcnow(),
-        status='pending'  # Status awal adalah pending
-    )
-
-    db.session.add(log)
-    db.session.commit()
-
-    return jsonify({"message": "Request submitted successfully!", "log_id": log.log_id}), 201
-
-# Endpoint untuk approve request barang
-@app.route('/api/inventory/approve', methods=['POST'])
-def approve_inventory_request():
-    data = request.get_json()
-    log_id = data.get('log_id')
-    approved_quantity = data.get('approved_quantity')
-
-    if approved_quantity <= 0:
-        return jsonify({"error": "Approved quantity must be greater than zero"}), 400
-
-    # Mencari log yang sesuai
-    log = InventoryLog.query.get(log_id)
-    if not log:
-        return jsonify({"error": "Log not found"}), 404
-
-    if log.status != 'pending':
-        return jsonify({"error": "Request already processed"}), 400
-
-    # Memperbarui status log menjadi approved
-    log.status = 'approved'
-
-    # Update inventory status
-    inventory_status = InventoryStatus.query.get(log.item_id)
-    if inventory_status:
-        if inventory_status.current_stock >= approved_quantity:
-            # Update stok barang
-            inventory_status.current_stock -= approved_quantity
-            inventory_status.last_updated = datetime.utcnow()
-
-            # Menambahkan log outbound (pengiriman barang)
-            outbound_log = InventoryLog(
-                item_id=log.item_id,
-                log_type='outbound',
-                quantity=approved_quantity,
-                reference=log.reference,
-                created_by=log.created_by,
-                created_at=datetime.utcnow(),
-                status='approved'
-            )
-            db.session.add(outbound_log)
-
-            # Commit semua perubahan dalam satu batch
-            db.session.commit()
-
-            return jsonify({"message": "Request approved and inventory updated"}), 200
-        else:
-            return jsonify({"error": "Insufficient stock"}), 400
-    else:
-        return jsonify({"error": "Inventory status not found"}), 404
-
-
 # Create all tables if they don't exist
 with app.app_context():
-    db.create_all()  # Ensure that the tables are created
+    db.create_all()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003, debug=True)
