@@ -34,6 +34,7 @@
             color: white;
             padding: 40px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
@@ -45,6 +46,34 @@
         .header p {
             font-size: 1.2rem;
             opacity: 0.9;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-info span {
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .main-nav {
@@ -150,6 +179,12 @@
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .user-info {
+                position: static;
+                justify-content: center;
+                margin-top: 20px;
+            }
         }
 
         .loading {
@@ -179,6 +214,10 @@
         <div class="header">
             <h1>🏭 Warehouse Management System</h1>
             <p>Comprehensive solution for managing orders, inventory, items, quality control, and users</p>
+            <div class="user-info">
+                <span id="userName">Loading...</span>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
         </div>
 
         <div class="main-nav">
@@ -264,16 +303,36 @@
             users: {
                 url: 'http://localhost:5005',
                 name: 'User Service',
-                path: '/users/'
+                path: '/user/'
             }
         };
+
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (!token) {
+                window.location.href = '/user/';
+                return;
+            }
+
+            // Display user info
+            document.getElementById('userName').textContent = user.nama || 'User';
+        }
+
+        // Handle logout
+        function handleLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/user/';
+        }
 
         // Navigate to specific service
         function navigateToService(serviceName) {
             const service = SERVICES[serviceName];
             if (service) {
-                // Open service-specific frontend
-                window.open(service.path + 'index.html', '_blank');
+                window.location.href = service.path;
             }
         }
 
@@ -339,6 +398,7 @@
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
             loadStats();
             
             // Refresh stats every 30 seconds
