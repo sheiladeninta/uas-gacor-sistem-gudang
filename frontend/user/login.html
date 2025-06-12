@@ -7,74 +7,169 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .login-container {
             max-width: 400px;
-            margin: 100px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin: 40px auto;
+            padding: 32px 28px;
+            background: rgba(255,255,255,0.97);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.10);
         }
         .login-header {
             text-align: center;
             margin-bottom: 30px;
         }
+        .login-header h2 {
+            font-size: 2rem;
+            color: #4facfe;
+            font-weight: bold;
+        }
+        .login-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        .form-label {
+            font-weight: 500;
+        }
+        .form-control {
+            border-radius: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        #registerLink {
+            text-align: center;
+            margin-top: 18px;
+        }
+        #registerLink a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+        #registerLink a:hover {
+            text-decoration: underline;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #6c757d;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #0d6efd;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="login-container">
-            <div class="login-header">
-                <h2>Sistem Gudang</h2>
-                <p>Silakan login untuk melanjutkan</p>
-            </div>
-            <form id="loginForm">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" required>
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Login</button>
-            </form>
+    <div class="login-container">
+        <div class="login-header">
+            <h2 id="loginType">Login</h2>
+            <p id="loginDescription">Silakan login untuk mengakses sistem</p>
         </div>
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+        <div id="registerLink" style="display:none;">
+            <a href="register.html">Belum punya akun? Daftar sebagai Client</a>
+        </div>
+        <a href="index.html" class="back-link">
+            <i class="bi bi-arrow-left"></i> Kembali ke halaman utama
+        </a>
     </div>
-
     <script>
+        // Ambil tipe login dari URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const loginType = urlParams.get('type');
+        // Update tampilan berdasarkan tipe login
+        const loginTypeElement = document.getElementById('loginType');
+        const loginDescriptionElement = document.getElementById('loginDescription');
+        if (loginType === 'staff') {
+            loginTypeElement.textContent = 'Login Staff';
+            loginDescriptionElement.textContent = 'Login sebagai staff untuk mengelola sistem gudang';
+        } else if (loginType === 'client') {
+            loginTypeElement.textContent = 'Login Client';
+            loginDescriptionElement.textContent = 'Login sebagai client untuk mengakses layanan gudang';
+            document.getElementById('registerLink').style.display = 'block';
+        }
+        // Handle form submission
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-
             try {
-                const response = await fetch('http://localhost:5001/login', {
+                const response = await fetch('http://localhost:5003/graphql', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({
+                        query: `
+                            mutation {
+                                loginUser(
+                                    nama: "${username}"
+                                    password: "${password}"
+                                ) {
+                                    user {
+                                        id
+                                        nama
+                                        email
+                                        role
+                                    }
+                                    token
+                                }
+                            }
+                        `
+                    })
                 });
-
                 const data = await response.json();
-
-                if (response.ok) {
-                    // Simpan token ke localStorage
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('userRole', data.role);
-                    
-                    // Redirect ke dashboard
-                    window.location.href = '/user/dashboard.html';
+                if (data.data && data.data.loginUser) {
+                    const user = data.data.loginUser.user;
+                    // Validasi tipe login
+                    if (loginType === 'staff' && user.role !== 'staff') {
+                        alert('Anda harus login sebagai staff');
+                        return;
+                    }
+                    if (loginType === 'client' && user.role !== 'client') {
+                        alert('Anda harus login sebagai client');
+                        return;
+                    }
+                    // Simpan token dan data user ke localStorage
+                    localStorage.setItem('token', data.data.loginUser.token);
+                    localStorage.setItem('userRole', user.role);
+                    localStorage.setItem('userName', user.nama);
+                    // Redirect ke dashboard berdasarkan role
+                    if (user.role === 'staff') {
+                        window.location.href = '../index.html';
+                    } else {
+                        window.location.href = 'client-dashboard.html';
+                    }
                 } else {
-                    alert('Login gagal: ' + data.message);
+                    const errorMessage = data.errors ? data.errors[0].message : 'Username atau password salah';
+                    alert('Login gagal: ' + errorMessage);
                 }
             } catch (error) {
                 alert('Terjadi kesalahan saat login');
-                console.error('Error:', error);
             }
         });
     </script>

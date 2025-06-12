@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            overflow-x: hidden;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            width: 100vw;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            width: 100vw;
+            max-width: 100vw;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0;
+            box-shadow: none;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            width: 100vw;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px 20px 32px 20px;
+            text-align: center;
+            position: relative;
+            border-radius: 0;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-info span {
+            color: white;
+            font-size: 1.1rem;
+        }
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .main-nav {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            min-height: 0;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+        }
+        .service-card {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            border-radius: 20px;
+            padding: 40px 36px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            min-width: 320px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: #4facfe;
+        }
+        .service-icon {
+            font-size: 3.5rem;
+            margin-bottom: 24px;
+            display: block;
+            color: #e17055;
+        }
+        .service-title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        .service-description {
+            color: #666;
+            font-size: 1.08rem;
+            line-height: 1.6;
+        }
+        .footer {
+            width: 100vw;
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 18px;
+            font-size: 0.95rem;
+            border-radius: 0;
+        }
+        @media (max-width: 700px) {
+            .container {
+                border-radius: 0;
+                max-width: 100vw;
+            }
+            .header, .footer, .main-nav {
+                width: 100vw;
+            }
+            .main-nav {
+                padding: 20px 0;
+            }
+            .service-card {
+                min-width: 90vw;
+                max-width: 98vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dashboard Client</h1>
+            <p>Selamat datang, <span id="clientName"></span>!</p>
+            <div class="user-info">
+                <span id="clientRole"></span>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+        <nav class="main-nav">
+            <div class="service-card order-card">
+                <span class="service-icon"><i class="bi bi-clipboard-check"></i></span>
+                <h3 class="service-title">Order Management</h3>
+                <p class="service-description">Create, track, and manage restaurant orders. Handle order status updates and inventory requests.</p>
+            </div>
+        </nav>
+        <footer class="footer">
+            <p>&copy; 2024 Warehouse Management System. All rights reserved.</p>
+        </footer>
+    </div>
+    <script>
+        // Cek login
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+        // Tampilkan nama dan role
+        document.getElementById('clientName').textContent = localStorage.getItem('userName') || 'Client';
+        document.getElementById('clientRole').textContent = localStorage.getItem('userRole') || '-';
+        // Logout
+        document.getElementById('logoutBtn').onclick = function() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        };
+    </script>
+</body>
+</html> 
