@@ -3,80 +3,549 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistem Gudang</title>
+    <title>Login - Sistem Gudang Gacor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --success-color: #2ecc71;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
         .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            overflow: hidden;
+            width: 90%;
+            max-width: 900px;
+            margin: 20px;
+            display: flex;
+            min-height: 600px;
         }
+
+        .login-left {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.9) 0%, rgba(41, 128, 185, 0.9) 100%),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            color: white;
+            padding: 50px 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .login-right {
+            flex: 1;
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .brand-logo {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .brand-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .brand-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .role-badge {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .role-badge.client {
+            background: rgba(46, 204, 113, 0.3);
+        }
+
         .login-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+        }
+
+        .login-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.15);
+            background-color: white;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group .form-control {
+            padding-left: 50px;
+        }
+
+        .input-group-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 1.1rem;
+            z-index: 10;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-login .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        .btn-login.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-login.loading .btn-text {
+            opacity: 0.7;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .back-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link a:hover {
+            color: var(--secondary-color);
+            transform: translateX(-5px);
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .register-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .register-link a:hover {
+            color: var(--secondary-color);
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .alert-danger {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--accent-color);
+        }
+
+        .alert-success {
+            background-color: rgba(46, 204, 113, 0.1);
+            color: var(--success-color);
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                max-width: 500px;
+            }
+
+            .login-left {
+                padding: 30px 20px;
+                min-height: 250px;
+            }
+
+            .login-right {
+                padding: 30px 20px;
+            }
+
+            .brand-logo {
+                font-size: 3rem;
+                margin-bottom: 20px;
+            }
+
+            .brand-title {
+                font-size: 1.5rem;
+            }
+
+            .brand-subtitle {
+                font-size: 1rem;
+            }
+
+            .login-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Password visibility toggle */
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 5px;
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="login-container">
-            <div class="login-header">
-                <h2>Sistem Gudang</h2>
-                <p>Silakan login untuk melanjutkan</p>
+    <div class="login-container">
+        <div class="login-left">
+            <div class="brand-logo">
+                <i class="bi bi-boxes"></i>
             </div>
+            <h2 class="brand-title">Sistem Gudang Gacor</h2>
+            <p class="brand-subtitle">Sistem manajemen gudang yang efisien dan terpercaya untuk kebutuhan bisnis Anda</p>
+            <div class="role-badge" id="roleBadge">
+                <i class="bi bi-person-badge"></i> Staff Login
+            </div>
+        </div>
+
+        <div class="login-right">
+            <div class="back-link">
+                <a href="index.html">
+                    <i class="bi bi-arrow-left"></i>
+                    Kembali ke Pilihan Role
+                </a>
+            </div>
+
+            <div class="login-header">
+                <h3 class="login-title">Selamat Datang!</h3>
+                <p class="login-subtitle">Silakan login untuk melanjutkan</p>
+            </div>
+
+            <div id="alertContainer"></div>
+
             <form id="loginForm">
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" required>
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <div class="input-group">
+                        <i class="input-group-icon bi bi-person"></i>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" required>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-group">
+                        <i class="input-group-icon bi bi-lock"></i>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <i class="bi bi-eye" id="passwordToggleIcon"></i>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Login</button>
+
+                <button type="submit" class="btn btn-login" id="loginBtn">
+                    <div class="spinner"></div>
+                    <span class="btn-text">Login</span>
+                </button>
             </form>
+
+            <div class="register-link" id="registerLink" style="display: none;">
+                <p>Belum punya akun? <a href="register.html">Daftar sebagai Client</a></p>
+            </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        // Get role from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role') || 'staff';
 
+        // Update UI based on role
+        function updateUIForRole() {
+            const roleBadge = document.getElementById('roleBadge');
+            const registerLink = document.getElementById('registerLink');
+
+            if (role === 'client') {
+                roleBadge.innerHTML = '<i class="bi bi-building"></i> Client Login';
+                registerLink.style.display = 'none';
+            } else {
+                roleBadge.innerHTML = '<i class="bi bi-person-badge"></i> Staff Login';
+                registerLink.style.display = 'none';
+            }
+        }
+
+        // Show alert message
+        function showAlert(message, type = 'danger') {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                    ${message}
+                </div>
+            `;
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.className = 'bi bi-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.className = 'bi bi-eye';
+            }
+        }
+
+        // GraphQL login function
+        async function loginUser(username, password) {
+            const query = `
+                mutation LoginUser($identifier: String!, $password: String!) {
+                    loginUser(identifier: $identifier, password: $password) {
+                        user {
+                            id
+                            nama
+                            email
+                            role
+                        }
+                        token
+                    }
+                }
+            `;
             try {
-                const response = await fetch('http://localhost:5001/login', {
+                const response = await fetch('http://127.0.0.1:5003/graphql', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({
+                        query: query,
+                        variables: {
+                            identifier: username,  // Ubah dari 'nama' ke 'identifier'
+                            password: password
+                        }
+                    })
                 });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Simpan token ke localStorage
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('userRole', data.role);
-                    
-                    // Redirect ke dashboard
-                    window.location.href = '/user/dashboard.html';
-                } else {
-                    alert('Login gagal: ' + data.message);
+                const result = await response.json();
+                
+                if (result.errors) {
+                    throw new Error(result.errors[0].message);
                 }
+                return result.data.loginUser;
             } catch (error) {
-                alert('Terjadi kesalahan saat login');
-                console.error('Error:', error);
+                throw error;
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loginBtn = document.getElementById('loginBtn');
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Basic validation
+            if (!username || !password) {
+                showAlert('Username dan password harus diisi!');
+                return;
+            }
+            
+            // Show loading state
+            loginBtn.classList.add('loading');
+            loginBtn.disabled = true;
+            
+            try {
+                const loginResult = await loginUser(username, password);
+                
+                // Verify role matches expected role (ubah ke huruf kecil)
+                if (role === 'staff' && loginResult.user.role.toLowerCase() !== 'staff') {
+                    throw new Error('Akun ini bukan akun staff!');
+                }
+                if (role === 'client' && loginResult.user.role.toLowerCase() !== 'client') {
+                    throw new Error('Akun ini bukan akun client!');
+                }
+                
+                // Store user data and token
+                sessionStorage.setItem('user', JSON.stringify(loginResult.user));
+                sessionStorage.setItem('token', loginResult.token);
+                sessionStorage.setItem('userRole', loginResult.user.role);
+                
+                showAlert('Login berhasil! Mengalihkan...', 'success');
+                
+                // Redirect based on role (ubah ke huruf kecil)
+                setTimeout(() => {
+                    if (loginResult.user.role.toLowerCase() === 'staff') {
+                        window.location.href = 'staff/dashboard.html';
+                    } else {
+                        window.location.href = 'client/dashboard.html';
+                    }
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = 'Login gagal! ';
+                
+                if (error.message.includes('Invalid credentials')) {
+                    errorMessage += 'Username atau password salah.';
+                } else if (error.message.includes('fetch')) {
+                    errorMessage += 'Tidak dapat terhubung ke server. Pastikan server sedang berjalan.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showAlert(errorMessage);
+            } finally {
+                // Hide loading state
+                loginBtn.classList.remove('loading');
+                loginBtn.disabled = false;
             }
         });
+
+        // Initialize UI
+        updateUIForRole();
+
+        // Check if user is already logged in
+        const savedUser = sessionStorage.getItem('user');
+        if (savedUser) {
+            const user = JSON.parse(savedUser);
+            if (user.role === 'STAFF') {
+                window.location.href = 'staff/dashboard.html';
+            } else {
+                window.location.href = 'client/dashboard.html';
+            }
+        }
     </script>
 </body>
-</html> 
+</html>

@@ -9,7 +9,7 @@ class Config:
     # Konfigurasi database
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(BASE_DIR, 'user_service.db')
+        'sqlite:///' + os.path.join(BASE_DIR, 'user-service.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Konfigurasi JWT
