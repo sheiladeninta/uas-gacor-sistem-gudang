@@ -6,6 +6,7 @@ import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import requests
+from datetime import datetime
 
 import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
@@ -70,6 +71,28 @@ class Item(db.Model):
     def update_stock(self, quantity):
         self.stock_quantity += quantity
 
+class QCLog(db.Model):
+    __tablename__ = 'qc_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, nullable=False)  # ID order yang dikirim ke QC
+    item_code = db.Column(db.String(50), nullable=False)  # Kode barang
+    item_name = db.Column(db.String(200), nullable=False)  # Nama barang
+    quantity = db.Column(db.Integer, nullable=False)  # Jumlah barang yang dikirim ke QC
+    sent_to_qc_at = db.Column(db.DateTime, default=datetime.utcnow)  # Waktu pengiriman ke QC
+
+    def __repr__(self):
+        return f"<QCLog {self.item_code}: {self.item_name}, Quantity: {self.quantity}>"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'order_id': self.order_id,
+            'item_code': self.item_code,
+            'item_name': self.item_name,
+            'quantity': self.quantity,
+            'sent_to_qc_at': self.sent_to_qc_at.isoformat()
+        }
 
 # Model OrderRequest
 class OrderRequest(db.Model):
@@ -106,45 +129,67 @@ class OrderRequestType(SQLAlchemyObjectType):
         model = OrderRequest
         fields = ('id', 'order_code', 'item_code', 'quantity', 'status')
 
+class QCLogType(SQLAlchemyObjectType):
+    class Meta:
+        model = QCLog
+        fields = ('id', 'order_id', 'item_code', 'item_name', 'quantity', 'sent_to_qc_at')  # Sesuaikan field dengan yang ada di QCLog
+
 
 # Query untuk mendapatkan semua item dan order request
 class Query(graphene.ObjectType):
     items = graphene.List(ItemType)
     order_requests = graphene.List(OrderRequestType)
+    qc_logs = graphene.List(QCLogType)  # Mendapatkan semua log QC
 
     def resolve_items(self, info):
         return Item.query.all()
 
+    def resolve_qc_logs(self, info):
+        return QCLog.query.all()
+    
     def resolve_order_requests(self, info):
         return OrderRequest.query.all()
 
 
 # Mutation untuk mengirim barang ke QC dan mengupdate stok
+from datetime import datetime
+
+# Mutasi untuk mengirim barang ke QC dan mencatatnya di tabel qc_logs
 class SendToQC(graphene.Mutation):
     class Arguments:
-        order_id = graphene.Int(required=True)  # ID dari order yang akan dikirim ke QC
+        order_id = graphene.Int(required=True)
+        item_code = graphene.String(required=True)
+        item_name = graphene.String(required=True)
+        quantity = graphene.Int(required=True)
 
-    order = graphene.Field(OrderRequestType)
+    success = graphene.Boolean()
     message = graphene.String()
 
-    def mutate(self, info, order_id):
-        order = OrderRequest.query.get(order_id)
-        if not order:
-            raise Exception("Order not found")
-
-        # Dapatkan item yang terkait dengan order berdasarkan item_code
-        item = Item.query.filter_by(item_code=order.item_code).first()
+    def mutate(self, info, order_id, item_code, item_name, quantity):
+        item = Item.query.filter_by(item_code=item_code).first()
         if not item:
-            raise Exception("Item not found in inventory")
+            return SendToQC(success=False, message="Item tidak ditemukan.")
+        if item.stock_quantity < quantity:
+            return SendToQC(success=False, message="Stok tidak cukup.")
 
-        # Kurangi stok item berdasarkan quantity dari order
-        if item.stock_quantity >= order.quantity:
-            item.stock_quantity -= order.quantity
-            order.status = 'Sent to QC'  # Ubah status order menjadi 'Sent to QC'
-            db.session.commit()
-            return SendToQC(order=order, message="Order successfully sent to QC")
-        else:
-            raise Exception("Not enough stock to fulfill the order")
+        # Kurangi stok
+        item.stock_quantity -= quantity
+
+        # Tambahkan ke QCLog
+        qc_log = QCLog(
+            order_id=order_id,
+            item_code=item_code,
+            item_name=item_name,
+            quantity=quantity
+        )
+        db.session.add(qc_log)
+        db.session.commit()
+
+        return SendToQC(success=True, message="Berhasil dikirim ke QC dan stok dikurangi.")
+
+# Tambahkan ke Mutation
+
+    
 
 
 # Mutation untuk Create, Update dan Delete item

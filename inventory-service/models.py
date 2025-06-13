@@ -38,3 +38,26 @@ class Item(db.Model):
         """ Update the stock quantity of an item. """
         self.stock_quantity += quantity
 
+# Model QCLog untuk mencatat pengiriman barang ke QC
+class QCLog(db.Model):
+    __tablename__ = 'qc_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, nullable=False)  # ID order yang dikirim ke QC
+    item_code = db.Column(db.String(50), nullable=False)  # Kode barang
+    item_name = db.Column(db.String(200), nullable=False)  # Nama barang
+    quantity = db.Column(db.Integer, nullable=False)  # Jumlah barang yang dikirim ke QC
+    sent_to_qc_at = db.Column(db.DateTime, default=datetime.utcnow)  # Waktu pengiriman ke QC
+
+    def __repr__(self):
+        return f"<QCLog {self.item_code}: {self.item_name}, Quantity: {self.quantity}>"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'order_id': self.order_id,
+            'item_code': self.item_code,
+            'item_name': self.item_name,
+            'quantity': self.quantity,
+            'sent_to_qc_at': self.sent_to_qc_at.isoformat()
+        }

@@ -1,13 +1,13 @@
 /* Global Styles */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #ecf0f1;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
     height: 100vh;
     color: #333;
-    overflow: hidden; /* Prevent content from overflowing */
+    overflow: hidden;
 }
 
 /* Dashboard Container */
@@ -20,151 +20,221 @@ body {
 
 /* Sidebar Styles */
 #sidebar {
-    background-color: #2c3e50;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     color: white;
-    padding: 20px;
-    width: 200px; /* Fixed width for sidebar */
-    height: 100vh; /* Full height */
-    position: fixed; /* Fixed position to stay on the left */
+    padding: 30px 20px;
+    width: 220px;
+    height: 100vh;
+    position: fixed;
     top: 0;
     left: 0;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.07);
     z-index: 10;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-/* Sidebar Header */
 #sidebar h2 {
     margin: 0;
-    font-size: 24px;
-    margin-bottom: 20px;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #fff;
 }
 
 #sidebar ul {
     list-style-type: none;
     padding: 0;
+    width: 100%;
 }
 
 #sidebar li {
-    margin: 10px 0;
+    margin: 18px 0;
 }
 
 #sidebar a {
-    color: white;
+    color: #fff;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 1.1rem;
     display: block;
-    padding: 10px 15px;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+    padding: 10px 18px;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s;
+    font-weight: 500;
 }
 
-#sidebar a:hover {
-    background-color: #34495e;
+#sidebar a:hover, #sidebar a.active {
+    background: rgba(255,255,255,0.18);
+    color: #222;
 }
 
 /* Content Styles */
 #content {
-    margin-left: 250px; /* Ensure the content starts after the sidebar */
+    margin-left: 240px;
     flex-grow: 1;
-    padding: 20px;
-    background-color: white;
+    padding: 40px;
+    background: transparent;
     height: 100vh;
     overflow-y: auto;
-    box-sizing: border-box; /* Ensure padding doesn't cause overflow */
+    box-sizing: border-box;
 }
 
 /* Page Styles */
 .page {
     display: none;
 }
-
 .page.active {
     display: block;
 }
 
 /* Add Item Form & Update Item Form */
 #add-item, #update-item {
-    background-color: white;
+    background: rgba(255,255,255,0.98);
     padding: 20px;
     max-width: 500px;
     margin: auto;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.07);
+    border-radius: 12px;
 }
 
 input {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 6px;
     box-sizing: border-box;
+    font-size: 1rem;
+    background: #f8f9fa;
+    transition: border 0.2s;
+    outline: none;
+}
+input:focus {
+    border: 1.5px solid #4facfe;
+    background: #fff;
 }
 
 button {
     padding: 10px 20px;
-    background-color: #2c3e50;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     color: white;
     border: none;
     cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+    border-radius: 6px;
+    transition: background 0.3s, box-shadow 0.2s;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-right: 5px;
+    margin-bottom: 2px;
+    box-shadow: 0 2px 6px rgba(79,172,254,0.08);
 }
-
 button:hover {
-    background-color: #34495e;
+    background: linear-gradient(135deg, #667eea 0%, #4facfe 100%);
 }
 
 button[type="button"] {
-    background-color: #e74c3c;
+    background: #e74c3c;
     margin-left: 10px;
 }
-
 button[type="button"]:hover {
-    background-color: #c0392b;
+    background: #c0392b;
 }
 
 /* Responsive Styles */
-@media (max-width: 768px) {
-    /* Sidebar becomes top bar on small screens */
+@media (max-width: 900px) {
     #dashboard-container {
         flex-direction: column;
     }
-
     #sidebar {
         width: 100%;
+        height: auto;
         position: relative;
-        margin-bottom: 20px;
+        border-radius: 0;
+        flex-direction: row;
+        align-items: center;
+        padding: 15px 10px;
     }
-
     #content {
-        margin-left: 0; /* No margin needed for content on small screens */
+        margin-left: 0;
+        padding: 20px;
     }
-
-    /* Adjust form widths on smaller screens */
     #add-item, #update-item {
         max-width: 100%;
         margin: 20px;
     }
 }
+
 /* Table Styles */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 th, td {
-    padding: 12px;
+    padding: 14px 10px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #e9ecef;
 }
 
 th {
-    background-color: #2c3e50;
-    color: white;
+    background: #f8f9fa;
+    color: #333;
+    font-weight: 600;
 }
 
 tr:hover td {
     background-color: #f1f1f1;
+}
+
+#inventory-section, #order-requests-section {
+    background: rgba(255,255,255,0.98);
+    border-radius: 15px;
+    margin: 40px 0;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.07);
+    padding: 40px;
+}
+
+#inventory-section h2, #order-requests-section h2 {
+    font-size: 2rem;
+    color: #4facfe;
+    margin-bottom: 20px;
+}
+
+#inventory-section table, #order-requests-section table {
+    margin-top: 10px;
+    font-size: 1rem;
+}
+
+#inventory-section th, #order-requests-section th {
+    padding: 12px 8px;
+    background: #f8f9fa;
+    color: #333;
+    border-bottom: 2px solid #e9ecef;
+}
+
+#inventory-section td, #order-requests-section td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+#inventory-section button, #order-requests-section button {
+    background: #4facfe;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+#inventory-section button:hover, #order-requests-section button:hover {
+    background: #667eea;
 }

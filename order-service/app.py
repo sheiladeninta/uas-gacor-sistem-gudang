@@ -84,6 +84,7 @@ class Query(graphene.ObjectType):
                           status=graphene.String())
     order = graphene.Field(OrderType, id=graphene.Int())
     order_by_number = graphene.Field(OrderType, order_number=graphene.String())
+    order_items = graphene.List(OrderItemType)
     
     def resolve_orders(self, info, restaurant_id=None, status=None):
         query = Order.query
@@ -105,6 +106,8 @@ class Query(graphene.ObjectType):
     
     def resolve_order_by_number(self, info, order_number):
         return Order.query.filter(Order.order_number == order_number).first()
+    def resolve_order_items(self, info):
+        return OrderItem.query.all()
 
 class CreateOrder(graphene.Mutation):
     class Arguments:
