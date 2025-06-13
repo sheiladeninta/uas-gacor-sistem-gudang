@@ -12,6 +12,7 @@ import jwt
 import datetime
 import logging
 import socket
+import os
 
 # Konfigurasi logging
 logging.basicConfig(level=logging.INFO)
@@ -21,10 +22,13 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": ["http://localhost:8000", "http://127.0.0.1:8000"]}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 # Konfigurasi database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user_service.db'
+instance_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance')
+os.makedirs(instance_folder, exist_ok=True)
+db_path = os.path.join(instance_folder, 'user-service.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'your-secret-key'
-app.config['JWT_SECRET_KEY'] = 'jwt-secret-key'  # Secret key untuk JWT
+app.config['JWT_SECRET_KEY'] = 'jwt-secret-key'
 
 db.init_app(app)
 
@@ -38,10 +42,22 @@ class UserRoleEnum(GrapheneEnum):
 class UserType(ObjectType):
     id = Int()
     nama = String()
+    username = String()
     email = String()
+    companyName = String()  # Changed from company_name to companyName
     role = String()
-    created_at = String()
-    updated_at = String()
+    createdAt = String()    # Changed from created_at to createdAt
+    updatedAt = String()    # Changed from updated_at to updatedAt
+    
+    # Resolver methods to map from database fields to GraphQL fields
+    def resolve_companyName(self, info):
+        return self.companyName
+    
+    def resolve_createdAt(self, info):
+        return str(self.created_at) if hasattr(self, 'created_at') and self.created_at else None
+    
+    def resolve_updatedAt(self, info):
+        return str(self.updated_at) if hasattr(self, 'updated_at') and self.updated_at else None
 
 class LoginResponse(ObjectType):
     user = Field(UserType)
@@ -67,39 +83,108 @@ class Query(ObjectType):
 
 class CreateUser(Mutation):
     class Arguments:
-        nama = String(required=True)
+        nama = String()
+        username = String()
         password = String(required=True)
         email = String(required=True)
+        companyName = String()  # Changed from company_name to companyName
+        role = String()
 
     user = Field(UserType)
 
-    def mutate(self, info, nama, password, email):
-        # Check if user with given name or email already exists
-        if User.query.filter_by(nama=nama).first():
-            raise Exception('User with this name already exists')
+    def mutate(self, info, password, email, nama=None, username=None, companyName=None, role=None):
+        # Validasi role
+        if role and role not in [UserRole.STAFF.value, UserRole.CLIENT.value]:
+            raise Exception('Invalid role')
+        
+        user_role = role or UserRole.CLIENT.value
+        
+        # Untuk CLIENT, username dan companyName wajib
+        if user_role == UserRole.CLIENT.value:
+            if not username:
+                raise Exception('Username is required for client registration')
+            if not companyName:
+                raise Exception('Company name is required for client registration')
+            
+            # Check if username already exists
+            if User.query.filter_by(username=username).first():
+                raise Exception('Username already exists')
+            
+            # Untuk client, gunakan companyName sebagai nama jika nama tidak disediakan
+            if not nama:
+                nama = companyName
+        
+        # Untuk STAFF, nama wajib
+        if user_role == UserRole.STAFF.value:
+            if not nama:
+                raise Exception('Nama is required for staff registration')
+            
+            # Check if nama already exists for staff
+            if User.query.filter_by(nama=nama, role=UserRole.STAFF.value).first():
+                raise Exception('Staff with this name already exists')
+        
+        # Check if email already exists
         if User.query.filter_by(email=email).first():
-            raise Exception('User with this email already exists')
+            raise Exception('Email already exists')
             
         user = User(
             nama=nama,
+            username=username,
             password=password,
             email=email,
-            role=UserRole.CLIENT.value  # Default role is client
+            companyName=companyName,  # Map companyName to company_name for database
+            role=user_role
         )
         db.session.add(user)
         db.session.commit()
         return CreateUser(user=user)
 
+class CreateClientUser(Mutation):
+    """Mutation khusus untuk registrasi client dari frontend"""
+    class Arguments:
+        username = String(required=True)
+        password = String(required=True)
+        email = String(required=True)
+        companyName = String(required=True)  # Changed from company_name to companyName
+
+    user = Field(UserType)
+
+    def mutate(self, info, username, password, email, companyName):
+        # Check if username already exists
+        if User.query.filter_by(username=username).first():
+            raise Exception('Username already exists')
+        
+        # Check if email already exists
+        if User.query.filter_by(email=email).first():
+            raise Exception('Email already exists')
+        
+        # Untuk client, gunakan companyName sebagai nama
+        user = User(
+            nama=companyName,  # Gunakan companyName sebagai nama
+            username=username,
+            password=password,
+            email=email,
+            companyName=companyName,  # Map companyName to company_name for database
+            role=UserRole.CLIENT.value
+        )
+        db.session.add(user)
+        db.session.commit()
+        return CreateClientUser(user=user)
+
 class LoginUser(Mutation):
     class Arguments:
-        nama = String(required=True)
+        identifier = String(required=True)
         password = String(required=True)
 
     user = Field(UserType)
     token = String()
 
-    def mutate(self, info, nama, password):
-        user = User.query.filter_by(nama=nama).first()
+    def mutate(self, info, identifier, password):
+        # Coba cari berdasarkan nama (untuk staff) atau username (untuk client)
+        user = User.query.filter(
+            (User.nama == identifier) | (User.username == identifier)
+        ).first()
+        
         if user and user.password == password:
             # Generate JWT token
             token = jwt.encode({
@@ -114,17 +199,42 @@ class LoginUser(Mutation):
 class UpdateUser(Mutation):
     class Arguments:
         id = Int(required=True)
-        nama = String(required=True)
-        password = String(required=True)
+        nama = String()
+        username = String()
+        password = String()
+        email = String()
+        companyName = String()  # Changed from company_name to companyName
 
     user = Field(UserType)
 
-    def mutate(self, info, id, nama, password):
+    def mutate(self, info, id, nama=None, username=None, password=None, email=None, companyName=None):
         user = User.query.get(id)
-        if user:
+        if not user:
+            raise Exception('User not found')
+        
+        if nama:
             user.nama = nama
+        if username:
+            # Check if username already exists for other users
+            existing_user = User.query.filter_by(username=username).first()
+            if existing_user and existing_user.id != id:
+                raise Exception('Username already exists')
+            user.username = username
+        if password:
             user.password = password
-            db.session.commit()
+        if email:
+            # Check if email already exists for other users
+            existing_user = User.query.filter_by(email=email).first()
+            if existing_user and existing_user.id != id:
+                raise Exception('Email already exists')
+            user.email = email
+        if companyName:
+            user.companyName = companyName  # Map companyName to company_name for database
+            # Untuk client, update nama juga jika companyName berubah
+            if user.role == UserRole.CLIENT.value:
+                user.nama = companyName
+            
+        db.session.commit()
         return UpdateUser(user=user)
 
 class DeleteUser(Mutation):
@@ -154,6 +264,7 @@ class DeleteAllUsers(Mutation):
 
 class Mutation(ObjectType):
     create_user = CreateUser.Field()
+    create_client_user = CreateClientUser.Field()
     login_user = LoginUser.Field()
     update_user = UpdateUser.Field()
     delete_user = DeleteUser.Field()
@@ -171,23 +282,13 @@ app.add_url_rule(
     )
 )
 
-# Test endpoint
 @app.route('/test')
 def test():
     return jsonify({"message": "Server is running!"})
 
-# # Serve static files from the 'frontend' directory
-# @app.route('/')
-# def serve_index():
-#     return send_from_directory(app.static_folder, 'index.html')
-
-# @app.route('/<path:path>')
-# def serve_static_files(path):
-#     return send_from_directory(app.static_folder, path)
-
 def is_port_in_use(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('localhost', port)) == 0
+        return s.connect_ex(('localhost', port)) == 5003
 
 if __name__ == '__main__':
     try:
@@ -203,4 +304,4 @@ if __name__ == '__main__':
             logger.info("Starting server on port 5003...")
             app.run(host='127.0.0.1', port=5003, debug=True, use_reloader=False)
     except Exception as e:
-        logger.error(f"Error starting server: {str(e)}") 
+        logger.error(f"Error starting server: {str(e)}")

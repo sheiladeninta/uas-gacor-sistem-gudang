@@ -3,139 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Gudang - Pilih Login</title>
+    <title>Sistem Gudang Gacor - Pilih Role</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .choice-container {
-            max-width: 800px;
-            margin: 20px;
-            padding: 40px;
-            background: rgba(255,255,255,0.95);
+
+        .selection-container {
+            background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        .choice-header {
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
             text-align: center;
+            max-width: 800px;
+            width: 90%;
+            margin: 20px;
+        }
+
+        .logo-section {
             margin-bottom: 40px;
         }
-        .choice-header h1 {
+
+        .logo-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .main-title {
             font-size: 2.5rem;
-            color: #4facfe;
             font-weight: bold;
+            color: var(--dark-color);
             margin-bottom: 10px;
         }
-        .choice-header p {
+
+        .subtitle {
+            font-size: 1.2rem;
             color: #666;
-            font-size: 1.1rem;
+            margin-bottom: 50px;
         }
-        .choice-cards {
+
+        .role-selection {
             display: flex;
             gap: 30px;
             justify-content: center;
+            flex-wrap: wrap;
         }
-        .choice-card {
+
+        .role-card {
+            background: white;
+            border: 3px solid #f0f0f0;
+            border-radius: 20px;
+            padding: 40px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             flex: 1;
             max-width: 300px;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border: 2px solid transparent;
-            background: white;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            min-width: 250px;
+            text-decoration: none;
+            color: inherit;
         }
-        .choice-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.13);
-            border-color: #4facfe;
-        }
-        .choice-card h3 {
-            margin: 20px 0 10px 0;
-            color: #212529;
-            font-weight: bold;
-        }
-        .choice-card p {
-            color: #6c757d;
-            margin-bottom: 20px;
-        }
-        .icon {
-            font-size: 48px;
-            color: #0d6efd;
-            margin-bottom: 20px;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            border: none;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .register-link {
-            text-align: center;
-            margin-top: 30px;
-            color: #6c757d;
-        }
-        .register-link a {
-            color: #0d6efd;
+
+        .role-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(52, 152, 219, 0.2);
+            color: inherit;
             text-decoration: none;
         }
-        .register-link a:hover {
-            text-decoration: underline;
+
+        .role-card.staff:hover {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(41, 128, 185, 0.05) 100%);
         }
-        @media (max-width: 900px) {
-            .choice-cards {
+
+        .role-card.client:hover {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(41, 128, 185, 0.05) 100%);
+        }
+
+        .role-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .role-card.staff .role-icon {
+            color: var(--primary-color);
+        }
+
+        .role-card.client .role-icon {
+            color: var(--primary-color);
+        }
+
+        .role-card:hover .role-icon {
+            transform: scale(1.1);
+        }
+
+        .role-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+
+        .role-description {
+            font-size: 1rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .role-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .role-features li {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .role-features li i {
+            color: var(--primary-color);
+            font-size: 0.8rem;
+        }
+
+        .role-card.client .role-features li i {
+            color: var(--primary-color);
+        }
+
+        .footer-text {
+            margin-top: 40px;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .selection-container {
+                padding: 30px 20px;
+            }
+
+            .main-title {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .role-selection {
                 flex-direction: column;
                 gap: 20px;
             }
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-</head>
-<body>
-    <div class="choice-container">
-        <div class="choice-header">
-            <h1>Sistem Gudang Gacor</h1>
-            <p class="text-muted">Silakan pilih jenis login Anda</p>
-        </div>
-        <div class="choice-cards">
-            <div class="choice-card" onclick="window.location.href='login.html?type=staff'">
-                <i class="bi bi-person-badge icon"></i>
-                <h3>Staff</h3>
-                <p>Login sebagai staff untuk mengelola sistem gudang</p>
-                <button class="btn btn-primary w-100">Login Staff</button>
-            </div>
-            <div class="choice-card" onclick="window.location.href='login.html?type=client'">
-                <i class="bi bi-person icon"></i>
-                <h3>Client</h3>
-                <p>Login sebagai client untuk mengakses layanan gudang</p>
-                <button class="btn btn-primary w-100">Login Client</button>
-            </div>
-        </div>
-        <div class="register-link">
-            Belum punya akun? <a href="register.html">Daftar sebagai Client</a>
-        </div>
-    </div>
-    <script>
-        // Cek jika user sudah login
-        if (localStorage.getItem('token')) {
-            const userRole = localStorage.getItem('userRole');
-            if (userRole === 'staff') {
-                window.location.href = '../index.html';
-            } else {
-                window.location.href = 'client-dashboard.html';
+
+            .role-card {
+                max-width: 100%;
+                padding: 30px 20px;
+            }
+
+            .role-icon {
+                font-size: 3rem;
+            }
+
+            .role-title {
+                font-size: 1.3rem;
             }
         }
+
+        /* Loading animation */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="selection-container">
+        <div class="logo-section">
+            <div class="logo-icon">
+                <i class="bi bi-boxes"></i>
+            </div>
+            <h1 class="main-title">Sistem Gudang Gacor</h1>
+            <p class="subtitle">Pilih role Anda untuk melanjutkan</p>
+        </div>
+
+        <div class="role-selection">
+            <a href="login.html?role=staff" class="role-card staff">
+                <div class="role-icon">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <h3 class="role-title">Staff</h3>
+                <p class="role-description">
+                    Akses penuh untuk mengelola sistem gudang dan inventori perusahaan
+                </p>
+                <ul class="role-features">
+                    <li><i class="bi bi-check-circle-fill"></i> Kelola inventori</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Laporan lengkap</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Manajemen data</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Kontrol penuh</li>
+                </ul>
+            </a>
+
+            <a href="register.html" class="role-card client">
+                <div class="role-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+                <h3 class="role-title">Client</h3>
+                <p class="role-description">
+                    Akses untuk perusahaan klien yang ingin menggunakan layanan gudang
+                </p>
+                <ul class="role-features">
+                    <li><i class="bi bi-check-circle-fill"></i> Daftar akun baru</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Akses terbatas</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Kelola barang</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Lihat laporan</li>
+                </ul>
+            </a>
+        </div>
+
+        <p class="footer-text">
+            Sudah punya akun client? <a href="login.html?role=client" style="color: var(--primary-color); text-decoration: none;">Login di sini</a>
+        </p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Show loading animation when clicking role cards
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                document.getElementById('loading').classList.add('show');
+            });
+        });
+
+        // Hide loading if user goes back
+        window.addEventListener('pageshow', function() {
+            document.getElementById('loading').classList.remove('show');
+        });
     </script>
 </body>
 </html>

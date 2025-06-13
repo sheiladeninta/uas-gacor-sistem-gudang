@@ -3,138 +3,641 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrasi Client - Sistem Gudang</title>
+    <title>Register Client - Sistem Gudang Gacor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --success-color: #2ecc71;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
-            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
         }
         .register-container {
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            overflow: hidden;
+            width: 90%;
+            max-width: 900px;
+            margin: 20px;
+            display: flex;
+            min-height: 700px;
+        }
+        .register-left {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.9) 0%, rgba(41, 128, 185, 0.9) 100%),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            color: white;
+            padding: 50px 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .register-right {
+            flex: 1;
+            padding: 50px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-y: auto;
+        }
+        .brand-logo {
+            font-size: 4rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .brand-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+        .brand-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .role-badge {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .register-header {
             text-align: center;
             margin-bottom: 30px;
         }
+        .register-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+        .register-subtitle {
+            color: #666;
+            font-size: 1rem;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.15);
+            background-color: white;
+        }
+        .input-group {
+            position: relative;
+        }
+        .input-group .form-control {
+            padding-left: 50px;
+        }
+        .input-group-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 1.1rem;
+            z-index: 10;
+        }
+        .btn-register {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+        .btn-register:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-register .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        .btn-register.loading .spinner {
+            display: inline-block;
+        }
+        .btn-register.loading .btn-text {
+            opacity: 0.7;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         .back-link {
-            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .back-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-link a:hover {
+            color: var(--secondary-color);
+            transform: translateX(-5px);
+        }
+        .login-link {
             text-align: center;
             margin-top: 20px;
-            color: #6c757d;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+        .login-link a {
+            color: var(--primary-color);
             text-decoration: none;
+            font-weight: 600;
         }
-        .back-link:hover {
-            color: #0d6efd;
+        .login-link a:hover {
+            color: var(--secondary-color);
         }
-        .form-text {
-            color: #6c757d;
-            font-size: 0.875rem;
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .alert-danger {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--accent-color);
+        }
+        .alert-success {
+            background-color: rgba(46, 204, 113, 0.1);
+            color: var(--success-color);
+        }
+        @media (max-width: 768px) {
+            .register-container {
+                flex-direction: column;
+                max-width: 500px;
+                min-height: auto;
+            }
+            .register-left {
+                padding: 30px 20px;
+                min-height: 250px;
+            }
+            .register-right {
+                padding: 30px 20px;
+            }
+            .brand-logo {
+                font-size: 3rem;
+                margin-bottom: 20px;
+            }
+            .brand-title {
+                font-size: 1.5rem;
+            }
+            .brand-subtitle {
+                font-size: 1rem;
+            }
+            .register-title {
+                font-size: 1.5rem;
+            }
+            .form-group {
+                margin-bottom: 18px;
+            }
+        }
+        /* Password visibility toggle */
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 5px;
+            z-index: 10;
+        }
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+        /* Password strength indicator */
+        .password-strength {
+            margin-top: 5px;
+            font-size: 0.85rem;
+        }
+        .strength-bar {
+            height: 4px;
+            background-color: #e9ecef;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .strength-fill {
+            height: 100%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+        .strength-weak .strength-fill {
+            width: 33%;
+            background-color: var(--accent-color);
+        }
+        .strength-medium .strength-fill {
+            width: 66%;
+            background-color: #f39c12;
+        }
+        .strength-strong .strength-fill {
+            width: 100%;
+            background-color: var(--success-color);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="register-container">
-            <div class="register-header">
-                <h2>Registrasi Client</h2>
-                <p>Buat akun baru untuk mengakses layanan gudang</p>
+    <div class="register-container">
+        <div class="register-left">
+            <div class="brand-logo">
+                <i class="bi bi-boxes"></i>
             </div>
+            <h2 class="brand-title">Sistem Gudang Gacor</h2>
+            <p class="brand-subtitle">Bergabunglah dengan sistem manajemen gudang yang efisien dan terpercaya</p>
+            <div class="role-badge">
+                <i class="bi bi-building"></i> Client Registration
+            </div>
+        </div>
+        <div class="register-right">
+            <div class="back-link">
+                <a href="index.html">
+                    <i class="bi bi-arrow-left"></i>
+                    Kembali ke Pilihan Role
+                </a>
+            </div>
+            <div class="register-header">
+                <h3 class="register-title">Daftar Sebagai Client</h3>
+                <p class="register-subtitle">Buat akun baru untuk perusahaan Anda</p>
+            </div>
+            <div id="alertContainer"></div>
             <form id="registerForm">
-                <div class="mb-3">
-                    <label for="nama" class="form-label">Nama</label>
-                    <input type="text" class="form-control" id="nama" required>
-                    <div class="form-text">Masukkan nama lengkap Anda</div>
+                <div class="form-group">
+                    <label class="form-label">Nama Perusahaan</label>
+                    <div class="input-group">
+                        <i class="input-group-icon bi bi-building"></i>
+                        <input type="text" class="form-control" id="companyName" name="companyName" required placeholder="Masukkan nama perusahaan">
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" required>
-                    <div class="form-text">Masukkan email yang valid</div>
+                <div class="form-group">
+                    <label class="form-label">Email Perusahaan</label>
+                    <div class="input-group">
+                        <i class="input-group-icon bi bi-envelope"></i>
+                        <input type="email" class="form-control" id="email" name="email" required placeholder="contoh@perusahaan.com">
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" required>
-                    <div class="form-text">Minimal 6 karakter</div>
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <div class="input-group">
+                        <i class="input-group-icon bi bi-person"></i>
+                        <input type="text" class="form-control" id="username" name="username" required placeholder="Masukkan username">
+                    </div>
+                    <small class="text-muted">Username akan digunakan untuk login</small>
                 </div>
-                <div class="mb-3">
-                    <label for="confirmPassword" class="form-label">Konfirmasi Password</label>
-                    <input type="password" class="form-control" id="confirmPassword" required>
-                    <div class="form-text">Masukkan password yang sama</div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-group">
+                        <i class="input-group-icon bi bi-lock"></i>
+                        <input type="password" class="form-control" id="password" name="password" required placeholder="Masukkan password">
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <i class="bi bi-eye" id="passwordToggleIcon"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength" id="passwordStrength" style="display: none;">
+                        <div class="strength-bar">
+                            <div class="strength-fill"></div>
+                        </div>
+                        <small class="strength-text text-muted">Kekuatan password: <span id="strengthLabel">Lemah</span></small>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Daftar</button>
+                <div class="form-group">
+                    <label class="form-label">Konfirmasi Password</label>
+                    <div class="input-group">
+                        <i class="input-group-icon bi bi-lock-fill"></i>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required placeholder="Ulangi password">
+                        <button type="button" class="password-toggle" onclick="toggleConfirmPassword()">
+                            <i class="bi bi-eye" id="confirmPasswordToggleIcon"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted" id="passwordMatchMessage"></small>
+                </div>
+                <button type="submit" class="btn btn-register" id="registerBtn">
+                    <div class="spinner"></div>
+                    <span class="btn-text">Daftar Sekarang</span>
+                </button>
             </form>
-            <a href="index.html" class="back-link">
-                <i class="bi bi-arrow-left"></i> Kembali ke halaman utama
-            </a>
+            <div class="login-link">
+                <p>Sudah punya akun? <a href="login.html?role=client">Login sebagai Client</a></p>
+            </div>
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Show alert message
+        function showAlert(message, type = 'danger') {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                    ${message}
+                </div>
+            `;
             
-            const nama = document.getElementById('nama').value;
-            const email = document.getElementById('email').value;
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.className = 'bi bi-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.className = 'bi bi-eye';
+            }
+        }
+
+        function toggleConfirmPassword() {
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const toggleIcon = document.getElementById('confirmPasswordToggleIcon');
+            
+            if (confirmPasswordInput.type === 'password') {
+                confirmPasswordInput.type = 'text';
+                toggleIcon.className = 'bi bi-eye-slash';
+            } else {
+                confirmPasswordInput.type = 'password';
+                toggleIcon.className = 'bi bi-eye';
+            }
+        }
+
+        // Password strength checker
+        function checkPasswordStrength(password) {
+            const strengthIndicator = document.getElementById('passwordStrength');
+            const strengthLabel = document.getElementById('strengthLabel');
+            
+            if (password.length === 0) {
+                strengthIndicator.style.display = 'none';
+                return;
+            }
+            
+            strengthIndicator.style.display = 'block';
+            
+            let score = 0;
+            if (password.length >= 8) score++;
+            if (/[a-z]/.test(password)) score++;
+            if (/[A-Z]/.test(password)) score++;
+            if (/[0-9]/.test(password)) score++;
+            if (/[^a-zA-Z0-9]/.test(password)) score++;
+            
+            const strengthBar = document.querySelector('.strength-bar');
+            strengthBar.className = 'strength-bar';
+            
+            if (score <= 2) {
+                strengthBar.classList.add('strength-weak');
+                strengthLabel.textContent = 'Lemah';
+                strengthLabel.style.color = '#e74c3c';
+            } else if (score <= 3) {
+                strengthBar.classList.add('strength-medium');
+                strengthLabel.textContent = 'Sedang';
+                strengthLabel.style.color = '#f39c12';
+            } else {
+                strengthBar.classList.add('strength-strong');
+                strengthLabel.textContent = 'Kuat';
+                strengthLabel.style.color = '#2ecc71';
+            }
+        }
+
+        // Check password match
+        function checkPasswordMatch() {
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-
-            // Validasi password
-            if (password.length < 6) {
-                alert('Password minimal 6 karakter');
-                return;
+            const messageElement = document.getElementById('passwordMatchMessage');
+            
+            if (confirmPassword.length === 0) {
+                messageElement.textContent = '';
+                return true;
             }
-
-            if (password !== confirmPassword) {
-                alert('Password dan konfirmasi password tidak cocok');
-                return;
+            
+            if (password === confirmPassword) {
+                messageElement.textContent = 'Password cocok ✓';
+                messageElement.style.color = '#2ecc71';
+                return true;
+            } else {
+                messageElement.textContent = 'Password tidak cocok ✗';
+                messageElement.style.color = '#e74c3c';
+                return false;
             }
+        }
 
+        // GraphQL register function - FIXED VERSION
+        async function registerUser(username, password, email, companyName) {
+            // Gunakan mutation createClientUser yang khusus untuk registrasi client
+            const mutation = `
+                mutation CreateClientUser($username: String!, $password: String!, $email: String!, $companyName: String!) {
+                    createClientUser(username: $username, password: $password, email: $email, companyName: $companyName) {
+                        user {
+                            id
+                            username
+                            email
+                            companyName
+                            role
+                        }
+                    }
+                }
+            `;
+            
             try {
-                const response = await fetch('http://localhost:5003/graphql', {
+                const response = await fetch('http://127.0.0.1:5003/graphql', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        query: `
-                            mutation {
-                                createUser(
-                                    nama: "${nama}"
-                                    email: "${email}"
-                                    password: "${password}"
-                                ) {
-                                    user {
-                                        id
-                                        nama
-                                        email
-                                        role
-                                    }
-                                }
-                            }
-                        `
+                        query: mutation,
+                        variables: {
+                            username: username,
+                            password: password,
+                            email: email,
+                            companyName: companyName
+                        }
                     })
                 });
-
-                const data = await response.json();
-                console.log('Response:', data); // Untuk debugging
-
-                if (data.data && data.data.createUser && data.data.createUser.user) {
-                    alert('Registrasi berhasil! Silakan login.');
-                    window.location.href = 'login.html?type=client';
-                } else {
-                    const errorMessage = data.errors ? data.errors[0].message : 'Terjadi kesalahan';
-                    alert('Registrasi gagal: ' + errorMessage);
-                    console.error('Error details:', data.errors); // Untuk debugging
+                
+                const result = await response.json();
+                
+                if (result.errors) {
+                    throw new Error(result.errors[0].message);
                 }
+                
+                return result.data.createClientUser;
             } catch (error) {
-                alert('Terjadi kesalahan saat registrasi');
-                console.error('Error:', error);
+                throw error;
+            }
+        }
+
+        // Email validation
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Handle form submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const registerBtn = document.getElementById('registerBtn');
+            const companyName = document.getElementById('companyName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Basic validation
+            if (!companyName || !email || !username || !password || !confirmPassword) {
+                showAlert('Semua field harus diisi!');
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                showAlert('Format email tidak valid!');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showAlert('Password harus minimal 6 karakter!');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showAlert('Password dan konfirmasi password tidak cocok!');
+                return;
+            }
+            
+            // Show loading state
+            registerBtn.classList.add('loading');
+            registerBtn.disabled = true;
+            
+            try {
+                // Register user with correct parameters
+                const registerResult = await registerUser(username, password, email, companyName);
+                
+                showAlert('Registrasi berhasil! Anda akan dialihkan ke halaman login...', 'success');
+                
+                // Redirect to login page after successful registration
+                setTimeout(() => {
+                    window.location.href = 'login.html?role=client';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                let errorMessage = 'Registrasi gagal! ';
+                
+                if (error.message.includes('already exists')) {
+                    if (error.message.includes('Username')) {
+                        errorMessage += 'Username sudah digunakan.';
+                    } else if (error.message.includes('Email')) {
+                        errorMessage += 'Email sudah terdaftar.';
+                    } else {
+                        errorMessage += 'Username atau email sudah digunakan.';
+                    }
+                } else if (error.message.includes('fetch')) {
+                    errorMessage += 'Tidak dapat terhubung ke server. Pastikan server sedang berjalan.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showAlert(errorMessage);
+            } finally {
+                // Hide loading state
+                registerBtn.classList.remove('loading');
+                registerBtn.disabled = false;
             }
         });
+
+        // Add event listeners for real-time validation
+        document.getElementById('password').addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+            if (document.getElementById('confirmPassword').value) {
+                checkPasswordMatch();
+            }
+        });
+
+        document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
+
+        // Check if user is already logged in
+        const savedUser = sessionStorage.getItem('user');
+        if (savedUser) {
+            const user = JSON.parse(savedUser);
+            if (user.role === 'STAFF') {
+                window.location.href = 'staff/dashboard.html';
+            } else {
+                window.location.href = 'client/dashboard.html';
+            }
+        }
     </script>
 </body>
-</html> 
+</html>
