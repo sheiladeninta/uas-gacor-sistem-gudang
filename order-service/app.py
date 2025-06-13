@@ -12,12 +12,12 @@ from datetime import datetime
 import requests
 import os
 from enum import Enum
+import json
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///order_service.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
-
 db = SQLAlchemy(app)
 CORS(app)
 
@@ -78,6 +78,69 @@ class OrderItemType(SQLAlchemyObjectType):
         model = OrderItem
         load_instance = True
 
+def check_inventory_availability_helper(items):
+    """Helper function untuk mengecek ketersediaan inventory"""
+    try:
+        check_items = []
+        for item in items:
+            if isinstance(item, str):
+                item_data = json.loads(item)
+            else:
+                item_data = item
+                
+            check_items.append({
+                'item_code': item_data['item_code'],
+                'requested_quantity': item_data['requested_quantity']
+            })
+        
+        response = requests.post(
+            f"{INVENTORY_SERVICE_URL}/api/check-availability",
+            json={'items': check_items},
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return {
+                'available': False,
+                'message': 'Failed to check inventory availability',
+                'details': []
+            }
+            
+    except requests.RequestException as e:
+        # Fallback ketika inventory service tidak tersedia
+        return {
+            'available': True,  # Asumsikan tersedia untuk development
+            'message': f"Inventory service unavailable: {str(e)}",
+            'details': []
+        }
+
+def reserve_inventory_stock(order_id, items):
+    """Helper function untuk reserve stock di inventory"""
+    try:
+        reserve_items = []
+        for item in items:
+            reserve_items.append({
+                'item_code': item.item_code,
+                'quantity': item.approved_quantity if item.approved_quantity > 0 else item.requested_quantity
+            })
+        
+        response = requests.post(
+            f"{INVENTORY_SERVICE_URL}/api/reserve-stock",
+            json={
+                'order_id': order_id,
+                'items': reserve_items
+            },
+            timeout=10
+        )
+        
+        return response.status_code == 200, response.json() if response.status_code == 200 else {}
+        
+    except requests.RequestException:
+        return False, {'message': 'Failed to reserve stock'}
+
+
 class Query(graphene.ObjectType):
     orders = graphene.List(OrderType, 
                           restaurant_id=graphene.String(),
@@ -112,20 +175,42 @@ class CreateOrder(graphene.Mutation):
         restaurant_name = graphene.String(required=True)
         requested_date = graphene.String(required=True)
         notes = graphene.String()
-        items = graphene.List(graphene.String, required=True)  # JSON string of items
+        items = graphene.List(graphene.String, required=True)
+        check_inventory = graphene.Boolean(default_value=True)  # Option untuk cek inventory
     
     order = graphene.Field(OrderType)
     success = graphene.Boolean()
     message = graphene.String()
+    inventory_check = graphene.String()  # Detail hasil cek inventory
     
-    def mutate(self, info, restaurant_id, restaurant_name, requested_date, items, notes=None):
+    def mutate(self, info, restaurant_id, restaurant_name, requested_date, items, notes=None, check_inventory=True):
         try:
+            # Cek inventory availability terlebih dahulu jika diminta
+            inventory_result = None
+            if check_inventory:
+                inventory_result = check_inventory_availability_helper(items)
+                
+                if not inventory_result['available']:
+                    return CreateOrder(
+                        order=None, 
+                        success=False, 
+                        message="Some items are not available in sufficient quantity",
+                        inventory_check=json.dumps(inventory_result)
+                    )
+            
             # Generate order number
             order_count = Order.query.count() + 1
             order_number = f"ORD-{datetime.now().strftime('%Y%m%d')}-{order_count:04d}"
             
-            # Parse requested date
-            req_date = datetime.strptime(requested_date, '%Y-%m-%d %H:%M:%S')
+            # Parse requested date - handle both formats
+            try:
+                if 'T' in requested_date:
+                    req_date = datetime.fromisoformat(requested_date.replace('Z', ''))
+                else:
+                    req_date = datetime.strptime(requested_date, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                # Try alternative format
+                req_date = datetime.fromisoformat(requested_date.replace('T', ' ').replace('Z', ''))
             
             # Create order
             order = Order(
@@ -133,7 +218,7 @@ class CreateOrder(graphene.Mutation):
                 restaurant_id=restaurant_id,
                 restaurant_name=restaurant_name,
                 requested_date=req_date,
-                notes=notes,
+                notes=notes or '',
                 status=OrderStatus.PENDING
             )
             
@@ -141,61 +226,92 @@ class CreateOrder(graphene.Mutation):
             db.session.flush()  # Get order ID
             
             # Add order items
-            import json
             total_items = 0
             for item_data in items:
-                item = json.loads(item_data)
-                order_item = OrderItem(
-                    order_id=order.id,
-                    item_code=item['item_code'],
-                    item_name=item['item_name'],
-                    requested_quantity=item['requested_quantity'],
-                    unit=item['unit'],
-                    notes=item.get('notes', '')
-                )
-                db.session.add(order_item)
-                total_items += item['requested_quantity']
+                try:
+                    item = json.loads(item_data)
+                    order_item = OrderItem(
+                        order_id=order.id,
+                        item_code=item['item_code'],
+                        item_name=item['item_name'],
+                        requested_quantity=item['requested_quantity'],
+                        unit=item['unit'],
+                        notes=item.get('notes', '')
+                    )
+                    db.session.add(order_item)
+                    total_items += item['requested_quantity']
+                except (json.JSONDecodeError, KeyError) as e:
+                    db.session.rollback()
+                    return CreateOrder(
+                        order=None, 
+                        success=False, 
+                        message=f"Invalid item data: {str(e)}",
+                        inventory_check=None
+                    )
             
             order.total_items = total_items
             db.session.commit()
             
-            return CreateOrder(order=order, success=True, message="Order created successfully")
+            return CreateOrder(
+                order=order, 
+                success=True, 
+                message="Order created successfully",
+                inventory_check=json.dumps(inventory_result) if inventory_result else None
+            )
             
         except Exception as e:
             db.session.rollback()
-            return CreateOrder(order=None, success=False, message=str(e))
+            return CreateOrder(
+                order=None, 
+                success=False, 
+                message=str(e),
+                inventory_check=None
+            )
 
 class UpdateOrderStatus(graphene.Mutation):
     class Arguments:
         order_id = graphene.Int(required=True)
         status = graphene.String(required=True)
         approved_quantities = graphene.List(graphene.String)  # JSON string of item quantities
+        reserve_stock = graphene.Boolean(default_value=True)  # Option untuk reserve stock
     
     order = graphene.Field(OrderType)
     success = graphene.Boolean()
     message = graphene.String()
+    stock_reservation = graphene.String()  # Detail reservasi stock
     
-    def mutate(self, info, order_id, status, approved_quantities=None):
+    def mutate(self, info, order_id, status, approved_quantities=None, reserve_stock=True):
         try:
             order = Order.query.get(order_id)
             if not order:
-                return UpdateOrderStatus(order=None, success=False, message="Order not found")
+                return UpdateOrderStatus(
+                    order=None, 
+                    success=False, 
+                    message="Order not found",
+                    stock_reservation=None
+                )
             
             # Update status
             try:
                 new_status = OrderStatus(status.upper())
                 order.status = new_status
             except ValueError:
-                return UpdateOrderStatus(order=None, success=False, message="Invalid status")
+                return UpdateOrderStatus(
+                    order=None, 
+                    success=False, 
+                    message="Invalid status",
+                    stock_reservation=None
+                )
             
-            # Update timestamps based on status
+            # Update timestamps dan handle approved quantities
             now = datetime.utcnow()
+            stock_reservation_result = None
+            
             if new_status == OrderStatus.APPROVED:
                 order.approved_date = now
                 
                 # Update approved quantities if provided
                 if approved_quantities:
-                    import json
                     for qty_data in approved_quantities:
                         qty = json.loads(qty_data)
                         item = OrderItem.query.filter_by(
@@ -204,7 +320,21 @@ class UpdateOrderStatus(graphene.Mutation):
                         ).first()
                         if item:
                             item.approved_quantity = qty['approved_quantity']
-                            
+                
+                # Reserve stock di inventory service
+                if reserve_stock:
+                    success, reservation_result = reserve_inventory_stock(order_id, order.items)
+                    stock_reservation_result = reservation_result
+                    
+                    if not success:
+                        db.session.rollback()
+                        return UpdateOrderStatus(
+                            order=None,
+                            success=False,
+                            message=f"Failed to reserve stock: {reservation_result.get('message', 'Unknown error')}",
+                            stock_reservation=json.dumps(reservation_result)
+                        )
+                        
             elif new_status == OrderStatus.SHIPPED:
                 order.shipped_date = now
             elif new_status == OrderStatus.DELIVERED:
@@ -213,11 +343,21 @@ class UpdateOrderStatus(graphene.Mutation):
             order.updated_at = now
             db.session.commit()
             
-            return UpdateOrderStatus(order=order, success=True, message="Order status updated successfully")
+            return UpdateOrderStatus(
+                order=order, 
+                success=True, 
+                message="Order status updated successfully",
+                stock_reservation=json.dumps(stock_reservation_result) if stock_reservation_result else None
+            )
             
         except Exception as e:
             db.session.rollback()
-            return UpdateOrderStatus(order=None, success=False, message=str(e))
+            return UpdateOrderStatus(
+                order=None, 
+                success=False, 
+                message=str(e),
+                stock_reservation=None
+            )
 
 class CheckInventoryAvailability(graphene.Mutation):
     class Arguments:
@@ -230,7 +370,6 @@ class CheckInventoryAvailability(graphene.Mutation):
     def mutate(self, info, items):
         try:
             # Call Inventory Service to check availability
-            import json
             check_items = []
             for item_data in items:
                 item = json.loads(item_data)
@@ -240,34 +379,34 @@ class CheckInventoryAvailability(graphene.Mutation):
                 })
             
             # Mock API call to inventory service
-            # In real implementation, replace with actual HTTP request
-            response = requests.post(
-                f"{INVENTORY_SERVICE_URL}/api/check-availability",
-                json={'items': check_items},
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                return CheckInventoryAvailability(
-                    available=result.get('available', False),
-                    message=result.get('message', ''),
-                    availability_details=[json.dumps(detail) for detail in result.get('details', [])]
+            try:
+                response = requests.post(
+                    f"{INVENTORY_SERVICE_URL}/api/check-availability",
+                    json={'items': check_items},
+                    timeout=10
                 )
-            else:
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    return CheckInventoryAvailability(
+                        available=result.get('available', False),
+                        message=result.get('message', ''),
+                        availability_details=[json.dumps(detail) for detail in result.get('details', [])]
+                    )
+                else:
+                    return CheckInventoryAvailability(
+                        available=False,
+                        message="Failed to check inventory availability",
+                        availability_details=[]
+                    )
+            except requests.RequestException:
+                # Fallback when inventory service is not available
                 return CheckInventoryAvailability(
-                    available=False,
-                    message="Failed to check inventory availability",
+                    available=True,  # Assume available for development
+                    message="Inventory service unavailable, assuming items are available",
                     availability_details=[]
                 )
                 
-        except requests.RequestException:
-            # Fallback when inventory service is not available
-            return CheckInventoryAvailability(
-                available=True,  # Assume available for development
-                message="Inventory service unavailable, assuming items are available",
-                availability_details=[]
-            )
         except Exception as e:
             return CheckInventoryAvailability(
                 available=False,

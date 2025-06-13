@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Pesanan - Sistem Gudang Gacor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+        <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 70px;
+            --header-height: 70px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+        }
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 4px 20px rgba(52, 152, 219, 0.3);
+        }
+        .header .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 15px;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .header .toggle-btn:hover {
+            background-color: rgba(255,255,255,0.15);
+            transform: scale(1.05);
+        }
+        .header .logo {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-right: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header .logo i {
+            font-size: 1.8rem;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .header .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .header .logout-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .header .logout-btn:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.05);
+        }
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height));
+            background: white;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 1020;
+            overflow: hidden;
+        }
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+        .sidebar-content {
+            padding: 20px 0;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .user-profile {
+            padding: 0 20px 25px;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed .user-profile {
+            padding: 0 10px 25px;
+        }
+        .user-profile .avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            margin: 0 auto 15px;
+            transition: all 0.3s;
+            border: 3px solid #f0f0f0;
+        }
+        .sidebar.collapsed .user-profile .avatar {
+            width: 45px;
+            height: 45px;
+            font-size: 1.3rem;
+        }
+        .user-profile .name {
+            font-weight: bold;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.3s;
+        }
+        .user-profile .role {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            background: rgba(52, 152, 219, 0.1);
+            padding: 4px 12px;
+            border-radius: 15px;
+            display: inline-block;
+            transition: opacity 0.3s;
+        }
+        .sidebar.collapsed .user-profile .name,
+        .sidebar.collapsed .user-profile .role {
+            opacity: 0;
+        }
+        /* Menu */
+        .menu {
+            list-style: none;
+            padding: 0;
+        }
+        .menu-section {
+            margin-bottom: 20px;
+        }
+        .menu-section-title {
+            font-size: 0.75rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 0 20px 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: opacity 0.3s;
+        }
+        .sidebar.collapsed .menu-section-title {
+            opacity: 0;
+        }
+        .menu-item {
+            margin-bottom: 3px;
+        }
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+            border-radius: 0 30px 30px 0;
+            margin-right: 15px;
+        }
+        .sidebar.collapsed .menu-link {
+            padding: 15px 0;
+            justify-content: center;
+            margin-right: 0;
+            border-radius: 0;
+        }
+        .menu-link:hover {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%);
+            color: var(--primary-color);
+            transform: translateX(8px);
+        }
+        .sidebar.collapsed .menu-link:hover {
+            transform: none;
+            background: rgba(52, 152, 219, 0.1);
+        }
+        .menu-link.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        .menu-link.active::after {
+            content: '';
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border: 12px solid transparent;
+            border-left-color: var(--secondary-color);
+        }
+        .sidebar.collapsed .menu-link.active::after {
+            display: none;
+        }
+        .menu-icon {
+            font-size: 1.3rem;
+            width: 28px;
+            text-align: center;
+            margin-right: 15px;
+            transition: margin 0.3s;
+        }
+        .sidebar.collapsed .menu-icon {
+            margin-right: 0;
+        }
+        .menu-text {
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.3s;
+            font-weight: 500;
+        }
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            width: 0;
+        }
+        .badge-notification {
+            background: var(--accent-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 7px;
+            border-radius: 12px;
+            margin-left: auto;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+        .sidebar.collapsed .badge-notification {
+            opacity: 0;
+        }
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+            min-height: calc(100vh - var(--header-height));
+        }
+        .sidebar.collapsed + .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+        /* Content Cards */
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            border: 1px solid rgba(52, 152, 219, 0.1);
+        }
+        .card-title {
+            color: var(--dark-color);
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title i {
+            color: var(--primary-color);
+        }
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(52, 152, 219, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        .stats-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .stats-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .stats-label {
+            color: #666;
+            font-weight: 500;
+        }
+        /* Quick Actions */
+        .quick-action {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(52, 152, 219, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+        }
+        .quick-action:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .quick-action i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        .quick-action h5 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .quick-action p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+        .welcome-section h2 {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .welcome-section p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        /* Recent Orders Table */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .table {
+            margin: 0;
+        }
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 15px;
+        }
+        .table tbody td {
+            padding: 15px;
+            border-color: #f0f0f0;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-processing {
+            background-color: #cff4fc;
+            color: #087990;
+        }
+        .status-shipped {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: var(--sidebar-width);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .sidebar.collapsed + .main-content {
+                margin-left: 0;
+            }
+            .header .logo {
+                font-size: 1.3rem;
+            }
+            .header .user-info span {
+                display: none;
+            }
+            .stats-card {
+                margin-bottom: 20px;
+            }
+            .quick-action {
+                margin-bottom: 20px;
+            }
+        }
+        /* Custom Scrollbar */
+        .sidebar-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar-content::-webkit-scrollbar-track {
+            background: #f8f9fa;
+        }
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: rgba(52, 152, 219, 0.3);
+            border-radius: 3px;
+        }
+        .sidebar-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(52, 152, 219, 0.5);
+        }
+    </style>
+</head>
+<body>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <button class="toggle-btn" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="logo">
+            <i class="bi bi-boxes"></i>
+            <span>Sistem Gudang Gacor</span>
+        </div>
+        <div class="user-info">
+            <span id="userName"></span>
+            <div class="user-avatar">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <button class="logout-btn" onclick="logout()" title="Logout">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="name" id="profileName"></div>
+                <div class="role">CLIENT</div>
+            </div>
+            <ul class="menu">
+                <div class="menu-section">
+                    <div class="menu-section-title">UTAMA</div>
+                    <li class="menu-item">
+                        <a href="../../user/client/dashboard.html" class="menu-link">
+                            <i class="menu-icon bi-speedometer2"></i>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="catalog.html" class="menu-link">
+                            <i class="menu-icon bi-boxes"></i>
+                            <span class="menu-text">Katalog Produk</span>
+                        </a>
+                    </li>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">PESANAN</div>
+                    <li class="menu-item">
+                        <a href="create-order.html" class="menu-link">
+                            <i class="menu-icon bi-cart-plus"></i>
+                            <span class="menu-text">Buat Pesanan</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="order-status.html" class="menu-link active">
+                            <i class="menu-icon bi-clock-history"></i>
+                            <span class="menu-text">Status Pesanan</span>
+                        </a>
+                    </li>
+                </div>
+                <div class="menu-section">
+                    <li class="menu-item" style="margin-top: 20px; border-top: 1px solid #f0f0f0; padding-top: 15px;">
+                        <a href="#" class="menu-link" onclick="logout()">
+                            <i class="menu-icon bi-box-arrow-right"></i>
+                            <span class="menu-text">Logout</span>
+                        </a>
+                    </li>
+                </div>
+            </ul>
+        </div>
+    </nav>
+            <!-- Main Content -->
+            <div class="col-lg-9 col-xl-10 main-content">
+                <!-- Page Header -->
+                <div class="welcome-section">
+                    <h2>
+                        <i class="bi bi-list-check me-2"></i>
+                        Status Pesanan
+                    </h2>
+                    <p>Lihat semua pesanan yang pernah Anda buat beserta statusnya.</p>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="content-card">
+                    <h3 class="card-title">
+                        <i class="bi bi-funnel"></i>
+                        Filter Pesanan
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="statusFilter" class="form-label">Status</label>
+                            <select class="form-select" id="statusFilter" onchange="filterOrders()">
+                                <option value="">Semua Status</option>
+                                <option value="PENDING">Pending</option>
+                                <option value="APPROVED">Approved</option>
+                                <option value="PROCESSING">Processing</option>
+                                <option value="SHIPPED">Shipped</option>
+                                <option value="DELIVERED">Delivered</option>
+                                <option value="REJECTED">Rejected</option>
+                                <option value="CANCELLED">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="dateFrom" class="form-label">Dari Tanggal</label>
+                            <input type="date" class="form-control" id="dateFrom" onchange="filterOrders()">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="dateTo" class="form-label">Sampai Tanggal</label>
+                            <input type="date" class="form-control" id="dateTo" onchange="filterOrders()">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary" onclick="loadOrders()">
+                                <i class="bi bi-arrow-clockwise"></i>
+                                Refresh
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                                <i class="bi bi-x-circle"></i>
+                                Clear Filter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders List -->
+                <div class="content-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="card-title">
+                            <i class="bi bi-list-ul"></i>
+                            Daftar Pesanan
+                        </h3>
+                        <div class="text-muted">
+                            Total: <span id="totalOrders">0</span> pesanan
+                        </div>
+                    </div>
+                    
+                    <div id="ordersContainer">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="mt-2">Memuat data pesanan...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-receipt"></i>
+                        Detail Pesanan
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="orderDetailsContent">
+                    <!-- Order details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let sidebarCollapsed = false;
+        let currentUser = null;
+        let allOrders = [];
+
+        // Common functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('show');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                sidebarCollapsed = !sidebarCollapsed;
+            }
+        }
+        
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('currentUser');
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('user');
+                sessionStorage.removeItem('userRole');
+                window.location.href = '../../user/login.html';
+            }
+        }
+
+        // Handle responsive
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('show');
+            }
+        });
+
+        // Close sidebar on mobile when clicking outside
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.querySelector('.toggle-btn');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !toggleBtn.contains(e.target) && 
+                sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
+        });
+
+        // Load user info
+        async function loadUserInfo() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            
+            if (!token) {
+                window.location.href = '../../user/login.html';
+                return;
+            }
+            
+            try {
+                const userData = localStorage.getItem('currentUser');
+                if (userData) {
+                    currentUser = JSON.parse(userData);
+                } else {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    currentUser = {
+                        id: payload.user_id,
+                        nama: payload.nama,
+                        companyName: payload.companyName,
+                        username: payload.username
+                    };
+                }
+                
+                const displayName = currentUser.companyName || currentUser.nama;
+                document.getElementById('userName').textContent = displayName;
+                document.getElementById('profileName').textContent = displayName;
+                
+            } catch (error) {
+                console.error('Error loading user info:', error);
+                window.location.href = '../../user/login.html';
+            }
+        }
+
+        // Load orders
+        async function loadOrders() {
+            try {
+                const response = await fetch('http://127.0.0.1:5002/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: `
+                            query GetOrders($restaurantId: String) {
+                                orders(restaurantId: $restaurantId) {
+                                    id
+                                    orderNumber
+                                    restaurantName
+                                    status
+                                    totalItems
+                                    notes
+                                    requestedDate
+                                    approvedDate
+                                    shippedDate
+                                    deliveredDate
+                                    createdAt
+                                    updatedAt
+                                    items {
+                                        id
+                                        itemCode
+                                        itemName
+                                        requestedQuantity
+                                        approvedQuantity
+                                        unit
+                                        notes
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            restaurantId: currentUser.id.toString()
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.data?.orders) {
+                    allOrders = result.data.orders;
+                    displayOrders(allOrders);
+                } else {
+                    displayError('Gagal memuat data pesanan');
+                }
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                displayError('Terjadi kesalahan saat memuat data pesanan');
+            }
+        }
+
+        // Display orders
+        function displayOrders(orders) {
+            const container = document.getElementById('ordersContainer');
+            document.getElementById('totalOrders').textContent = orders.length;
+
+            if (orders.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-1 text-muted"></i>
+                        <h4 class="text-muted mt-3">Belum ada pesanan</h4>
+                        <p class="text-muted">Anda belum membuat pesanan apapun.</p>
+                        <a href="create-order.html" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i>
+                            Buat Pesanan Pertama
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            let ordersHTML = '';
+            orders.forEach(order => {
+                const statusBadge = getStatusBadge(order.status);
+                const createdDate = new Date(order.createdAt).toLocaleString('id-ID');
+                const requestedDate = new Date(order.requestedDate).toLocaleString('id-ID');
+                
+                ordersHTML += `
+                    <div class="card mb-3 order-card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <h6 class="mb-1">${order.orderNumber}</h6>
+                                    <small class="text-muted">Dibuat: ${createdDate}</small>
+                                </div>
+                                <div class="col-md-2">
+                                    ${statusBadge}
+                                </div>
+                                <div class="col-md-2">
+                                    <strong>${order.totalItems}</strong>
+                                    <small class="text-muted d-block">Total Items</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Dibutuhkan:</small>
+                                    <div>${requestedDate}</div>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="showOrderDetails(${order.id})">
+                                        <i class="bi bi-eye"></i>
+                                        Detail
+                                    </button>
+                                </div>
+                            </div>
+                            ${order.notes ? `
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <small class="text-muted">Catatan:</small>
+                                        <div class="text-muted">${order.notes}</div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = ordersHTML;
+        }
+
+        // Get status badge
+        function getStatusBadge(status) {
+            const statusConfig = {
+                'PENDING': { class: 'warning', text: 'Menunggu', icon: 'clock' },
+                'APPROVED': { class: 'success', text: 'Disetujui', icon: 'check-circle' },
+                'PROCESSING': { class: 'info', text: 'Diproses', icon: 'gear' },
+                'SHIPPED': { class: 'primary', text: 'Dikirim', icon: 'truck' },
+                'DELIVERED': { class: 'success', text: 'Diterima', icon: 'check2-circle' },
+                'REJECTED': { class: 'danger', text: 'Ditolak', icon: 'x-circle' },
+                'CANCELLED': { class: 'secondary', text: 'Dibatalkan', icon: 'slash-circle' }
+            };
+
+            const config = statusConfig[status] || statusConfig['PENDING'];
+            return `
+                <span class="badge bg-${config.class}">
+                    <i class="bi bi-${config.icon} me-1"></i>
+                    ${config.text}
+                </span>
+            `;
+        }
+
+        // Show order details
+        async function showOrderDetails(orderId) {
+            const order = allOrders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+            const content = document.getElementById('orderDetailsContent');
+
+            // Build order details HTML
+            const createdDate = new Date(order.createdAt).toLocaleString('id-ID');
+            const requestedDate = new Date(order.requestedDate).toLocaleString('id-ID');
+            const approvedDate = order.approvedDate ? new Date(order.approvedDate).toLocaleString('id-ID') : '-';
+            const shippedDate = order.shippedDate ? new Date(order.shippedDate).toLocaleString('id-ID') : '-';
+            const deliveredDate = order.deliveredDate ? new Date(order.deliveredDate).toLocaleString('id-ID') : '-';
+
+            let itemsHTML = '';
+            order.items.forEach(item => {
+                itemsHTML += `
+                    <tr>
+                        <td>${item.itemCode}</td>
+                        <td>${item.itemName}</td>
+                        <td class="text-center">${item.requestedQuantity}</td>
+                        <td class="text-center">${item.approvedQuantity || '-'}</td>
+                        <td class="text-center">${item.unit}</td>
+                        <td>${item.notes || '-'}</td>
+                    </tr>
+                `;
+            });
+
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Informasi Pesanan</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Nomor Pesanan:</strong></td>
+                                <td>${order.orderNumber}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Status:</strong></td>
+                                <td>${getStatusBadge(order.status)}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Item:</strong></td>
+                                <td>${order.totalItems}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tanggal Dibuat:</strong></td>
+                                <td>${createdDate}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tanggal Dibutuhkan:</strong></td>
+                                <td>${requestedDate}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Timeline Status</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Disetujui:</strong></td>
+                                <td>${approvedDate}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Dikirim:</strong></td>
+                                <td>${shippedDate}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Diterima:</strong></td>
+                                <td>${deliveredDate}</td>
+                            </tr>
+                        </table>
+                        ${order.notes ? `
+                            <h6>Catatan</h6>
+                            <div class="alert alert-info">
+                                ${order.notes}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <h6 class="mt-4">Detail Item</h6>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Kode Item</th>
+                                <th>Nama Item</th>
+                                <th class="text-center">Qty Diminta</th>
+                                <th class="text-center">Qty Disetujui</th>
+                                <th class="text-center">Satuan</th>
+                                <th>Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHTML}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            modal.show();
+        }
+
+        // Filter orders
+        function filterOrders() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            let filteredOrders = allOrders;
+
+            // Filter by status
+            if (statusFilter) {
+                filteredOrders = filteredOrders.filter(order => order.status === statusFilter);
+            }
+
+            // Filter by date range
+            if (dateFrom) {
+                const fromDate = new Date(dateFrom);
+                filteredOrders = filteredOrders.filter(order => {
+                    const orderDate = new Date(order.createdAt);
+                    return orderDate >= fromDate;
+                });
+            }
+
+            if (dateTo) {
+                const toDate = new Date(dateTo);
+                toDate.setHours(23, 59, 59, 999); // End of day
+                filteredOrders = filteredOrders.filter(order => {
+                    const orderDate = new Date(order.createdAt);
+                    return orderDate <= toDate;
+                });
+            }
+
+            displayOrders(filteredOrders);
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            displayOrders(allOrders);
+        }
+
+        // Display error
+        function displayError(message) {
+            const container = document.getElementById('ordersContainer');
+            container.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    ${message}
+                </div>
+            `;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadUserInfo();
+            await loadOrders();
+        });
+    </script>
+</body>
+</html>

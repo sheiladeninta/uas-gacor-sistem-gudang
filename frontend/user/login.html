@@ -380,172 +380,188 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Get role from URL parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const role = urlParams.get('role') || 'staff';
-
-        // Update UI based on role
-        function updateUIForRole() {
-            const roleBadge = document.getElementById('roleBadge');
-            const registerLink = document.getElementById('registerLink');
-
-            if (role === 'client') {
-                roleBadge.innerHTML = '<i class="bi bi-building"></i> Client Login';
-                registerLink.style.display = 'none';
-            } else {
-                roleBadge.innerHTML = '<i class="bi bi-person-badge"></i> Staff Login';
-                registerLink.style.display = 'none';
-            }
-        }
-
-        // Show alert message
-        function showAlert(message, type = 'danger') {
-            const alertContainer = document.getElementById('alertContainer');
-            alertContainer.innerHTML = `
-                <div class="alert alert-${type}">
-                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-                    ${message}
-                </div>
-            `;
+            // Get role from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const role = urlParams.get('role') || 'staff';
             
-            // Auto hide after 5 seconds
-            setTimeout(() => {
-                alertContainer.innerHTML = '';
-            }, 5000);
-        }
-
-        // Toggle password visibility
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.getElementById('passwordToggleIcon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.className = 'bi bi-eye-slash';
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.className = 'bi bi-eye';
-            }
-        }
-
-        // GraphQL login function
-        async function loginUser(username, password) {
-            const query = `
-                mutation LoginUser($identifier: String!, $password: String!) {
-                    loginUser(identifier: $identifier, password: $password) {
-                        user {
-                            id
-                            nama
-                            email
-                            role
-                        }
-                        token
-                    }
-                }
-            `;
-            try {
-                const response = await fetch('http://127.0.0.1:5003/graphql', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        query: query,
-                        variables: {
-                            identifier: username,  // Ubah dari 'nama' ke 'identifier'
-                            password: password
-                        }
-                    })
-                });
-                const result = await response.json();
-                
-                if (result.errors) {
-                    throw new Error(result.errors[0].message);
-                }
-                return result.data.loginUser;
-            } catch (error) {
-                throw error;
-            }
-        }
-
-        // Handle form submission
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const loginBtn = document.getElementById('loginBtn');
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            
-            // Basic validation
-            if (!username || !password) {
-                showAlert('Username dan password harus diisi!');
-                return;
-            }
-            
-            // Show loading state
-            loginBtn.classList.add('loading');
-            loginBtn.disabled = true;
-            
-            try {
-                const loginResult = await loginUser(username, password);
-                
-                // Verify role matches expected role (ubah ke huruf kecil)
-                if (role === 'staff' && loginResult.user.role.toLowerCase() !== 'staff') {
-                    throw new Error('Akun ini bukan akun staff!');
-                }
-                if (role === 'client' && loginResult.user.role.toLowerCase() !== 'client') {
-                    throw new Error('Akun ini bukan akun client!');
-                }
-                
-                // Store user data and token
-                sessionStorage.setItem('user', JSON.stringify(loginResult.user));
-                sessionStorage.setItem('token', loginResult.token);
-                sessionStorage.setItem('userRole', loginResult.user.role);
-                
-                showAlert('Login berhasil! Mengalihkan...', 'success');
-                
-                // Redirect based on role (ubah ke huruf kecil)
-                setTimeout(() => {
-                    if (loginResult.user.role.toLowerCase() === 'staff') {
-                        window.location.href = 'staff/dashboard.html';
-                    } else {
-                        window.location.href = 'client/dashboard.html';
-                    }
-                }, 1500);
-                
-            } catch (error) {
-                console.error('Login error:', error);
-                let errorMessage = 'Login gagal! ';
-                
-                if (error.message.includes('Invalid credentials')) {
-                    errorMessage += 'Username atau password salah.';
-                } else if (error.message.includes('fetch')) {
-                    errorMessage += 'Tidak dapat terhubung ke server. Pastikan server sedang berjalan.';
+            // Update UI based on role
+            function updateUIForRole() {
+                const roleBadge = document.getElementById('roleBadge');
+                const registerLink = document.getElementById('registerLink');
+                if (role === 'client') {
+                    roleBadge.innerHTML = '<i class="bi bi-building"></i> Client Login';
+                    registerLink.style.display = 'none';
                 } else {
-                    errorMessage += error.message;
+                    roleBadge.innerHTML = '<i class="bi bi-person-badge"></i> Staff Login';
+                    registerLink.style.display = 'none';
+                }
+            }
+            
+            // Show alert message
+            function showAlert(message, type = 'danger') {
+                const alertContainer = document.getElementById('alertContainer');
+                alertContainer.innerHTML = `
+                    <div class="alert alert-${type}">
+                        <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                        ${message}
+                    </div>
+                `;
+                
+                // Auto hide after 5 seconds
+                setTimeout(() => {
+                    alertContainer.innerHTML = '';
+                }, 5000);
+            }
+            
+            // Toggle password visibility
+            function togglePassword() {
+                const passwordInput = document.getElementById('password');
+                const toggleIcon = document.getElementById('passwordToggleIcon');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleIcon.className = 'bi bi-eye-slash';
+                } else {
+                    passwordInput.type = 'password';
+                    toggleIcon.className = 'bi bi-eye';
+                }
+            }
+            
+            // GraphQL login function
+            async function loginUser(username, password) {
+                const query = `
+                    mutation LoginUser($identifier: String!, $password: String!) {
+                        loginUser(identifier: $identifier, password: $password) {
+                            user {
+                                id
+                                nama
+                                email
+                                role
+                            }
+                            token
+                        }
+                    }
+                `;
+                try {
+                    const response = await fetch('http://127.0.0.1:5003/graphql', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            query: query,
+                            variables: {
+                                identifier: username,
+                                password: password
+                            }
+                        })
+                    });
+                    const result = await response.json();
+                    
+                    if (result.errors) {
+                        throw new Error(result.errors[0].message);
+                    }
+                    return result.data.loginUser;
+                } catch (error) {
+                    throw error;
+                }
+            }
+            
+            // Handle form submission
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const loginBtn = document.getElementById('loginBtn');
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+                
+                // Basic validation
+                if (!username || !password) {
+                    showAlert('Username dan password harus diisi!');
+                    return;
                 }
                 
-                showAlert(errorMessage);
-            } finally {
-                // Hide loading state
-                loginBtn.classList.remove('loading');
-                loginBtn.disabled = false;
+                // Show loading state
+                loginBtn.classList.add('loading');
+                loginBtn.disabled = true;
+                
+                try {
+                    const loginResult = await loginUser(username, password);
+                    
+                    console.log('Login result:', loginResult); // Debug log
+                    console.log('Current role param:', role); // Debug log
+                    console.log('User role from server:', loginResult.user.role); // Debug log
+                    
+                    // Verify role matches expected role (ubah ke huruf kecil)
+                    if (role === 'staff' && loginResult.user.role.toLowerCase() !== 'staff') {
+                        throw new Error('Akun ini bukan akun staff!');
+                    }
+                    if (role === 'client' && loginResult.user.role.toLowerCase() !== 'client') {
+                        throw new Error('Akun ini bukan akun client!');
+                    }
+                    
+                    // Store user data and token - MENGGUNAKAN localStorage
+                    localStorage.setItem('user', JSON.stringify(loginResult.user));
+                    localStorage.setItem('token', loginResult.token);
+                    localStorage.setItem('userRole', loginResult.user.role);
+                    
+                    showAlert('Login berhasil! Mengalihkan...', 'success');
+                    
+                    // Redirect based on role
+                    setTimeout(() => {
+                        const userRole = loginResult.user.role.toLowerCase();
+                        console.log('Redirecting with role:', userRole); // Debug log
+                        
+                        if (role === 'staff' && userRole === 'staff') {
+                            console.log('Redirecting to staff dashboard'); // Debug log
+                            window.location.href = '/user/staff/dashboard.html';
+                        } else if (role === 'client' && userRole === 'client') {
+                            console.log('Redirecting to client dashboard'); // Debug log
+                            window.location.href = '/user/client/dashboard.html';
+                        } else {
+                            console.error('Role mismatch or unknown role'); // Debug log
+                            showAlert('Terjadi kesalahan dalam redirect!');
+                        }
+                    }, 1500);
+                    
+                } catch (error) {
+                    console.error('Login error:', error);
+                    let errorMessage = 'Login gagal! ';
+                    
+                    if (error.message.includes('Invalid credentials')) {
+                        errorMessage += 'Username atau password salah.';
+                    } else if (error.message.includes('fetch')) {
+                        errorMessage += 'Tidak dapat terhubung ke server. Pastikan server sedang berjalan.';
+                    } else {
+                        errorMessage += error.message;
+                    }
+                    
+                    showAlert(errorMessage);
+                } finally {
+                    // Hide loading state
+                    loginBtn.classList.remove('loading');
+                    loginBtn.disabled = false;
+                }
+            });
+            
+            // Initialize UI
+            updateUIForRole();
+            
+            // Check if user is already logged in - MENGGUNAKAN localStorage
+            const savedUser = localStorage.getItem('user');
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                console.log('Found saved user:', user); // Debug log
+                console.log('Current role param:', role); // Debug log
+                
+                if (role === 'staff' && user.role.toLowerCase() === 'staff') {
+                    console.log('Auto-redirecting to staff dashboard'); // Debug log
+                    window.location.href = '/user/staff/dashboard.html';
+                } else if (role === 'client' && user.role.toLowerCase() === 'client') {
+                    console.log('Auto-redirecting to client dashboard'); // Debug log
+                    window.location.href = '/user/client/dashboard.html';
+                }
             }
-        });
-
-        // Initialize UI
-        updateUIForRole();
-
-        // Check if user is already logged in
-        const savedUser = sessionStorage.getItem('user');
-        if (savedUser) {
-            const user = JSON.parse(savedUser);
-            if (user.role === 'STAFF') {
-                window.location.href = 'staff/dashboard.html';
-            } else {
-                window.location.href = 'client/dashboard.html';
-            }
-        }
     </script>
 </body>
 </html>

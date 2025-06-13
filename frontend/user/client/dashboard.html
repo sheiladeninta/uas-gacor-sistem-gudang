@@ -489,7 +489,7 @@
             <span>Sistem Gudang Gacor</span>
         </div>
         <div class="user-info">
-            <span id="userName">Client User</span>
+            <span id="userName"></span>
             <div class="user-avatar">
                 <i class="bi bi-person-circle"></i>
             </div>
@@ -505,7 +505,7 @@
                 <div class="avatar">
                     <i class="bi bi-person-circle"></i>
                 </div>
-                <div class="name" id="profileName">Client User</div>
+                <div class="name" id="profileName"></div>
                 <div class="role">CLIENT</div>
             </div>
             <ul class="menu">
@@ -527,42 +527,15 @@
                 <div class="menu-section">
                     <div class="menu-section-title">PESANAN</div>
                     <li class="menu-item">
-                        <a href="create-order.html" class="menu-link">
+                        <a href="../../order/client/create-order.html" class="menu-link">
                             <i class="menu-icon bi-cart-plus"></i>
                             <span class="menu-text">Buat Pesanan</span>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="orders.html" class="menu-link">
-                            <i class="menu-icon bi-list-ul"></i>
-                            <span class="menu-text">Riwayat Pesanan</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="order-status.html" class="menu-link">
+                        <a href="../../order/client/order-status.html" class="menu-link">
                             <i class="menu-icon bi-clock-history"></i>
                             <span class="menu-text">Status Pesanan</span>
-                        </a>
-                    </li>
-                </div>
-                <div class="menu-section">
-                    <div class="menu-section-title">INFORMASI</div>
-                    <li class="menu-item">
-                        <a href="invoices.html" class="menu-link">
-                            <i class="menu-icon bi-receipt"></i>
-                            <span class="menu-text">Faktur & Invoice</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="reports.html" class="menu-link">
-                            <i class="menu-icon bi-clipboard-data"></i>
-                            <span class="menu-text">Laporan Pembelian</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="analytics.html" class="menu-link">
-                            <i class="menu-icon bi-graph-up"></i>
-                            <span class="menu-text">Analisis Pembelian</span>
                         </a>
                     </li>
                 </div>
@@ -581,7 +554,7 @@
     <main class="main-content">
         <!-- Welcome Section -->
         <div class="welcome-section">
-            <h2>Selamat Datang, <span id="welcomeName">Client User</span>!</h2>
+            <h2>Selamat Datang, <span id="welcomeName"></span>!</h2>
             <p>Kelola pesanan dan pantau status pembelian Anda dengan mudah melalui dashboard ini.</p>
         </div>
         <!-- Statistics Cards -->
@@ -631,7 +604,7 @@
             </h3>
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-3">
-                    <a href="create-order.html" class="quick-action">
+                    <a href="../../order/client/create-order.html" class="quick-action">
                         <i class="bi bi-plus-circle"></i>
                         <h5>Buat Pesanan Baru</h5>
                         <p>Buat pesanan produk dengan cepat</p>
@@ -797,7 +770,7 @@
                 
                 if (result.data && result.data.user) {
                     const user = result.data.user;
-                    const displayName = user.companyName || user.nama || 'Client User';
+                    const displayName = user.companyName || user.nama ;
                     
                     // Update all display elements with company name
                     document.getElementById('userName').textContent = displayName;
@@ -809,7 +782,7 @@
                 } else {
                     console.error('Failed to fetch user data:', result.errors);
                     // Fallback to token data
-                    const displayName = payload.companyName || payload.nama || 'Client User';
+                    const displayName = payload.companyName || payload.nama ;
                     document.getElementById('userName').textContent = displayName;
                     document.getElementById('profileName').textContent = displayName;
                     document.getElementById('welcomeName').textContent = displayName;
@@ -819,7 +792,7 @@
                 // Fallback: try to use token data
                 try {
                     const payload = JSON.parse(atob(token.split('.')[1]));
-                    const displayName = payload.companyName || payload.nama || 'Client User';
+                    const displayName = payload.companyName || payload.nama ;
                     document.getElementById('userName').textContent = displayName;
                     document.getElementById('profileName').textContent = displayName;
                     document.getElementById('welcomeName').textContent = displayName;
