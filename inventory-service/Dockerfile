@@ -1,21 +1,15 @@
-# Gunakan image Python 3.10 sebagai base image
-FROM python:3.10
+# Gunakan image Python
+FROM python:3.8-slim
 
-# Set direktori kerja di dalam container
+# Set working directory
 WORKDIR /app
 
-# Salin file dari host ke dalam container
-COPY . /app
-
-# Install dependensi
+# Salin requirements.txt dan install dependensi
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Set variabel environment untuk Flask
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
+# Salin semua file ke dalam container
+COPY . /app/
 
-# Expose port yang digunakan oleh Flask
-EXPOSE 5000
-
-# Jalankan aplikasi Flask
-CMD ["flask", "run"]
+# Jalankan aplikasi
+CMD ["python", "app.py"]
