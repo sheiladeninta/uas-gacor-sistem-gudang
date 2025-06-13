@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Client - Sistem Gudang Gacor</title>
+    <title>Buat Pesanan - Sistem Gudang Gacor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    <style>
+        <style>
         :root {
             --primary-color: #3498db;
             --secondary-color: #2980b9;
@@ -498,6 +498,7 @@
             </button>
         </div>
     </header>
+
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-content">
@@ -512,7 +513,7 @@
                 <div class="menu-section">
                     <div class="menu-section-title">UTAMA</div>
                     <li class="menu-item">
-                        <a href="dashboard.html" class="menu-link active">
+                        <a href="../../user/client/dashboard.html" class="menu-link">
                             <i class="menu-icon bi-speedometer2"></i>
                             <span class="menu-text">Dashboard</span>
                         </a>
@@ -527,7 +528,7 @@
                 <div class="menu-section">
                     <div class="menu-section-title">PESANAN</div>
                     <li class="menu-item">
-                        <a href="../../order/client/create-order.html" class="menu-link">
+                        <a href="create-order.html" class="menu-link active">
                             <i class="menu-icon bi-cart-plus"></i>
                             <span class="menu-text">Buat Pesanan</span>
                         </a>
@@ -577,130 +578,141 @@
             </ul>
         </div>
     </nav>
+
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Welcome Section -->
+        <!-- Page Header -->
         <div class="welcome-section">
-            <h2>Selamat Datang, <span id="welcomeName"></span>!</h2>
-            <p>Kelola pesanan dan pantau status pembelian Anda dengan mudah melalui dashboard ini.</p>
+            <h2>
+                <i class="bi bi-cart-plus me-2"></i>
+                Buat Pesanan Baru
+            </h2>
+            <p>Buat pesanan produk untuk restoran Anda dengan mudah dan cepat.</p>
         </div>
-        <!-- Statistics Cards -->
-        <div class="row mb-4">
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="stats-card">
-                    <div class="stats-icon text-primary">
-                        <i class="bi bi-cart-check"></i>
-                    </div>
-                    <div class="stats-value text-primary">24</div>
-                    <div class="stats-label">Total Pesanan</div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="stats-card">
-                    <div class="stats-icon text-warning">
-                        <i class="bi bi-clock-history"></i>
-                    </div>
-                    <div class="stats-value text-warning">3</div>
-                    <div class="stats-label">Pesanan Pending</div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="stats-card">
-                    <div class="stats-icon text-success">
-                        <i class="bi bi-truck"></i>
-                    </div>
-                    <div class="stats-value text-success">2</div>
-                    <div class="stats-label">Dalam Pengiriman</div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="stats-card">
-                    <div class="stats-icon text-info">
-                        <i class="bi bi-currency-dollar"></i>
-                    </div>
-                    <div class="stats-value text-info">Rp 45.2M</div>
-                    <div class="stats-label">Total Pembelian</div>
-                </div>
-            </div>
-        </div>
-        <!-- Quick Actions -->
+
+        <!-- Order Form -->
         <div class="content-card">
             <h3 class="card-title">
-                <i class="bi bi-lightning-charge"></i>
-                Aksi Cepat
+                <i class="bi bi-clipboard-data"></i>
+                Informasi Pesanan
             </h3>
-            <div class="row">
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <a href="../../order/client/create-order.html" class="quick-action">
-                        <i class="bi bi-plus-circle"></i>
-                        <h5>Buat Pesanan Baru</h5>
-                        <p>Buat pesanan produk dengan cepat</p>
-                    </a>
+            
+            <form id="orderForm">
+                <!-- Restaurant Info (Auto-filled) -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="restaurantName" class="form-label">Nama Restoran</label>
+                        <input type="text" class="form-control" id="restaurantName" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="requestedDate" class="form-label">Tanggal Dibutuhkan</label>
+                        <input type="datetime-local" class="form-control" id="requestedDate" required>
+                    </div>
                 </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <a href="catalog.html" class="quick-action">
-                        <i class="bi bi-search"></i>
-                        <h5>Lihat Katalog</h5>
-                        <p>Jelajahi produk yang tersedia</p>
-                    </a>
+
+                <!-- Notes -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <label for="orderNotes" class="form-label">Catatan Pesanan (Opsional)</label>
+                        <textarea class="form-control" id="orderNotes" rows="3" placeholder="Tambahkan catatan khusus untuk pesanan ini..."></textarea>
+                    </div>
                 </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <a href="order-status.html" class="quick-action">
-                        <i class="bi bi-eye"></i>
-                        <h5>Cek Status Pesanan</h5>
-                        <p>Pantau progress pesanan Anda</p>
-                    </a>
+
+                <!-- Items Section -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>
+                            <i class="bi bi-box-seam"></i>
+                            Item Pesanan
+                        </h4>
+                        <button type="button" class="btn btn-success" onclick="addOrderItem()">
+                            <i class="bi bi-plus-circle"></i>
+                            Tambah Item
+                        </button>
+                    </div>
+
+                    <div id="orderItems">
+                        <!-- Dynamic order items will be added here -->
+                    </div>
                 </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <a href="support.html" class="quick-action">
-                        <i class="bi bi-headset"></i>
-                        <h5>Hubungi Support</h5>
-                        <p>Dapatkan bantuan dari tim kami</p>
-                    </a>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        Reset Form
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-outline-info me-2" onclick="checkInventoryAvailability()">
+                            <i class="bi bi-search"></i>
+                            Cek Ketersediaan
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i>
+                            Buat Pesanan
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
-        <!-- Recent Orders -->
+
+        <!-- Order Summary -->
         <div class="content-card">
             <h3 class="card-title">
-                <i class="bi bi-clock-history"></i>
-                Pesanan Terbaru
+                <i class="bi bi-list-check"></i>
+                Ringkasan Pesanan
             </h3>
-            <div class="table-container">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID Pesanan</th>
-                            <th>Tanggal</th>
-                            <th>Produk</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>#ORD-001</strong></td>
-                            <td>13 Jun 2025</td>
-                            <td>Laptop Gaming + Aksesori</td>
-                            <td><strong>Rp 15.500.000</strong></td>
-                            <td><span class="status-badge status-processing">Processing</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary">Detail</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="text-center mt-3">
-                <a href="orders.html" class="btn btn-primary">Lihat Semua Pesanan</a>
+            <div id="orderSummary">
+                <p class="text-muted">Belum ada item pesanan. Tambahkan item untuk melihat ringkasan.</p>
             </div>
         </div>
     </main>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-check-circle text-success"></i>
+                        Pesanan Berhasil Dibuat
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Pesanan Anda telah berhasil dibuat dengan nomor:</p>
+                    <h4 class="text-center text-primary" id="orderNumber"></h4>
+                    <p class="text-muted">Anda dapat memantau status pesanan melalui menu "Status Pesanan".</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" onclick="viewOrderStatus()">Lihat Status</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="mt-2">Sedang memproses pesanan...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let sidebarCollapsed = false;
-        
+        let itemCounter = 0;
+        let currentUser = null;
+
+        // Common functions from dashboard
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             
@@ -717,13 +729,14 @@
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 localStorage.removeItem('userRole');
+                localStorage.removeItem('currentUser');
                 sessionStorage.removeItem('token');
                 sessionStorage.removeItem('user');
                 sessionStorage.removeItem('userRole');
                 window.location.href = '../login.html';
             }
         }
-        
+
         // Handle responsive
         window.addEventListener('resize', function() {
             const sidebar = document.getElementById('sidebar');
@@ -731,7 +744,7 @@
                 sidebar.classList.remove('show');
             }
         });
-        
+
         // Close sidebar on mobile when clicking outside
         document.addEventListener('click', function(e) {
             const sidebar = document.getElementById('sidebar');
@@ -744,18 +757,8 @@
                 sidebar.classList.remove('show');
             }
         });
-        
-        // Menu active state management
-        document.querySelectorAll('.menu-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Remove active class from all links
-                document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
-                // Add active class to clicked link
-                this.classList.add('active');
-            });
-        });
-        
-        // Load user info from token
+
+        // Load user info and initialize form
         async function loadUserInfo() {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             
@@ -765,74 +768,323 @@
             }
             
             try {
-                // Parse JWT token to get user_id
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const userId = payload.user_id;
+                // Get user data from localStorage first
+                const userData = localStorage.getItem('currentUser');
+                if (userData) {
+                    currentUser = JSON.parse(userData);
+                } else {
+                    // Fallback: parse from token
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    currentUser = {
+                        id: payload.user_id,
+                        nama: payload.nama,
+                        companyName: payload.companyName,
+                        username: payload.username
+                    };
+                }
+
+                const displayName = currentUser.companyName || currentUser.nama;
                 
-                // Fetch complete user data from GraphQL
-                const response = await fetch('http://127.0.0.1:5003/graphql', {
+                // Update display elements
+                document.getElementById('userName').textContent = displayName;
+                document.getElementById('profileName').textContent = displayName;
+                
+                // Set restaurant name in form
+                document.getElementById('restaurantName').value = displayName;
+                
+                // Set default requested date (tomorrow)
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(9, 0, 0, 0);
+                document.getElementById('requestedDate').value = tomorrow.toISOString().slice(0, 16);
+                
+            } catch (error) {
+                console.error('Error loading user info:', error);
+                window.location.href = '../login.html';
+            }
+        }
+
+        // Add order item
+        function addOrderItem() {
+            itemCounter++;
+            const itemsContainer = document.getElementById('orderItems');
+            
+            const itemHTML = `
+                <div class="card mb-3" id="item-${itemCounter}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="card-title mb-0">Item #${itemCounter}</h6>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeOrderItem(${itemCounter})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Kode Item</label>
+                                <input type="text" class="form-control" name="item_code_${itemCounter}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Nama Item</label>
+                                <input type="text" class="form-control" name="item_name_${itemCounter}" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Jumlah</label>
+                                <input type="number" class="form-control" name="quantity_${itemCounter}" min="1" required onchange="updateOrderSummary()">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Satuan</label>
+                                <select class="form-select" name="unit_${itemCounter}" required>
+                                    <option value="">Pilih Satuan</option>
+                                    <option value="pcs">Pieces (pcs)</option>
+                                    <option value="kg">Kilogram (kg)</option>
+                                    <option value="box">Box</option>
+                                    <option value="pack">Pack</option>
+                                    <option value="liter">Liter</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <label class="form-label">Catatan Item (Opsional)</label>
+                                <input type="text" class="form-control" name="item_notes_${itemCounter}" placeholder="Catatan khusus untuk item ini...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            itemsContainer.insertAdjacentHTML('beforeend', itemHTML);
+            updateOrderSummary();
+        }
+
+        // Remove order item
+        function removeOrderItem(itemId) {
+            const itemElement = document.getElementById(`item-${itemId}`);
+            if (itemElement) {
+                itemElement.remove();
+                updateOrderSummary();
+            }
+        }
+
+        // Update order summary
+        function updateOrderSummary() {
+            const itemsContainer = document.getElementById('orderItems');
+            const summaryContainer = document.getElementById('orderSummary');
+            const items = itemsContainer.querySelectorAll('.card');
+            
+            if (items.length === 0) {
+                summaryContainer.innerHTML = '<p class="text-muted">Belum ada item pesanan. Tambahkan item untuk melihat ringkasan.</p>';
+                return;
+            }
+            
+            let summaryHTML = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Item</th><th>Jumlah</th><th>Satuan</th></tr></thead><tbody>';
+            let totalItems = 0;
+            
+            items.forEach((item, index) => {
+                const itemCode = item.querySelector(`input[name^="item_code_"]`)?.value || '';
+                const itemName = item.querySelector(`input[name^="item_name_"]`)?.value || '';
+                const quantity = parseInt(item.querySelector(`input[name^="quantity_"]`)?.value) || 0;
+                const unit = item.querySelector(`select[name^="unit_"]`)?.value || '';
+                
+                if (itemCode && itemName && quantity > 0) {
+                    summaryHTML += `<tr>
+                        <td><strong>${itemCode}</strong><br><small>${itemName}</small></td>
+                        <td>${quantity}</td>
+                        <td>${unit}</td>
+                    </tr>`;
+                    totalItems += quantity;
+                }
+            });
+            
+            summaryHTML += '</tbody></table></div>';
+            summaryHTML += `<div class="alert alert-info"><strong>Total Items: ${totalItems}</strong></div>`;
+            
+            summaryContainer.innerHTML = summaryHTML;
+        }
+
+        // Check inventory availability
+        async function checkInventoryAvailability() {
+            const items = collectOrderItems();
+            if (items.length === 0) {
+                alert('Harap tambahkan minimal satu item untuk mengecek ketersediaan.');
+                return;
+            }
+
+            try {
+                const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+                loadingModal.show();
+
+                const response = await fetch('http://127.0.0.1:5002/graphql', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         query: `
-                            query GetUser($id: Int!) {
-                                user(id: $id) {
-                                    id
-                                    nama
-                                    username
-                                    email
-                                    companyName
-                                    role
+                            mutation CheckInventoryAvailability($items: [String!]!) {
+                                checkInventoryAvailability(items: $items) {
+                                    available
+                                    message
+                                    availabilityDetails
                                 }
                             }
                         `,
-                        variables: { id: userId }
+                        variables: {
+                            items: items.map(item => JSON.stringify({
+                                item_code: item.item_code,
+                                requested_quantity: item.requested_quantity
+                            }))
+                        }
                     })
                 });
-                
+
                 const result = await response.json();
-                
-                if (result.data && result.data.user) {
-                    const user = result.data.user;
-                    const displayName = user.companyName || user.nama ;
+                loadingModal.hide();
+
+                if (result.data?.checkInventoryAvailability) {
+                    const availability = result.data.checkInventoryAvailability;
+                    const alertType = availability.available ? 'success' : 'warning';
+                    const icon = availability.available ? 'check-circle' : 'exclamation-triangle';
                     
-                    // Update all display elements with company name
-                    document.getElementById('userName').textContent = displayName;
-                    document.getElementById('profileName').textContent = displayName;
-                    document.getElementById('welcomeName').textContent = displayName;
-                    
-                    // Store user data for other pages
-                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    alert(`Ketersediaan Stok:\n${availability.message}`);
                 } else {
-                    console.error('Failed to fetch user data:', result.errors);
-                    // Fallback to token data
-                    const displayName = payload.companyName || payload.nama ;
-                    document.getElementById('userName').textContent = displayName;
-                    document.getElementById('profileName').textContent = displayName;
-                    document.getElementById('welcomeName').textContent = displayName;
+                    alert('Gagal mengecek ketersediaan stok. Silakan coba lagi.');
                 }
             } catch (error) {
-                console.error('Error loading user info:', error);
-                // Fallback: try to use token data
-                try {
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    const displayName = payload.companyName || payload.nama ;
-                    document.getElementById('userName').textContent = displayName;
-                    document.getElementById('profileName').textContent = displayName;
-                    document.getElementById('welcomeName').textContent = displayName;
-                } catch (tokenError) {
-                    console.error('Error parsing token:', tokenError);
-                    window.location.href = '../login.html';
-                }
+                document.getElementById('loadingModal').style.display = 'none';
+                console.error('Error checking inventory:', error);
+                alert('Terjadi kesalahan saat mengecek ketersediaan stok.');
             }
         }
-        
+
+        // Collect order items from form
+        function collectOrderItems() {
+            const itemsContainer = document.getElementById('orderItems');
+            const items = itemsContainer.querySelectorAll('.card');
+            const orderItems = [];
+            
+            items.forEach(item => {
+                const itemCode = item.querySelector(`input[name^="item_code_"]`)?.value?.trim();
+                const itemName = item.querySelector(`input[name^="item_name_"]`)?.value?.trim();
+                const quantity = parseInt(item.querySelector(`input[name^="quantity_"]`)?.value) || 0;
+                const unit = item.querySelector(`select[name^="unit_"]`)?.value;
+                const notes = item.querySelector(`input[name^="item_notes_"]`)?.value?.trim() || '';
+                
+                if (itemCode && itemName && quantity > 0 && unit) {
+                    orderItems.push({
+                        item_code: itemCode,
+                        item_name: itemName,
+                        requested_quantity: quantity,
+                        unit: unit,
+                        notes: notes
+                    });
+                }
+            });
+            
+            return orderItems;
+        }
+
+        // Submit order
+        async function submitOrder(event) {
+            event.preventDefault();
+            
+            const items = collectOrderItems();
+            if (items.length === 0) {
+                alert('Harap tambahkan minimal satu item pesanan.');
+                return;
+            }
+
+            const requestedDate = document.getElementById('requestedDate').value;
+            const orderNotes = document.getElementById('orderNotes').value.trim();
+
+            try {
+                const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+                loadingModal.show();
+
+                const response = await fetch('http://127.0.0.1:5002/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: `
+                            mutation CreateOrder($restaurantId: String!, $restaurantName: String!, $requestedDate: String!, $notes: String, $items: [String!]!) {
+                                createOrder(restaurantId: $restaurantId, restaurantName: $restaurantName, requestedDate: $requestedDate, notes: $notes, items: $items) {
+                                    success
+                                    message
+                                    order {
+                                        id
+                                        orderNumber
+                                        status
+                                    }
+                                }
+                            }
+                        `,
+                        variables: {
+                            restaurantId: currentUser.id.toString(),
+                            restaurantName: currentUser.companyName || currentUser.nama,
+                            requestedDate: new Date(requestedDate).toISOString().replace('T', ' ').slice(0, 19),
+                            notes: orderNotes,
+                            items: items.map(item => JSON.stringify(item))
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                loadingModal.hide();
+
+                if (result.data?.createOrder?.success) {
+                    const orderNumber = result.data.createOrder.order.orderNumber;
+                    document.getElementById('orderNumber').textContent = orderNumber;
+                    
+                    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                    successModal.show();
+                    
+                    // Reset form
+                    resetForm();
+                } else {
+                    const message = result.data?.createOrder?.message || 'Gagal membuat pesanan';
+                    alert(`Error: ${message}`);
+                }
+            } catch (error) {
+                document.getElementById('loadingModal').style.display = 'none';
+                console.error('Error creating order:', error);
+                alert('Terjadi kesalahan saat membuat pesanan. Silakan coba lagi.');
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('orderForm').reset();
+            document.getElementById('orderItems').innerHTML = '';
+            itemCounter = 0;
+            updateOrderSummary();
+            
+            // Reset default values
+            if (currentUser) {
+                document.getElementById('restaurantName').value = currentUser.companyName || currentUser.nama;
+            }
+            
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(9, 0, 0, 0);
+            document.getElementById('requestedDate').value = tomorrow.toISOString().slice(0, 16);
+        }
+
+        // View order status
+        function viewOrderStatus() {
+            window.location.href = 'order-status.html';
+        }
+
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadUserInfo();
+            
+            // Add first item by default
+            addOrderItem();
+            
+            // Setup form submission
+            document.getElementById('orderForm').addEventListener('submit', submitOrder);
         });
     </script>
 </body>
