@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="dashboard-container">
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <h2>Inventory Dashboard</h2>
+            <ul>
+                <li><a href="#" onclick="showPage('home')">Home</a></li>
+                <li><a href="#" onclick="showPage('add-item')">Add New Item</a></li>
+                <li><a href="#" onclick="showPage('update-item')">Update Item</a></li>
+                <li><a href="#" onclick="showPage('order-requests')">Order Requests</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div id="content">
+            <!-- Home (Dashboard) -->
+            <div id="home" class="page active">
+                <h1>Inventory Items</h1>
+                <button onclick="showPage('add-item')">Add New Item</button>
+
+                <!-- Inventory Table -->
+                <table id="inventoryTable">
+                    <thead>
+                        <tr>
+                            <th>Item Code</th>
+                            <th>Name</th>
+                            <th>Stock Quantity</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Unit</th>
+                            <th>Unit Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsContainer">
+                        <!-- Items will be dynamically loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add New Item Form -->
+            <div id="add-item" class="page hidden">
+                <h2>Add New Item</h2>
+                <form id="newItemForm">
+                    <input type="text" id="itemCode" placeholder="Item Code" required />
+                    <input type="text" id="name" placeholder="Name" required />
+                    <input type="number" id="stockQuantity" placeholder="Stock Quantity" required />
+                    <input type="text" id="description" placeholder="Description" />
+                    <input type="text" id="category" placeholder="Category" />
+                    <input type="text" id="unit" placeholder="Unit" />
+                    <input type="number" id="unitPrice" placeholder="Unit Price" />
+                    <button type="submit">Add Item</button>
+                    <button type="button" onclick="hideAddItemForm()">Cancel</button>
+                </form>
+            </div>
+
+            <!-- Update Item Form -->
+            <div id="update-item" class="page hidden">
+                <h2>Update Item</h2>
+                <form id="updateItemForm">
+                    <input type="text" id="updateItemCode" placeholder="Item Code" required readonly />
+                    <input type="text" id="updateName" placeholder="Name" required />
+                    <input type="number" id="updateStockQuantity" placeholder="Stock Quantity" required />
+                    <input type="text" id="updateDescription" placeholder="Description" />
+                    <input type="text" id="updateCategory" placeholder="Category" />
+                    <input type="text" id="updateUnit" placeholder="Unit" />
+                    <input type="number" id="updateUnitPrice" placeholder="Unit Price" />
+                    <button type="submit">Update Item</button>
+                    <button type="button" onclick="hideUpdateItemForm()">Cancel</button>
+                </form>
+            </div>
+
+            <!-- Order Requests Section -->
+            <div id="order-requests" class="page">
+                <h2>Order Requests</h2>
+                <table id="orderTable">
+                    <thead>
+                        <tr>
+                            <th>Order Number</th>
+                            <th>Item Code</th>
+                            <th>Item Name</th>
+                            <th>Requested Quantity</th>
+                            <th>Unit</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderRequestsContainer">
+                        <!-- Order items data will be dynamically loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
