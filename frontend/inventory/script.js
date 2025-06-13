@@ -41,15 +41,12 @@ async function fetchItems() {
         });
 
         const result = await response.json();
-        console.log("API Response:", result);
+        console.log("Fetched Items:", result);  // Cek data yang diterima
 
         if (result && result.data && result.data.items) {
             const items = result.data.items;
+            itemsContainer.innerHTML = '';  // Clear existing content
 
-            // Clear existing content
-            itemsContainer.innerHTML = '';
-
-            // Loop through items to display in table
             items.forEach(item => {
                 const itemRow = document.createElement('tr');
                 itemRow.innerHTML = `
@@ -74,6 +71,7 @@ async function fetchItems() {
         console.error('Error fetching data:', error);
     }
 }
+
 
 // Add Item
 document.getElementById('newItemForm').addEventListener('submit', async (e) => {
@@ -169,7 +167,7 @@ function editItem(itemCode) {
     .then(response => response.json())
     .then(result => {
         const item = result.data.item;
-        
+
         // Fill in the form with item data
         document.getElementById('updateItemCode').value = item.itemCode;
         document.getElementById('updateName').value = item.name;
@@ -283,8 +281,7 @@ async function fetchOrderRequests() {
 
         if (result && result.data && result.data.orders) {
             const orders = result.data.orders;
-            const ordersContainer = document.getElementById('orderRequestsContainer');
-            ordersContainer.innerHTML = ''; // Clear previous data
+            orderRequestsContainer.innerHTML = ''; // Clear previous data
 
             orders.forEach(order => {
                 order.items.forEach(item => {
@@ -295,9 +292,9 @@ async function fetchOrderRequests() {
                         <td>${item.itemName}</td>
                         <td>${item.requestedQuantity}</td>
                         <td>${item.unit}</td>
-                        <td><button onclick="sendToQC(${order.id}, '${item.itemCode}', ${item.requestedQuantity})">Send to QC</button></td>
+                        <td><button onclick="sendToQC(${order.id}, '${item.itemCode}', ${item.requestedQuantity}, '${item.itemName}')">Send to QC</button></td>
                     `;
-                    ordersContainer.appendChild(orderRow);
+                    orderRequestsContainer.appendChild(orderRow);
                 });
             });
         } else {
@@ -309,10 +306,11 @@ async function fetchOrderRequests() {
 }
 
 
+
 // Function to send the selected order to QC service and update inventory
 // Function to send the selected order to QC service and update inventory
-async function sendToQC(orderId, itemCode, quantity) {
-    // Step 1: Update Inventory Service (decrease stock)
+async function sendToQC(orderId, itemCode, quantity, itemName) {
+    // Langkah 1: Update Inventory Service (kurangi stok)
     const updateInventoryMutation = `
     mutation {
         updateInventoryForQC(itemCode: "${itemCode}", quantity: ${quantity}) {
@@ -333,10 +331,10 @@ async function sendToQC(orderId, itemCode, quantity) {
     console.log("Inventory Update Response:", updateResult);
 
     if (updateResult.data.updateInventoryForQC.success) {
-        // Step 2: Send the order to QC Service
+        // Langkah 2: Kirim order ke QC Service
         const sendToQCMutation = `
         mutation {
-            sendToQC(orderId: ${orderId}, itemCode: "${itemCode}", itemName: "Item Name", quantity: ${quantity}) {
+            sendToQC(orderId: ${orderId}, itemCode: "${itemCode}", itemName: "${itemName}", quantity: ${quantity}) {
                 success
                 message
             }
@@ -354,13 +352,15 @@ async function sendToQC(orderId, itemCode, quantity) {
         console.log("QC Service Response:", qcResult);
 
         if (qcResult.data.sendToQC.success) {
-            alert("Order sent to QC successfully!");
-            fetchOrderRequests();  // Refresh the order list
+            alert("Order berhasil dikirim ke QC!");
+            fetchOrderRequests();  // Refresh daftar order
         } else {
-            alert("Failed to send order to QC!");
+            alert("Gagal mengirim order ke QC!");
         }
     } else {
-        alert("Failed to update inventory!");
+        alert("Gagal memperbarui inventory!");
     }
 }
+
+
 
