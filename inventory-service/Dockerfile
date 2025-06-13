@@ -10,6 +10,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Salin semua file ke dalam container
 COPY . /app/
-
+EXPOSE 5000
 # Jalankan aplikasi
 CMD ["python", "app.py"]

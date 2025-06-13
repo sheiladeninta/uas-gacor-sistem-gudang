@@ -1,0 +1,753 @@
+{% extends "../../layouts/staff-layout.html" %}
+
+{% block content %}
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Page Header -->
+    <div class="content-card">
+        <div class="card-title">
+            <i class="bi bi-boxes"></i>
+            Manajemen Inventory
+        </div>
+        <p class="text-muted">Kelola data barang dan stok inventory Anda</p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="content-card">
+        <div class="d-flex gap-3 mb-3">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                <i class="bi bi-plus-circle"></i> Tambah Item Baru
+            </button>
+            <button class="btn btn-info" onclick="refreshItems()">
+                <i class="bi bi-arrow-clockwise"></i> Refresh Data
+            </button>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#sendToQCModal">
+                <i class="bi bi-send"></i> Kirim ke QC
+            </button>
+        </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="content-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0">Daftar Item Inventory</h5>
+            <div class="d-flex gap-2">
+                <input type="text" class="form-control" id="searchInput" placeholder="Cari item..." style="width: 250px;">
+                <select class="form-select" id="categoryFilter" style="width: 150px;">
+                    <option value="">Semua Kategori</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Kode Item</th>
+                        <th>Nama Item</th>
+                        <th>Kategori</th>
+                        <th>Unit</th>
+                        <th>Harga Unit</th>
+                        <th>Stok</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsTableBody">
+                    <tr>
+                        <td colspan="8" class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- QC Logs -->
+    <div class="content-card">
+        <h5 class="mb-4">Log Pengiriman ke QC</h5>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead class="table-info">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Kode Item</th>
+                        <th>Nama Item</th>
+                        <th>Jumlah</th>
+                        <th>Waktu Kirim</th>
+                    </tr>
+                </thead>
+                <tbody id="qcLogsTableBody">
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Belum ada data</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Item Modal -->
+<div class="modal fade" id="addItemModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Item Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addItemForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Kode Item *</label>
+                                <input type="text" class="form-control" id="itemCode" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nama Item *</label>
+                                <input type="text" class="form-control" id="itemName" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Kategori</label>
+                                <input type="text" class="form-control" id="itemCategory" placeholder="Contoh: Electronics">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Unit</label>
+                                <select class="form-select" id="itemUnit">
+                                    <option value="pcs">Pcs</option>
+                                    <option value="kg">Kg</option>
+                                    <option value="liter">Liter</option>
+                                    <option value="meter">Meter</option>
+                                    <option value="box">Box</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Harga Unit</label>
+                                <input type="number" class="form-control" id="itemPrice" step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Stok Awal *</label>
+                                <input type="number" class="form-control" id="itemStock" required min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="itemDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="addItem()">Simpan Item</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Item Modal -->
+<div class="modal fade" id="updateItemModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateItemForm">
+                    <input type="hidden" id="updateItemCode">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Kode Item</label>
+                                <input type="text" class="form-control" id="updateItemCodeDisplay" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nama Item</label>
+                                <input type="text" class="form-control" id="updateItemName">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Kategori</label>
+                                <input type="text" class="form-control" id="updateItemCategory">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Unit</label>
+                                <select class="form-select" id="updateItemUnit">
+                                    <option value="pcs">Pcs</option>
+                                    <option value="kg">Kg</option>
+                                    <option value="liter">Liter</option>
+                                    <option value="meter">Meter</option>
+                                    <option value="box">Box</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Harga Unit</label>
+                                <input type="number" class="form-control" id="updateItemPrice" step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Stok</label>
+                                <input type="number" class="form-control" id="updateItemStock" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Deskripsi</label>
+                        <textarea class="form-control" id="updateItemDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="updateItem()">Update Item</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Send to QC Modal -->
+<div class="modal fade" id="sendToQCModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kirim Item ke QC</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="sendToQCForm">
+                    <div class="mb-3">
+                        <label class="form-label">Order ID *</label>
+                        <input type="number" class="form-control" id="qcOrderId" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Item *</label>
+                        <select class="form-select" id="qcItemSelect" required>
+                            <option value="">Pilih Item...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah *</label>
+                        <input type="number" class="form-control" id="qcQuantity" required min="1">
+                        <div class="form-text">Stok tersedia: <span id="availableStock">0</span></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-success" onclick="sendToQC()">Kirim ke QC</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const GRAPHQL_ENDPOINT = 'http://localhost:5000/graphql';
+
+let allItems = [];
+let allCategories = [];
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadItems();
+    loadQCLogs();
+});
+
+// GraphQL Query untuk mengambil items
+async function loadItems() {
+    const query = `
+        query {
+            items {
+                id
+                itemCode
+                name
+                description
+                category
+                unit
+                unitPrice
+                stockQuantity
+                createdAt
+                updatedAt
+            }
+        }
+    `;
+    
+    try {
+        const response = await fetch(GRAPHQL_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query })
+        });
+        
+        const data = await response.json();
+        
+        if (data.errors) {
+            console.error('GraphQL errors:', data.errors);
+            showAlert('Error loading items: ' + data.errors[0].message, 'danger');
+            return;
+        }
+        
+        allItems = data.data.items;
+        displayItems(allItems);
+        updateCategoryFilter();
+        updateQCItemSelect();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('Error connecting to server', 'danger');
+    }
+}
+
+// GraphQL Query untuk mengambil QC logs
+async function loadQCLogs() {
+    const query = `
+        query {
+            qcLogs {
+                id
+                orderId
+                itemCode
+                itemName
+                quantity
+                sentToQcAt
+            }
+        }
+    `;
+    
+    try {
+        const response = await fetch(GRAPHQL_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query })
+        });
+        
+        const data = await response.json();
+        
+        if (data.errors) {
+            console.error('GraphQL errors:', data.errors);
+            return;
+        }
+        
+        displayQCLogs(data.data.qcLogs);
+        
+    } catch (error) {
+        console.error('Error loading QC logs:', error);
+    }
+}
+
+// Display items in table
+function displayItems(items) {
+    const tbody = document.getElementById('itemsTableBody');
+    
+    if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Tidak ada data item</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = items.map(item => `
+        <tr>
+            <td><strong>${item.itemCode}</strong></td>
+            <td>${item.name}</td>
+            <td><span class="badge bg-info">${item.category || 'Uncategorized'}</span></td>
+            <td>${item.unit}</td>
+            <td>Rp ${parseFloat(item.unitPrice).toLocaleString('id-ID')}</td>
+            <td>
+                <span class="badge ${item.stockQuantity > 10 ? 'bg-success' : item.stockQuantity > 0 ? 'bg-warning' : 'bg-danger'}">
+                    ${item.stockQuantity}
+                </span>
+            </td>
+            <td>
+                ${item.stockQuantity > 10 ? '<span class="badge bg-success">Stock Aman</span>' : 
+                  item.stockQuantity > 0 ? '<span class="badge bg-warning">Stock Rendah</span>' : 
+                  '<span class="badge bg-danger">Stock Habis</span>'}
+            </td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary" onclick="editItem('${item.itemCode}')" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteItem(${item.id})" title="Delete">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// Display QC logs
+function displayQCLogs(logs) {
+    const tbody = document.getElementById('qcLogsTableBody');
+    
+    if (logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada pengiriman ke QC</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = logs.map(log => `
+        <tr>
+            <td>${log.orderId}</td>
+            <td><strong>${log.itemCode}</strong></td>
+            <td>${log.itemName}</td>
+            <td><span class="badge bg-primary">${log.quantity}</span></td>
+            <td>${new Date(log.sentToQcAt).toLocaleString('id-ID')}</td>
+        </tr>
+    `).join('');
+}
+
+// Update category filter
+function updateCategoryFilter() {
+    const categories = [...new Set(allItems.map(item => item.category).filter(cat => cat))];
+    const select = document.getElementById('categoryFilter');
+    
+    select.innerHTML = '<option value="">Semua Kategori</option>';
+    categories.forEach(category => {
+        select.innerHTML += `<option value="${category}">${category}</option>`;
+    });
+}
+
+// Update QC item select
+function updateQCItemSelect() {
+    const select = document.getElementById('qcItemSelect');
+    select.innerHTML = '<option value="">Pilih Item...</option>';
+    
+    allItems.forEach(item => {
+        select.innerHTML += `<option value="${item.itemCode}" data-stock="${item.stockQuantity}" data-name="${item.name}">${item.itemCode} - ${item.name}</option>`;
+    });
+}
+
+// Add new item
+async function addItem() {
+    const itemCode = document.getElementById('itemCode').value;
+    const name = document.getElementById('itemName').value;
+    const category = document.getElementById('itemCategory').value || 'Uncategorized';
+    const unit = document.getElementById('itemUnit').value;
+    const unitPrice = parseFloat(document.getElementById('itemPrice').value) || 0;
+    const stockQuantity = parseInt(document.getElementById('itemStock').value);
+    const description = document.getElementById('itemDescription').value;
+    
+    if (!itemCode || !name || stockQuantity < 0) {
+        showAlert('Please fill all required fields', 'warning');
+        return;
+    }
+    
+    const mutation = `
+        mutation {
+            createItem(
+                itemCode: "${itemCode}"
+                name: "${name}"
+                category: "${category}"
+                unit: "${unit}"
+                unitPrice: ${unitPrice}
+                stockQuantity: ${stockQuantity}
+                description: "${description}"
+            ) {
+                item {
+                    id
+                    itemCode
+                    name
+                }
+            }
+        }
+    `;
+    
+    try {
+        const response = await fetch(GRAPHQL_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: mutation })
+        });
+        
+        const data = await response.json();
+        
+        if (data.errors) {
+            showAlert('Error: ' + data.errors[0].message, 'danger');
+            return;
+        }
+        
+        showAlert('Item berhasil ditambahkan!', 'success');
+        document.getElementById('addItemForm').reset();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
+        modal.hide();
+        loadItems();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('Error connecting to server', 'danger');
+    }
+}
+
+// Edit item
+function editItem(itemCode) {
+    const item = allItems.find(i => i.itemCode === itemCode);
+    if (!item) return;
+    
+    document.getElementById('updateItemCode').value = item.itemCode;
+    document.getElementById('updateItemCodeDisplay').value = item.itemCode;
+    document.getElementById('updateItemName').value = item.name;
+    document.getElementById('updateItemCategory').value = item.category || '';
+    document.getElementById('updateItemUnit').value = item.unit;
+    document.getElementById('updateItemPrice').value = item.unitPrice;
+    document.getElementById('updateItemStock').value = item.stockQuantity;
+    document.getElementById('updateItemDescription').value = item.description || '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('updateItemModal'));
+    modal.show();
+}
+
+// Update item
+async function updateItem() {
+    const itemCode = document.getElementById('updateItemCode').value;
+    const name = document.getElementById('updateItemName').value;
+    const category = document.getElementById('updateItemCategory').value;
+    const unit = document.getElementById('updateItemUnit').value;
+    const unitPrice = parseFloat(document.getElementById('updateItemPrice').value);
+    const stockQuantity = parseInt(document.getElementById('updateItemStock').value);
+    const description = document.getElementById('updateItemDescription').value;
+    
+    const mutation = `
+        mutation {
+            updateItem(
+                itemCode: "${itemCode}"
+                name: "${name}"
+                category: "${category}"
+                unit: "${unit}"
+                unitPrice: ${unitPrice}
+                stockQuantity: ${stockQuantity}
+                description: "${description}"
+            ) {
+                item {
+                    id
+                    itemCode
+                    name
+                }
+            }
+        }
+    `;
+    
+    try {
+        const response = await fetch(GRAPHQL_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: mutation })
+        });
+        
+        const data = await response.json();
+        
+        if (data.errors) {
+            showAlert('Error: ' + data.errors[0].message, 'danger');
+            return;
+        }
+        
+        showAlert('Item berhasil diupdate!', 'success');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('updateItemModal'));
+        modal.hide();
+        loadItems();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('Error connecting to server', 'danger');
+    }
+}
+
+// Delete item
+async function deleteItem(itemId) {
+    if (!confirm('Apakah Anda yakin ingin menghapus item ini?')) {
+        return;
+    }
+    
+    const mutation = `
+        mutation {
+            deleteItem(id: ${itemId}) {
+                success
+            }
+        }
+    `;
+    
+    try {
+        const response = await fetch(GRAPHQL_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: mutation })
+        });
+        
+        const data = await response.json();
+        
+        if (data.errors) {
+            showAlert('Error: ' + data.errors[0].message, 'danger');
+            return;
+        }
+        
+        showAlert('Item berhasil dihapus!', 'success');
+        loadItems();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('Error connecting to server', 'danger');
+    }
+}
+
+// Send to QC
+async function sendToQC() {
+    const orderId = parseInt(document.getElementById('qcOrderId').value);
+    const itemSelect = document.getElementById('qcItemSelect');
+    const itemCode = itemSelect.value;
+    const itemName = itemSelect.options[itemSelect.selectedIndex].getAttribute('data-name');
+    const quantity = parseInt(document.getElementById('qcQuantity').value);
+    
+    if (!orderId || !itemCode || !quantity) {
+        showAlert('Please fill all fields', 'warning');
+        return;
+    }
+    
+    const mutation = `
+        mutation {
+            sendToQc(
+                orderId: ${orderId}
+                itemCode: "${itemCode}"
+                itemName: "${itemName}"
+                quantity: ${quantity}
+            ) {
+                success
+                message
+            }
+        }
+    `;
+    
+    try {
+        const response = await fetch(GRAPHQL_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: mutation })
+        });
+        
+        const data = await response.json();
+        
+        if (data.errors) {
+            showAlert('Error: ' + data.errors[0].message, 'danger');
+            return;
+        }
+        
+        if (data.data.sendToQc.success) {
+            showAlert(data.data.sendToQc.message, 'success');
+            document.getElementById('sendToQCForm').reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('sendToQCModal'));
+            modal.hide();
+            loadItems();
+            loadQCLogs();
+        } else {
+            showAlert(data.data.sendToQc.message, 'danger');
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('Error connecting to server', 'danger');
+    }
+}
+
+// Update available stock when item is selected
+document.getElementById('qcItemSelect').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const stock = selectedOption.getAttribute('data-stock') || 0;
+    document.getElementById('availableStock').textContent = stock;
+});
+
+// Search functionality
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    const searchTerm = this.value.toLowerCase();
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    
+    let filteredItems = allItems.filter(item => {
+        const matchesSearch = item.itemCode.toLowerCase().includes(searchTerm) || 
+                             item.name.toLowerCase().includes(searchTerm);
+        const matchesCategory = !categoryFilter || item.category === categoryFilter;
+        return matchesSearch && matchesCategory;
+    });
+    
+    displayItems(filteredItems);
+});
+
+// Category filter
+document.getElementById('categoryFilter').addEventListener('change', function() {
+    const categoryFilter = this.value;
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    
+    let filteredItems = allItems.filter(item => {
+        const matchesSearch = item.itemCode.toLowerCase().includes(searchTerm) || 
+                             item.name.toLowerCase().includes(searchTerm);
+        const matchesCategory = !categoryFilter || item.category === categoryFilter;
+        return matchesSearch && matchesCategory;
+    });
+    
+    displayItems(filteredItems);
+});
+
+// Refresh data
+function refreshItems() {
+    loadItems();
+    loadQCLogs();
+    showAlert('Data refreshed!', 'info');
+}
+
+// Show alert
+function showAlert(message, type) {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertDiv.style.top = '90px';
+    alertDiv.style.right = '20px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

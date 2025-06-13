@@ -352,9 +352,13 @@ class Mutation(graphene.ObjectType):
 # Menambahkan GraphQL endpoint
 app.add_url_rule('/graphql', view_func=GraphQLView.as_view('graphql', schema=graphene.Schema(query=Query, mutation=Mutation), graphiql=True))
 
+@app.route('/', methods=['GET'])
+def list_items():
+    items = Item.query.all()
+    return jsonify([item.to_dict() for item in items])
 
 # Menjalankan aplikasi
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Membuat semua tabel sebelum aplikasi dijalankan
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
