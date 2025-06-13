@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Order - Staff Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+        <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 70px;
+            --header-height: 70px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+        }
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 4px 20px rgba(52, 152, 219, 0.3);
+        }
+        .header .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 15px;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .header .toggle-btn:hover {
+            background-color: rgba(255,255,255,0.15);
+            transform: scale(1.05);
+        }
+        .header .logo {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-right: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header .logo i {
+            font-size: 1.8rem;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .header .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .header .logout-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .header .logout-btn:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.05);
+        }
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height));
+            background: white;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 1020;
+            overflow: hidden;
+        }
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+        .sidebar-content {
+            padding: 20px 0;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .user-profile {
+            padding: 0 20px 25px;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed .user-profile {
+            padding: 0 10px 25px;
+        }
+        .user-profile .avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            margin: 0 auto 15px;
+            transition: all 0.3s;
+            border: 3px solid #f0f0f0;
+        }
+        .sidebar.collapsed .user-profile .avatar {
+            width: 45px;
+            height: 45px;
+            font-size: 1.3rem;
+        }
+        .user-profile .name {
+            font-weight: bold;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.3s;
+        }
+        .user-profile .role {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            background: rgba(52, 152, 219, 0.1);
+            padding: 4px 12px;
+            border-radius: 15px;
+            display: inline-block;
+            transition: opacity 0.3s;
+        }
+        .sidebar.collapsed .user-profile .name,
+        .sidebar.collapsed .user-profile .role {
+            opacity: 0;
+        }
+        /* Menu */
+        .menu {
+            list-style: none;
+            padding: 0;
+        }
+        .menu-section {
+            margin-bottom: 20px;
+        }
+        .menu-section-title {
+            font-size: 0.75rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 0 20px 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: opacity 0.3s;
+        }
+        .sidebar.collapsed .menu-section-title {
+            opacity: 0;
+        }
+        .menu-item {
+            margin-bottom: 3px;
+        }
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+            border-radius: 0 30px 30px 0;
+            margin-right: 15px;
+        }
+        .sidebar.collapsed .menu-link {
+            padding: 15px 0;
+            justify-content: center;
+            margin-right: 0;
+            border-radius: 0;
+        }
+        .menu-link:hover {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%);
+            color: var(--primary-color);
+            transform: translateX(8px);
+        }
+        .sidebar.collapsed .menu-link:hover {
+            transform: none;
+            background: rgba(52, 152, 219, 0.1);
+        }
+        .menu-link.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        .menu-link.active::after {
+            content: '';
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border: 12px solid transparent;
+            border-left-color: var(--secondary-color);
+        }
+        .sidebar.collapsed .menu-link.active::after {
+            display: none;
+        }
+        .menu-icon {
+            font-size: 1.3rem;
+            width: 28px;
+            text-align: center;
+            margin-right: 15px;
+            transition: margin 0.3s;
+        }
+        .sidebar.collapsed .menu-icon {
+            margin-right: 0;
+        }
+        .menu-text {
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.3s;
+            font-weight: 500;
+        }
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            width: 0;
+        }
+        .badge-notification {
+            background: var(--accent-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 7px;
+            border-radius: 12px;
+            margin-left: auto;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+        .sidebar.collapsed .badge-notification {
+            opacity: 0;
+        }
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+            min-height: calc(100vh - var(--header-height));
+        }
+        .sidebar.collapsed + .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+        /* Content Cards */
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            border: 1px solid rgba(52, 152, 219, 0.1);
+        }
+        .card-title {
+            color: var(--dark-color);
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title i {
+            color: var(--primary-color);
+        }
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(52, 152, 219, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        .stats-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .stats-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .stats-label {
+            color: #666;
+            font-weight: 500;
+        }
+        /* Quick Actions */
+        .quick-action {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(52, 152, 219, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+        }
+        .quick-action:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .quick-action i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        .quick-action h5 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .quick-action p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+        .welcome-section h2 {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .welcome-section p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        /* Recent Orders Table */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .table {
+            margin: 0;
+        }
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 15px;
+        }
+        .table tbody td {
+            padding: 15px;
+            border-color: #f0f0f0;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-processing {
+            background-color: #cff4fc;
+            color: #087990;
+        }
+        .status-shipped {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: var(--sidebar-width);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .sidebar.collapsed + .main-content {
+                margin-left: 0;
+            }
+            .header .logo {
+                font-size: 1.3rem;
+            }
+            .header .user-info span {
+                display: none;
+            }
+            .stats-card {
+                margin-bottom: 20px;
+            }
+            .quick-action {
+                margin-bottom: 20px;
+            }
+        }
+        /* Custom Scrollbar */
+        .sidebar-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar-content::-webkit-scrollbar-track {
+            background: #f8f9fa;
+        }
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: rgba(52, 152, 219, 0.3);
+            border-radius: 3px;
+        }
+        .sidebar-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(52, 152, 219, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <button class="toggle-btn" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="logo">
+            <i class="bi bi-boxes"></i>
+            <span>Sistem Gudang Gacor</span>
+        </div>
+        <div class="user-info">
+            <span id="userName"></span>
+            <div class="user-avatar">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <button class="logout-btn" onclick="logout()" title="Logout">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="name" id="profileName">Admin Staff</div>
+                <div class="role">STAFF ADMINISTRATOR</div>
+            </div>
+            <ul class="menu">
+                <div class="menu-section">
+                    <div class="menu-section-title">UTAMA</div>
+                    <li class="menu-item">
+                        <a href="../../user/staff/dashboard.html" class="menu-link">
+                            <i class="menu-icon bi-speedometer2"></i>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                    </li>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">OPERASIONAL</div>
+                    <li class="menu-item">
+                        <a href="../../order/staff/manage-order.html" class="menu-link active">
+                            <i class="menu-icon bi-clipboard-check"></i>
+                            <span class="menu-text">Manajemen Order</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-boxes"></i>
+                            <span class="menu-text">Manajemen Inventory</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-shield-check"></i>
+                            <span class="menu-text">Quality Control</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-truck"></i>
+                            <span class="menu-text">Logistic</span>
+                        </a>
+                    </li>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">SISTEM</div>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-people"></i>
+                            <span class="menu-text">Manajemen User</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-gear"></i>
+                            <span class="menu-text">Pengaturan</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" style="margin-top: 20px; border-top: 1px solid #f0f0f0; padding-top: 15px;">
+                        <a href="#" class="menu-link" onclick="logout()">
+                            <i class="menu-icon bi-box-array-right"></i>
+                            <span class="menu-text">Logout</span>
+                        </a>
+                    </li>
+                </div>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h2>Manajemen Order, <span id="welcomeName"></span>!</h2>
+            <p>Kelola dan update status order, serta cek ketersediaan inventory dengan mudah.</p>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="content-card">
+            <h3 class="card-title">
+                <i class="bi bi-funnel"></i>
+                Filter Order
+            </h3>
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">Status Order</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Semua Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="APPROVED">Approved</option>
+                        <option value="PROCESSING">Processing</option>
+                        <option value="SHIPPED">Shipped</option>
+                        <option value="DELIVERED">Delivered</option>
+                        <option value="REJECTED">Rejected</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Restaurant ID</label>
+                    <input type="text" class="form-control" id="restaurantFilter" placeholder="Masukkan Restaurant ID">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Nomor Order</label>
+                    <input type="text" class="form-control" id="orderNumberFilter" placeholder="Masukkan nomor order">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" onclick="filterOrders()">
+                            <i class="bi bi-search"></i> Filter
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetFilters()">
+                            <i class="bi bi-arrow-clockwise"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="card-title">
+                    <i class="bi bi-clipboard-check"></i>
+                    Daftar Order
+                </h3>
+                <button class="btn btn-success" onclick="refreshOrders()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+            
+            <div class="table-container">
+                <div id="loadingIndicator" class="text-center p-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Memuat data order...</p>
+                </div>
+                
+                <table class="table table-hover" id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>No. Order</th>
+                            <th>Restaurant</th>
+                            <th>Total Items</th>
+                            <th>Tanggal Request</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <!-- Data akan dimuat dari JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Order Detail Modal -->
+    <div class="modal fade" id="orderDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="orderDetailContent">
+                        <!-- Content akan dimuat dari JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Status Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nomor Order</label>
+                        <input type="text" class="form-control" id="updateOrderNumber" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status Baru</label>
+                        <select class="form-select" id="newStatus">
+                            <option value="PENDING">Pending</option>
+                            <option value="APPROVED">Approved</option>
+                            <option value="PROCESSING">Processing</option>
+                            <option value="SHIPPED">Shipped</option>
+                            <option value="DELIVERED">Delivered</option>
+                            <option value="REJECTED">Rejected</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                    </div>
+                    <div id="approvedQuantitiesSection" style="display: none;">
+                        <label class="form-label">Approved Quantities</label>
+                        <div id="approvedQuantitiesContainer">
+                            <!-- Akan dimuat dari JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="updateOrderStatus()">Update Status</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check Inventory Modal -->
+    <div class="modal fade" id="checkInventoryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cek Ketersediaan Inventory</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="inventoryCheckContent">
+                        <!-- Content akan dimuat dari JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                <strong class="me-auto">Berhasil</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="successToastBody">
+                <!-- Success message -->
+            </div>
+        </div>
+        
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="bi bi-exclamation-circle-fill text-danger me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorToastBody">
+                <!-- Error message -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentOrders = [];
+        let currentOrderForUpdate = null;
+        const ORDER_SERVICE_URL = 'http://127.0.0.1:5002'; // Backend order service URL
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            loadUserInfo();
+            loadOrders();
+            
+            // Ensure all event listeners are properly attached
+            attachEventListeners();
+        });
+
+        // Attach all event listeners
+        function attachEventListeners() {
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.view-detail-btn')) {
+                    e.preventDefault();
+                    const orderId = parseInt(e.target.closest('.view-detail-btn').dataset.orderId);
+                    viewOrderDetail(orderId);
+                }
+                
+                if (e.target.closest('.update-status-btn')) {
+                    e.preventDefault();
+                    const orderId = parseInt(e.target.closest('.update-status-btn').dataset.orderId);
+                    openUpdateStatusModal(orderId);
+                }
+                
+                if (e.target.closest('.check-inventory-btn')) {
+                    e.preventDefault();
+                    const orderId = parseInt(e.target.closest('.check-inventory-btn').dataset.orderId);
+                    checkInventoryAvailability(orderId);
+                }
+            });
+            // Filter button
+            const filterBtn = document.querySelector('button[onclick="filterOrders()"]');
+            if (filterBtn) {
+                filterBtn.removeAttribute('onclick');
+                filterBtn.addEventListener('click', filterOrders);
+            }
+            
+            // Reset button
+            const resetBtn = document.querySelector('button[onclick="resetFilters()"]');
+            if (resetBtn) {
+                resetBtn.removeAttribute('onclick');
+                resetBtn.addEventListener('click', resetFilters);
+            }
+            
+            // Refresh button
+            const refreshBtn = document.querySelector('button[onclick="refreshOrders()"]');
+            if (refreshBtn) {
+                refreshBtn.removeAttribute('onclick');
+                refreshBtn.addEventListener('click', refreshOrders);
+            }
+            
+            // Status select change listener
+            const statusSelect = document.getElementById('newStatus');
+            if (statusSelect) {
+                statusSelect.addEventListener('change', function() {
+                    const approvedSection = document.getElementById('approvedQuantitiesSection');
+                    if (this.value === 'APPROVED') {
+                        approvedSection.style.display = 'block';
+                        if (currentOrderForUpdate) {
+                            generateApprovedQuantitiesInputs(currentOrderForUpdate.items);
+                        }
+                    } else {
+                        approvedSection.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Update status button
+            const updateStatusBtn = document.querySelector('button[onclick="updateOrderStatus()"]');
+            if (updateStatusBtn) {
+                updateStatusBtn.removeAttribute('onclick');
+                updateStatusBtn.addEventListener('click', updateOrderStatus);
+            }
+        }
+
+        // Load user info
+        function loadUserInfo() {
+            const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || '{}');
+            const userName = user.username || 'Staff';
+            
+            const userNameEl = document.getElementById('userName');
+            const profileNameEl = document.getElementById('profileName');
+            const welcomeNameEl = document.getElementById('welcomeName');
+            
+            if (userNameEl) userNameEl.textContent = userName;
+            if (profileNameEl) profileNameEl.textContent = userName;
+            if (welcomeNameEl) welcomeNameEl.textContent = userName;
+        }
+
+        // Sidebar functions
+        let sidebarCollapsed = false;
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('show');
+            } else {
+                sidebar.classList.toggle('collapsed');
+                sidebarCollapsed = !sidebarCollapsed;
+            }
+        }
+
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('userRole');
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('user');
+                sessionStorage.removeItem('userRole');
+                window.location.href = '../../user/login.html';
+            }
+        }
+
+        // Toast functions
+        function showSuccessToast(message) {
+            const toastBody = document.getElementById('successToastBody');
+            if (toastBody) {
+                toastBody.textContent = message;
+                const toastEl = document.getElementById('successToast');
+                if (toastEl) {
+                    const toast = new bootstrap.Toast(toastEl);
+                    toast.show();
+                }
+            }
+        }
+
+        function showErrorToast(message) {
+            const toastBody = document.getElementById('errorToastBody');
+            if (toastBody) {
+                toastBody.textContent = message;
+                const toastEl = document.getElementById('errorToast');
+                if (toastEl) {
+                    const toast = new bootstrap.Toast(toastEl);
+                    toast.show();
+                }
+            }
+        }
+
+        // Load orders from backend
+        async function loadOrders(filters = {}) {
+            try {
+                showLoading(true);
+                
+                // Build GraphQL query
+                let query = `
+                    query GetOrders($restaurantId: String, $status: String) {
+                        orders(restaurantId: $restaurantId, status: $status) {
+                            id
+                            orderNumber
+                            restaurantId
+                            restaurantName
+                            status
+                            totalItems
+                            notes
+                            requestedDate
+                            approvedDate
+                            shippedDate
+                            deliveredDate
+                            createdAt
+                            updatedAt
+                            items {
+                                id
+                                itemCode
+                                itemName
+                                requestedQuantity
+                                approvedQuantity
+                                unit
+                                notes
+                            }
+                        }
+                    }
+                `;
+                
+                const variables = {};
+                if (filters.restaurantId) variables.restaurantId = filters.restaurantId;
+                if (filters.status) variables.status = filters.status;
+                
+                const response = await fetch(`${ORDER_SERVICE_URL}/graphql`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        variables: variables
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.errors) {
+                    throw new Error(result.errors[0].message);
+                }
+                
+                currentOrders = result.data.orders || [];
+                
+                // Filter by order number if specified
+                if (filters.orderNumber) {
+                    currentOrders = currentOrders.filter(order => 
+                        order.orderNumber.toLowerCase().includes(filters.orderNumber.toLowerCase())
+                    );
+                }
+                
+                displayOrders(currentOrders);
+                
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                showErrorToast('Gagal memuat data order: ' + error.message);
+                displayOrders([]);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Display orders in table - FIXED VERSION
+        function displayOrders(orders) {
+            const tbody = document.getElementById('ordersTableBody');
+            
+            if (!tbody) {
+                console.error('Table body not found');
+                return;
+            }
+            
+            if (orders.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">Tidak ada data order</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = orders.map(order => `
+                <tr>
+                    <td><strong>${order.orderNumber}</strong></td>
+                    <td>
+                        <div>${order.restaurantName}</div>
+                        <small class="text-muted">${order.restaurantId}</small>
+                    </td>
+                    <td>${order.totalItems}</td>
+                    <td>${formatDate(order.requestedDate)}</td>
+                    <td>${getStatusBadge(order.status)}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-primary view-detail-btn" 
+                                    data-order-id="${order.id}" 
+                                    title="Lihat Detail">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-success update-status-btn" 
+                                    data-order-id="${order.id}" 
+                                    title="Update Status">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info check-inventory-btn" 
+                                    data-order-id="${order.id}" 
+                                    title="Cek Inventory">
+                                <i class="bi bi-boxes"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Attach event listeners to newly created buttons
+            attachOrderActionListeners();
+        }
+
+        // Attach event listeners to order action buttons
+        function attachOrderActionListeners() {
+            console.log('Attaching order action listeners...');
+            
+            // View detail buttons
+            document.querySelectorAll('.view-detail-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const orderId = parseInt(this.dataset.orderId);
+                    console.log('View detail clicked for order:', orderId);
+                    viewOrderDetail(orderId);
+                });
+            });
+            
+            // Update status buttons
+            document.querySelectorAll('.update-status-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const orderId = parseInt(this.dataset.orderId);
+                    console.log('Update status clicked for order:', orderId);
+                    openUpdateStatusModal(orderId);
+                });
+            });
+            
+            // Check inventory buttons
+            document.querySelectorAll('.check-inventory-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const orderId = parseInt(this.dataset.orderId);
+                    console.log('Check inventory clicked for order:', orderId);
+                    checkInventoryAvailability(orderId);
+                });
+            });
+            
+            console.log('Order action listeners attached successfully');
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Get status badge
+        function getStatusBadge(status) {
+            const statusMap = {
+                'PENDING': 'warning',
+                'APPROVED': 'success',
+                'PROCESSING': 'info',
+                'SHIPPED': 'primary',
+                'DELIVERED': 'success',
+                'REJECTED': 'danger',
+                'CANCELLED': 'secondary'
+            };
+            
+            const color = statusMap[status] || 'secondary';
+            return `<span class="badge bg-${color}">${status}</span>`;
+        }
+
+        // Show loading indicator
+        function showLoading(show) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const ordersTable = document.getElementById('ordersTable');
+            
+            if (loadingIndicator && ordersTable) {
+                if (show) {
+                    loadingIndicator.style.display = 'block';
+                    ordersTable.style.display = 'none';
+                } else {
+                    loadingIndicator.style.display = 'none';
+                    ordersTable.style.display = 'table';
+                }
+            }
+        }
+
+        // Filter orders
+        function filterOrders() {
+            console.log('Filter orders clicked');
+            const filters = {
+                status: document.getElementById('statusFilter')?.value || '',
+                restaurantId: document.getElementById('restaurantFilter')?.value || '',
+                orderNumber: document.getElementById('orderNumberFilter')?.value || ''
+            };
+            
+            loadOrders(filters);
+        }
+
+        // Reset filters
+        function resetFilters() {
+            console.log('Reset filters clicked');
+            const statusFilter = document.getElementById('statusFilter');
+            const restaurantFilter = document.getElementById('restaurantFilter');
+            const orderNumberFilter = document.getElementById('orderNumberFilter');
+            
+            if (statusFilter) statusFilter.value = '';
+            if (restaurantFilter) restaurantFilter.value = '';
+            if (orderNumberFilter) orderNumberFilter.value = '';
+            
+            loadOrders();
+        }
+
+        // Refresh orders
+        function refreshOrders() {
+            console.log('Refresh orders clicked');
+            const filters = {
+                status: document.getElementById('statusFilter')?.value || '',
+                restaurantId: document.getElementById('restaurantFilter')?.value || '',
+                orderNumber: document.getElementById('orderNumberFilter')?.value || ''
+            };
+            
+            loadOrders(filters);
+        }
+
+        // View order detail
+        function viewOrderDetail(orderId) {
+            console.log('Viewing order detail for ID:', orderId);
+            const order = currentOrders.find(o => o.id === orderId);
+            if (!order) {
+                console.error('Order not found:', orderId);
+                return;
+            }
+            
+            const content = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Informasi Order</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>Nomor Order:</strong></td><td>${order.orderNumber}</td></tr>
+                            <tr><td><strong>Restaurant:</strong></td><td>${order.restaurantName}</td></tr>
+                            <tr><td><strong>Restaurant ID:</strong></td><td>${order.restaurantId}</td></tr>
+                            <tr><td><strong>Status:</strong></td><td>${getStatusBadge(order.status)}</td></tr>
+                            <tr><td><strong>Total Items:</strong></td><td>${order.totalItems}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Tanggal</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>Tanggal Request:</strong></td><td>${formatDate(order.requestedDate)}</td></tr>
+                            ${order.approvedDate ? `<tr><td><strong>Tanggal Approved:</strong></td><td>${formatDate(order.approvedDate)}</td></tr>` : ''}
+                            ${order.shippedDate ? `<tr><td><strong>Tanggal Shipped:</strong></td><td>${formatDate(order.shippedDate)}</td></tr>` : ''}
+                            ${order.deliveredDate ? `<tr><td><strong>Tanggal Delivered:</strong></td><td>${formatDate(order.deliveredDate)}</td></tr>` : ''}
+                        </table>
+                    </div>
+                </div>
+                
+                ${order.notes ? `
+                    <div class="mb-3">
+                        <h6>Catatan</h6>
+                        <p class="text-muted">${order.notes}</p>
+                    </div>
+                ` : ''}
+                
+                <h6>Items Order</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Kode Item</th>
+                                <th>Nama Item</th>
+                                <th>Qty Request</th>
+                                <th>Qty Approved</th>
+                                <th>Unit</th>
+                                <th>Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${order.items.map(item => `
+                                <tr>
+                                    <td>${item.itemCode}</td>
+                                    <td>${item.itemName}</td>
+                                    <td>${item.requestedQuantity}</td>
+                                    <td>${item.approvedQuantity || '-'}</td>
+                                    <td>${item.unit}</td>
+                                    <td>${item.notes || '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            const modalContent = document.getElementById('orderDetailContent');
+            if (modalContent) {
+                modalContent.innerHTML = content;
+                const modalEl = document.getElementById('orderDetailModal');
+                if (modalEl) {
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                }
+            }
+        }
+
+        // Open update status modal
+        function openUpdateStatusModal(orderId) {
+            console.log('Opening update status modal for ID:', orderId);
+            const order = currentOrders.find(o => o.id === orderId);
+            if (!order) {
+                console.error('Order not found:', orderId);
+                return;
+            }
+            
+            currentOrderForUpdate = order;
+            
+            const orderNumberInput = document.getElementById('updateOrderNumber');
+            const statusSelect = document.getElementById('newStatus');
+            
+            if (orderNumberInput) orderNumberInput.value = order.orderNumber;
+            if (statusSelect) statusSelect.value = order.status;
+            
+            // Trigger change event to handle approved quantities
+            if (statusSelect) {
+                statusSelect.dispatchEvent(new Event('change'));
+            }
+            
+            const modalEl = document.getElementById('updateStatusModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        }
+
+        // Generate approved quantities inputs
+        function generateApprovedQuantitiesInputs(items) {
+            const container = document.getElementById('approvedQuantitiesContainer');
+            if (!container || !items) return;
+            
+            container.innerHTML = items.map(item => `
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <label class="form-label small">${item.itemCode}</label>
+                        <input type="text" class="form-control form-control-sm" value="${item.itemName}" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">Requested</label>
+                        <input type="number" class="form-control form-control-sm" value="${item.requestedQuantity}" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">Approved</label>
+                        <input type="number" class="form-control form-control-sm" id="approved_${item.itemCode}" 
+                            value="${item.approvedQuantity || item.requestedQuantity}" min="0" max="${item.requestedQuantity}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">Unit</label>
+                        <input type="text" class="form-control form-control-sm" value="${item.unit}" readonly>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update order status
+        async function updateOrderStatus() {
+            console.log('Update order status clicked');
+            if (!currentOrderForUpdate) {
+                console.error('No order selected for update');
+                return;
+            }
+            
+            const newStatus = document.getElementById('newStatus')?.value;
+            const orderId = currentOrderForUpdate.id;
+            
+            if (!newStatus) {
+                showErrorToast('Please select a status');
+                return;
+            }
+            
+            try {
+                let approvedQuantities = [];
+                
+                // Collect approved quantities if status is APPROVED
+                if (newStatus === 'APPROVED') {
+                    approvedQuantities = currentOrderForUpdate.items.map(item => {
+                        const approvedQtyInput = document.getElementById(`approved_${item.itemCode}`);
+                        const approvedQty = approvedQtyInput ? approvedQtyInput.value : item.requestedQuantity;
+                        return JSON.stringify({
+                            item_code: item.itemCode,
+                            approved_quantity: parseInt(approvedQty)
+                        });
+                    });
+                }
+                
+                const mutation = `
+                    mutation UpdateOrderStatus($orderId: Int!, $status: String!, $approvedQuantities: [String]) {
+                        updateOrderStatus(orderId: $orderId, status: $status, approvedQuantities: $approvedQuantities) {
+                            success
+                            message
+                            order {
+                                id
+                                orderNumber
+                                status
+                            }
+                        }
+                    }
+                `;
+                
+                const response = await fetch(`${ORDER_SERVICE_URL}/graphql`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: mutation,
+                        variables: {
+                            orderId: orderId,
+                            status: newStatus,
+                            approvedQuantities: approvedQuantities.length > 0 ? approvedQuantities : null
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.errors) {
+                    throw new Error(result.errors[0].message);
+                }
+                
+                const updateResult = result.data.updateOrderStatus;
+                
+                if (updateResult.success) {
+                    showSuccessToast(updateResult.message);
+                    
+                    // Close modal
+                    const modalEl = document.getElementById('updateStatusModal');
+                    if (modalEl) {
+                        const modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                    }
+                    
+                    // Refresh orders
+                    refreshOrders();
+                } else {
+                    throw new Error(updateResult.message);
+                }
+            } catch (error) {
+                console.error('Error updating order status:', error);
+                showErrorToast('Gagal update status order: ' + error.message);
+            }
+        }
+
+        // Check inventory availability
+        async function checkInventoryAvailability(orderId) {
+            console.log('Check inventory clicked for order:', orderId);
+            const order = currentOrders.find(o => o.id === orderId);
+            if (!order) {
+                console.error('Order not found:', orderId);
+                return;
+            }
+            
+            try {
+                const items = order.items.map(item => JSON.stringify({
+                    item_code: item.itemCode,
+                    requested_quantity: item.requestedQuantity
+                }));
+                
+                const mutation = `
+                    mutation CheckInventoryAvailability($items: [String]!) {
+                        checkInventoryAvailability(items: $items) {
+                            available
+                            message
+                            availabilityDetails
+                        }
+                    }
+                `;
+                
+                const response = await fetch(`${ORDER_SERVICE_URL}/graphql`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: mutation,
+                        variables: {
+                            items: items
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.errors) {
+                    throw new Error(result.errors[0].message);
+                }
+                
+                const availabilityData = result.data.checkInventoryAvailability;
+                
+                // Display results in modal
+                displayInventoryModal(order, availabilityData);
+                
+                return availabilityData;
+                
+            } catch (error) {
+                console.error('Error checking inventory:', error);
+                showErrorToast('Gagal cek inventory: ' + error.message);
+                return null;
+            }
+        }
+
+        // Display inventory results in modal
+        function displayInventoryModal(order, availabilityData) {
+            let content = `
+                <div class="mb-3">
+                    <h6>Order: ${order.orderNumber}</h6>
+                    <p class="text-muted">${order.restaurantName}</p>
+                </div>
+                
+                <div class="alert ${availabilityData.available ? 'alert-success' : 'alert-warning'}" role="alert">
+                    <i class="bi ${availabilityData.available ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'}"></i>
+                    ${availabilityData.message}
+                </div>
+            `;
+            
+            if (availabilityData.availabilityDetails && availabilityData.availabilityDetails.length > 0) {
+                content += `
+                    <h6 class="mt-3">Detail Ketersediaan Item:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Kode Item</th>
+                                    <th>Nama Item</th>
+                                    <th>Diminta</th>
+                                    <th>Tersedia</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${availabilityData.availabilityDetails.map(detail => {
+                                    const detailObj = JSON.parse(detail);
+                                    return `
+                                        <tr class="${detailObj.available ? 'table-success' : 'table-warning'}">
+                                            <td>${detailObj.item_code}</td>
+                                            <td>${detailObj.item_name || '-'}</td>
+                                            <td>${detailObj.requested_quantity}</td>
+                                            <td>${detailObj.available_quantity}</td>
+                                            <td>
+                                                <i class="bi ${detailObj.available ? 'bi-check-circle text-success' : 'bi-x-circle text-warning'}"></i>
+                                                ${detailObj.available ? 'Tersedia' : 'Tidak Cukup'}
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+            
+            const modalContent = document.getElementById('inventoryCheckContent');
+            if (modalContent) {
+                modalContent.innerHTML = content;
+                const modalEl = document.getElementById('checkInventoryModal');
+                if (modalEl) {
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

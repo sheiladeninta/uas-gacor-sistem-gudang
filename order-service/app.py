@@ -12,12 +12,12 @@ from datetime import datetime
 import requests
 import os
 from enum import Enum
+import json
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///order_service.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
-
 db = SQLAlchemy(app)
 CORS(app)
 
@@ -124,8 +124,15 @@ class CreateOrder(graphene.Mutation):
             order_count = Order.query.count() + 1
             order_number = f"ORD-{datetime.now().strftime('%Y%m%d')}-{order_count:04d}"
             
-            # Parse requested date
-            req_date = datetime.strptime(requested_date, '%Y-%m-%d %H:%M:%S')
+            # Parse requested date - handle both formats
+            try:
+                if 'T' in requested_date:
+                    req_date = datetime.fromisoformat(requested_date.replace('Z', ''))
+                else:
+                    req_date = datetime.strptime(requested_date, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                # Try alternative format
+                req_date = datetime.fromisoformat(requested_date.replace('T', ' ').replace('Z', ''))
             
             # Create order
             order = Order(
@@ -133,7 +140,7 @@ class CreateOrder(graphene.Mutation):
                 restaurant_id=restaurant_id,
                 restaurant_name=restaurant_name,
                 requested_date=req_date,
-                notes=notes,
+                notes=notes or '',
                 status=OrderStatus.PENDING
             )
             
@@ -141,20 +148,23 @@ class CreateOrder(graphene.Mutation):
             db.session.flush()  # Get order ID
             
             # Add order items
-            import json
             total_items = 0
             for item_data in items:
-                item = json.loads(item_data)
-                order_item = OrderItem(
-                    order_id=order.id,
-                    item_code=item['item_code'],
-                    item_name=item['item_name'],
-                    requested_quantity=item['requested_quantity'],
-                    unit=item['unit'],
-                    notes=item.get('notes', '')
-                )
-                db.session.add(order_item)
-                total_items += item['requested_quantity']
+                try:
+                    item = json.loads(item_data)
+                    order_item = OrderItem(
+                        order_id=order.id,
+                        item_code=item['item_code'],
+                        item_name=item['item_name'],
+                        requested_quantity=item['requested_quantity'],
+                        unit=item['unit'],
+                        notes=item.get('notes', '')
+                    )
+                    db.session.add(order_item)
+                    total_items += item['requested_quantity']
+                except (json.JSONDecodeError, KeyError) as e:
+                    db.session.rollback()
+                    return CreateOrder(order=None, success=False, message=f"Invalid item data: {str(e)}")
             
             order.total_items = total_items
             db.session.commit()
@@ -195,7 +205,6 @@ class UpdateOrderStatus(graphene.Mutation):
                 
                 # Update approved quantities if provided
                 if approved_quantities:
-                    import json
                     for qty_data in approved_quantities:
                         qty = json.loads(qty_data)
                         item = OrderItem.query.filter_by(
@@ -230,7 +239,6 @@ class CheckInventoryAvailability(graphene.Mutation):
     def mutate(self, info, items):
         try:
             # Call Inventory Service to check availability
-            import json
             check_items = []
             for item_data in items:
                 item = json.loads(item_data)
@@ -240,34 +248,34 @@ class CheckInventoryAvailability(graphene.Mutation):
                 })
             
             # Mock API call to inventory service
-            # In real implementation, replace with actual HTTP request
-            response = requests.post(
-                f"{INVENTORY_SERVICE_URL}/api/check-availability",
-                json={'items': check_items},
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                return CheckInventoryAvailability(
-                    available=result.get('available', False),
-                    message=result.get('message', ''),
-                    availability_details=[json.dumps(detail) for detail in result.get('details', [])]
+            try:
+                response = requests.post(
+                    f"{INVENTORY_SERVICE_URL}/api/check-availability",
+                    json={'items': check_items},
+                    timeout=10
                 )
-            else:
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    return CheckInventoryAvailability(
+                        available=result.get('available', False),
+                        message=result.get('message', ''),
+                        availability_details=[json.dumps(detail) for detail in result.get('details', [])]
+                    )
+                else:
+                    return CheckInventoryAvailability(
+                        available=False,
+                        message="Failed to check inventory availability",
+                        availability_details=[]
+                    )
+            except requests.RequestException:
+                # Fallback when inventory service is not available
                 return CheckInventoryAvailability(
-                    available=False,
-                    message="Failed to check inventory availability",
+                    available=True,  # Assume available for development
+                    message="Inventory service unavailable, assuming items are available",
                     availability_details=[]
                 )
                 
-        except requests.RequestException:
-            # Fallback when inventory service is not available
-            return CheckInventoryAvailability(
-                available=True,  # Assume available for development
-                message="Inventory service unavailable, assuming items are available",
-                availability_details=[]
-            )
         except Exception as e:
             return CheckInventoryAvailability(
                 available=False,
