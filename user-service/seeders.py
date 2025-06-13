@@ -5,44 +5,16 @@ def seed_staff():
     staff_list = [
         {
             'nama': 'admin',
+            'username' : 'admin.gacor',
             'password': 'admin123',
             'email': 'admin@example.com',
             'role': UserRole.STAFF.value
         },
         {
-            'nama': 'staff1',
-            'password': 'staff123',
-            'email': 'staff1@example.com',
-            'role': UserRole.STAFF.value
-        },
-        {
-            'nama': 'fajar',
-            'password': 'fajar123',
-            'email': 'fajar@example.com',
-            'role': UserRole.STAFF.value
-        },
-        {
-            'nama': 'yoga',
-            'password': 'yoga123',
-            'email': 'yoga@example.com',
-            'role': UserRole.STAFF.value
-        },
-        {
-            'nama': 'lala',
-            'password': 'lala123',
-            'email': 'lala@example.com',
-            'role': UserRole.STAFF.value
-        },
-        {
             'nama': 'sheila',
+            'username' : 'sheila.gacor',
             'password': 'sheila123',
             'email': 'sheila@example.com',
-            'role': UserRole.STAFF.value
-        },
-        {
-            'nama': 'naza',
-            'password': 'naza123',
-            'email': 'naza@example.com',
             'role': UserRole.STAFF.value
         }
     ]

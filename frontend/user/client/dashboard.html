@@ -489,7 +489,7 @@
             <span>Sistem Gudang Gacor</span>
         </div>
         <div class="user-info">
-            <span id="userName">Client User</span>
+            <span id="userName"></span>
             <div class="user-avatar">
                 <i class="bi bi-person-circle"></i>
             </div>
@@ -505,7 +505,7 @@
                 <div class="avatar">
                     <i class="bi bi-person-circle"></i>
                 </div>
-                <div class="name" id="profileName">Client User</div>
+                <div class="name" id="profileName"></div>
                 <div class="role">CLIENT</div>
             </div>
             <ul class="menu">
@@ -581,7 +581,7 @@
     <main class="main-content">
         <!-- Welcome Section -->
         <div class="welcome-section">
-            <h2>Selamat Datang, <span id="welcomeName">Client User</span>!</h2>
+            <h2>Selamat Datang, <span id="welcomeName"></span>!</h2>
             <p>Kelola pesanan dan pantau status pembelian Anda dengan mudah melalui dashboard ini.</p>
         </div>
         <!-- Statistics Cards -->
@@ -797,7 +797,7 @@
                 
                 if (result.data && result.data.user) {
                     const user = result.data.user;
-                    const displayName = user.companyName || user.nama || 'Client User';
+                    const displayName = user.companyName || user.nama ;
                     
                     // Update all display elements with company name
                     document.getElementById('userName').textContent = displayName;
@@ -809,7 +809,7 @@
                 } else {
                     console.error('Failed to fetch user data:', result.errors);
                     // Fallback to token data
-                    const displayName = payload.companyName || payload.nama || 'Client User';
+                    const displayName = payload.companyName || payload.nama ;
                     document.getElementById('userName').textContent = displayName;
                     document.getElementById('profileName').textContent = displayName;
                     document.getElementById('welcomeName').textContent = displayName;
@@ -819,7 +819,7 @@
                 // Fallback: try to use token data
                 try {
                     const payload = JSON.parse(atob(token.split('.')[1]));
-                    const displayName = payload.companyName || payload.nama || 'Client User';
+                    const displayName = payload.companyName || payload.nama ;
                     document.getElementById('userName').textContent = displayName;
                     document.getElementById('profileName').textContent = displayName;
                     document.getElementById('welcomeName').textContent = displayName;

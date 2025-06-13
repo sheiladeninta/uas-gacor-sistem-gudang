@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Layout - Sistem Gudang Gacor</title>
+    <title>Dashboard Staff - Sistem Gudang Gacor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
@@ -17,19 +17,16 @@
             --sidebar-collapsed-width: 70px;
             --header-height: 70px;
         }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
             overflow-x: hidden;
         }
-
         /* Header */
         .header {
             position: fixed;
@@ -45,7 +42,6 @@
             padding: 0 20px;
             box-shadow: 0 4px 20px rgba(52, 152, 219, 0.3);
         }
-
         .header .toggle-btn {
             background: none;
             border: none;
@@ -57,12 +53,10 @@
             border-radius: 8px;
             transition: all 0.3s;
         }
-
         .header .toggle-btn:hover {
             background-color: rgba(255,255,255,0.15);
             transform: scale(1.05);
         }
-
         .header .logo {
             font-size: 1.6rem;
             font-weight: bold;
@@ -71,17 +65,14 @@
             align-items: center;
             gap: 10px;
         }
-
         .header .logo i {
             font-size: 1.8rem;
         }
-
         .header .user-info {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-
         .header .user-avatar {
             width: 45px;
             height: 45px;
@@ -93,7 +84,6 @@
             font-size: 1.3rem;
             border: 2px solid rgba(255,255,255,0.3);
         }
-
         .header .logout-btn {
             background: none;
             border: none;
@@ -104,12 +94,10 @@
             border-radius: 8px;
             transition: all 0.3s;
         }
-
         .header .logout-btn:hover {
             background-color: var(--accent-color);
             transform: scale(1.05);
         }
-
         /* Sidebar */
         .sidebar {
             position: fixed;
@@ -123,18 +111,15 @@
             z-index: 1020;
             overflow: hidden;
         }
-
         .sidebar.collapsed {
             width: var(--sidebar-collapsed-width);
         }
-
         .sidebar-content {
             padding: 20px 0;
             height: 100%;
             overflow-y: auto;
             overflow-x: hidden;
         }
-
         .user-profile {
             padding: 0 20px 25px;
             border-bottom: 2px solid #f0f0f0;
@@ -142,11 +127,9 @@
             text-align: center;
             transition: all 0.3s;
         }
-
         .sidebar.collapsed .user-profile {
             padding: 0 10px 25px;
         }
-
         .user-profile .avatar {
             width: 70px;
             height: 70px;
@@ -161,13 +144,11 @@
             transition: all 0.3s;
             border: 3px solid #f0f0f0;
         }
-
         .sidebar.collapsed .user-profile .avatar {
             width: 45px;
             height: 45px;
             font-size: 1.3rem;
         }
-
         .user-profile .name {
             font-weight: bold;
             color: var(--dark-color);
@@ -177,7 +158,6 @@
             overflow: hidden;
             transition: opacity 0.3s;
         }
-
         .user-profile .role {
             font-size: 0.85rem;
             color: var(--primary-color);
@@ -190,22 +170,18 @@
             display: inline-block;
             transition: opacity 0.3s;
         }
-
         .sidebar.collapsed .user-profile .name,
         .sidebar.collapsed .user-profile .role {
             opacity: 0;
         }
-
         /* Menu */
         .menu {
             list-style: none;
             padding: 0;
         }
-
         .menu-section {
             margin-bottom: 20px;
         }
-
         .menu-section-title {
             font-size: 0.75rem;
             color: #999;
@@ -217,15 +193,12 @@
             border-bottom: 1px solid #f0f0f0;
             transition: opacity 0.3s;
         }
-
         .sidebar.collapsed .menu-section-title {
             opacity: 0;
         }
-
         .menu-item {
             margin-bottom: 3px;
         }
-
         .menu-link {
             display: flex;
             align-items: center;
@@ -237,31 +210,26 @@
             border-radius: 0 30px 30px 0;
             margin-right: 15px;
         }
-
         .sidebar.collapsed .menu-link {
             padding: 15px 0;
             justify-content: center;
             margin-right: 0;
             border-radius: 0;
         }
-
         .menu-link:hover {
             background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%);
             color: var(--primary-color);
             transform: translateX(8px);
         }
-
         .sidebar.collapsed .menu-link:hover {
             transform: none;
             background: rgba(52, 152, 219, 0.1);
         }
-
         .menu-link.active {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
         }
-
         .menu-link.active::after {
             content: '';
             position: absolute;
@@ -273,11 +241,9 @@
             border: 12px solid transparent;
             border-left-color: var(--secondary-color);
         }
-
         .sidebar.collapsed .menu-link.active::after {
             display: none;
         }
-
         .menu-icon {
             font-size: 1.3rem;
             width: 28px;
@@ -285,23 +251,19 @@
             margin-right: 15px;
             transition: margin 0.3s;
         }
-
         .sidebar.collapsed .menu-icon {
             margin-right: 0;
         }
-
         .menu-text {
             white-space: nowrap;
             overflow: hidden;
             transition: opacity 0.3s;
             font-weight: 500;
         }
-
         .sidebar.collapsed .menu-text {
             opacity: 0;
             width: 0;
         }
-
         .badge-notification {
             background: var(--accent-color);
             color: white;
@@ -312,11 +274,9 @@
             font-weight: 600;
             transition: opacity 0.3s;
         }
-
         .sidebar.collapsed .badge-notification {
             opacity: 0;
         }
-
         /* Main Content */
         .main-content {
             margin-left: var(--sidebar-width);
@@ -325,11 +285,9 @@
             transition: margin-left 0.3s ease;
             min-height: calc(100vh - var(--header-height));
         }
-
         .sidebar.collapsed + .main-content {
             margin-left: var(--sidebar-collapsed-width);
         }
-
         /* Content Cards */
         .content-card {
             background: white;
@@ -339,7 +297,6 @@
             margin-bottom: 30px;
             border: 1px solid rgba(52, 152, 219, 0.1);
         }
-
         .card-title {
             color: var(--dark-color);
             font-size: 1.6rem;
@@ -349,11 +306,9 @@
             align-items: center;
             gap: 10px;
         }
-
         .card-title i {
             color: var(--primary-color);
         }
-
         /* Stats Cards */
         .stats-card {
             background: white;
@@ -363,84 +318,165 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.08);
             border: 1px solid rgba(52, 152, 219, 0.1);
             transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
         }
-
         .stats-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(0,0,0,0.15);
         }
-
         .stats-icon {
             font-size: 3rem;
             margin-bottom: 15px;
         }
-
         .stats-value {
             font-size: 2.2rem;
             font-weight: bold;
             margin-bottom: 8px;
         }
-
         .stats-label {
             color: #666;
             font-weight: 500;
         }
-
+        /* Quick Actions */
+        .quick-action {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(52, 152, 219, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+        }
+        .quick-action:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .quick-action i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        .quick-action h5 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .quick-action p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+        .welcome-section h2 {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .welcome-section p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        /* Recent Orders Table */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .table {
+            margin: 0;
+        }
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 15px;
+        }
+        .table tbody td {
+            padding: 15px;
+            border-color: #f0f0f0;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-processing {
+            background-color: #cff4fc;
+            color: #087990;
+        }
+        .status-shipped {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
                 width: var(--sidebar-width);
             }
-
             .sidebar.show {
                 transform: translateX(0);
             }
-
             .main-content {
                 margin-left: 0;
+                padding: 20px;
             }
-
             .sidebar.collapsed + .main-content {
                 margin-left: 0;
             }
-
             .header .logo {
                 font-size: 1.3rem;
             }
-
             .header .user-info span {
                 display: none;
             }
+            .stats-card {
+                margin-bottom: 20px;
+            }
+            .quick-action {
+                margin-bottom: 20px;
+            }
         }
-
         /* Custom Scrollbar */
         .sidebar-content::-webkit-scrollbar {
             width: 6px;
         }
-
         .sidebar-content::-webkit-scrollbar-track {
             background: #f8f9fa;
         }
-
         .sidebar-content::-webkit-scrollbar-thumb {
             background: rgba(52, 152, 219, 0.3);
             border-radius: 3px;
         }
-
         .sidebar-content::-webkit-scrollbar-thumb:hover {
             background: rgba(52, 152, 219, 0.5);
         }
     </style>
-</head>
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Layout - Sistem Gudang Gacor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
 </head>
 <body>
     <!-- Header -->
@@ -453,9 +489,9 @@
             <span>Sistem Gudang Gacor</span>
         </div>
         <div class="user-info">
-            <span id="userName">Loading...</span>
+            <span id="userName"></span>
             <div class="user-avatar">
-                <i class="bi bi-person-badge"></i>
+                <i class="bi bi-person-circle"></i>
             </div>
             <button class="logout-btn" onclick="logout()" title="Logout">
                 <i class="bi bi-box-arrow-right"></i>
@@ -469,7 +505,7 @@
                 <div class="avatar">
                     <i class="bi bi-person-badge"></i>
                 </div>
-                <div class="name" id="profileName">Loading...</div>
+                <div class="name" id="profileName">Admin Staff</div>
                 <div class="role">STAFF ADMINISTRATOR</div>
             </div>
             <ul class="menu">
@@ -481,46 +517,31 @@
                             <span class="menu-text">Dashboard</span>
                         </a>
                     </li>
-                    <li class="menu-item">
-                        <a href="#" class="menu-link">
-                            <i class="menu-icon bi-boxes"></i>
-                            <span class="menu-text">Manajemen Barang</span>
-                        </a>
-                    </li>
                 </div>
                 <div class="menu-section">
                     <div class="menu-section-title">OPERASIONAL</div>
                     <li class="menu-item">
                         <a href="#" class="menu-link">
-                            <i class="menu-icon bi-arrow-down-circle"></i>
-                            <span class="menu-text">Barang Masuk</span>
+                            <i class="menu-icon bi-clipboard-check"></i>
+                            <span class="menu-text">Manajemen Order</span>
                         </a>
                     </li>
                     <li class="menu-item">
                         <a href="#" class="menu-link">
-                            <i class="menu-icon bi-arrow-up-circle"></i>
-                            <span class="menu-text">Barang Keluar</span>
+                            <i class="menu-icon bi-boxes"></i>
+                            <span class="menu-text">Manajemen Inventory</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-shield-check"></i>
+                            <span class="menu-text">Quality Control</span>
                         </a>
                     </li>
                     <li class="menu-item">
                         <a href="#" class="menu-link">
                             <i class="menu-icon bi-truck"></i>
-                            <span class="menu-text">Supplier</span>
-                        </a>
-                    </li>
-                </div>
-                <div class="menu-section">
-                    <div class="menu-section-title">LAPORAN & ANALISIS</div>
-                    <li class="menu-item">
-                        <a href="#" class="menu-link">
-                            <i class="menu-icon bi-clipboard-data"></i>
-                            <span class="menu-text">Laporan</span>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#" class="menu-link">
-                            <i class="menu-icon bi-graph-up"></i>
-                            <span class="menu-text">Analitik</span>
+                            <span class="menu-text">Logistic</span>
                         </a>
                     </li>
                 </div>
@@ -548,125 +569,206 @@
             </ul>
         </div>
     </nav>
-
-    <!-- Loading overlay -->
-    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999; display: flex; justify-content: center; align-items: center;">
-        <div class="spinner-border text-light" role="status">
-            <span class="visually-hidden">Loading...</span>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h2>Dashboard Staff, <span id="welcomeName"></span>!</h2>
+            <p>Kelola operasional gudang, inventory, dan proses order dengan efisien melalui dashboard staff ini.</p>
         </div>
-    </div>
-
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card">
+                    <div class="stats-icon text-primary">
+                        <i class="bi bi-clipboard-check"></i>
+                    </div>
+                    <div class="stats-value text-primary" id="totalOrders">142</div>
+                    <div class="stats-label">Total Order Aktif</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card">
+                    <div class="stats-icon text-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <div class="stats-value text-warning" id="lowStock">8</div>
+                    <div class="stats-label">Item Stok Rendah</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card">
+                    <div class="stats-icon text-success">
+                        <i class="bi bi-truck"></i>
+                    </div>
+                    <div class="stats-value text-success" id="pendingShipment">23</div>
+                    <div class="stats-label">Siap Kirim</div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="stats-card">
+                    <div class="stats-icon text-info">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="stats-value text-info" id="qcPending">5</div>
+                    <div class="stats-label">Menunggu QC</div>
+                </div>
+            </div>
+        </div>
+        <!-- Quick Actions -->
+        <div class="content-card">
+            <h3 class="card-title">
+                <i class="bi bi-lightning-charge"></i>
+                Aksi Cepat Staff
+            </h3>
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <a href="#" class="quick-action" onclick="showSection('orders')">
+                        <i class="bi bi-clipboard-check"></i>
+                        <h5>Kelola Order</h5>
+                        <p>Proses dan update status order</p>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <a href="#" class="quick-action" onclick="showSection('inventory')">
+                        <i class="bi bi-boxes"></i>
+                        <h5>Update Inventory</h5>
+                        <p>Kelola stok dan barang masuk</p>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <a href="#" class="quick-action" onclick="showSection('quality')">
+                        <i class="bi bi-shield-check"></i>
+                        <h5>Quality Control</h5>
+                        <p>Verifikasi kualitas produk</p>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <a href="#" class="quick-action" onclick="showSection('logistic')">
+                        <i class="bi bi-truck"></i>
+                        <h5>Kelola Pengiriman</h5>
+                        <p>Atur jadwal dan status kirim</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Orders Requiring Attention -->
+        <div class="content-card">
+            <h3 class="card-title">
+                <i class="bi bi-exclamation-circle"></i>
+                Order Memerlukan Perhatian
+            </h3>
+            <div class="table-container">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID Order</th>
+                            <th>Client</th>
+                            <th>Tanggal</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="urgentOrdersTable">
+                        <tr>
+                            <td><strong>#ORD-2024-158</strong></td>
+                            <td>PT. Maju Bersama</td>
+                            <td>12 Jun 2025</td>
+                            <td><span class="status-badge status-pending">Pending QC</span></td>
+                            <td><span class="priority-badge priority-high">High</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="processOrder('ORD-2024-158')">Proses</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#ORD-2024-159</strong></td>
+                            <td>CV. Sejahtera Mandiri</td>
+                            <td>12 Jun 2025</td>
+                            <td><span class="status-badge status-processing">Processing</span></td>
+                            <td><span class="priority-badge priority-medium">Medium</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="processOrder('ORD-2024-159')">Update</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>#ORD-2024-160</strong></td>
+                            <td>PT. Global Sukses</td>
+                            <td>13 Jun 2025</td>
+                            <td><span class="status-badge status-ready">Ready to Ship</span></td>
+                            <td><span class="priority-badge priority-high">High</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="processOrder('ORD-2024-160')">Kirim</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center mt-3">
+                <button class="btn btn-primary" onclick="showSection('orders')">Lihat Semua Order</button>
+            </div>
+        </div>
+        <!-- Inventory Alert -->
+        <div class="content-card">
+            <h3 class="card-title">
+                <i class="bi bi-exclamation-triangle"></i>
+                Alert Inventory
+            </h3>
+            <div class="table-container">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Kode Item</th>
+                            <th>Nama Produk</th>
+                            <th>Stok Saat Ini</th>
+                            <th>Minimum Stok</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryAlertTable">
+                        <tr>
+                            <td><strong>ITM-001</strong></td>
+                            <td>Laptop Gaming ROG</td>
+                            <td class="text-danger"><strong>2</strong></td>
+                            <td>5</td>
+                            <td><span class="status-badge status-danger">Critical</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="restockItem('ITM-001')">Restock</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>ITM-015</strong></td>
+                            <td>Mouse Wireless Logitech</td>
+                            <td class="text-warning"><strong>8</strong></td>
+                            <td>15</td>
+                            <td><span class="status-badge status-warning">Low</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="restockItem('ITM-015')">Restock</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>ITM-032</strong></td>
+                            <td>Keyboard Mechanical</td>
+                            <td class="text-warning"><strong>12</strong></td>
+                            <td>20</td>
+                            <td><span class="status-badge status-warning">Low</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="restockItem('ITM-032')">Restock</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-center mt-3">
+                <button class="btn btn-primary" onclick="showSection('inventory')">Kelola Inventory</button>
+            </div>
+        </div>
+    </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Configuration
-        const API_URL = 'http://127.0.0.1:5003/graphql';
-        
         let sidebarCollapsed = false;
-        let currentUser = null;
-
-        // GraphQL query untuk mengambil data user
-        async function fetchUserData(userId) {
-            const query = `
-                query GetUser($id: Int!) {
-                    user(id: $id) {
-                        id
-                        nama
-                        username
-                        email
-                        companyName
-                        role
-                    }
-                }
-            `;
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        query: query,
-                        variables: { id: userId }
-                    })
-                });
-
-                const result = await response.json();
-                if (result.errors) {
-                    throw new Error(result.errors[0].message);
-                }
-
-                return result.data.user;
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-                throw error;
-            }
-        }
-
-        // Function untuk load user info dari token dan backend
-        async function loadUserInfo() {
-            const token = localStorage.getItem('token');
-            
-            if (!token) {
-                redirectToLogin();
-                return;
-            }
-
-            try {
-                // Parse JWT token untuk mendapatkan user_id
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const currentTime = Date.now() / 1000;
-                
-                // Cek apakah token sudah expired
-                if (payload.exp < currentTime) {
-                    alert('Sesi Anda telah berakhir. Silakan login kembali.');
-                    redirectToLogin();
-                    return;
-                }
-
-                // Cek role - hanya staff yang bisa akses dashboard ini
-                if (payload.role !== 'STAFF') {
-                    alert('Akses ditolak. Halaman ini hanya untuk staff.');
-                    redirectToLogin();
-                    return;
-                }
-
-                // Tampilkan loading
-                showLoading(true);
-
-                // Ambil data user dari backend menggunakan user_id
-                const userData = await fetchUserData(payload.user_id);
-                
-                if (userData) {
-                    currentUser = userData;
-                    // Update nama di header dan sidebar
-                    document.getElementById('userName').textContent = userData.nama || 'Staff';
-                    document.getElementById('profileName').textContent = userData.nama || 'Staff';
-                } else {
-                    throw new Error('User data not found');
-                }
-
-            } catch (error) {
-                console.error('Error loading user info:', error);
-                alert('Terjadi kesalahan saat memuat data user. Silakan login kembali.');
-                redirectToLogin();
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        function showLoading(show) {
-            const overlay = document.getElementById('loadingOverlay');
-            overlay.style.display = show ? 'flex' : 'none';
-        }
-
-        function redirectToLogin() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('userRole');
-            // Sesuaikan path dengan struktur folder Anda
-            window.location.href = '../../index.html'; // atau path yang sesuai ke halaman login
-        }
-
+        
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             
@@ -677,15 +779,19 @@
                 sidebarCollapsed = !sidebarCollapsed;
             }
         }
-
+        
         function logout() {
             if (confirm('Apakah Anda yakin ingin logout?')) {
                 localStorage.removeItem('token');
+                localStorage.removeItem('user');
                 localStorage.removeItem('userRole');
-                redirectToLogin();
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('user');
+                sessionStorage.removeItem('userRole');
+                window.location.href = '../login.html';
             }
         }
-
+        
         // Handle responsive
         window.addEventListener('resize', function() {
             const sidebar = document.getElementById('sidebar');
@@ -693,7 +799,7 @@
                 sidebar.classList.remove('show');
             }
         });
-
+        
         // Close sidebar on mobile when clicking outside
         document.addEventListener('click', function(e) {
             const sidebar = document.getElementById('sidebar');
@@ -706,43 +812,138 @@
                 sidebar.classList.remove('show');
             }
         });
-
+        
         // Menu active state management
         document.querySelectorAll('.menu-link').forEach(link => {
             link.addEventListener('click', function(e) {
-                e.preventDefault();
                 // Remove active class from all links
                 document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
                 // Add active class to clicked link
                 this.classList.add('active');
             });
         });
-
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            loadUserInfo();
-        });
-
-        // Handle page visibility change (ketika user kembali ke tab)
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                // Cek apakah token masih valid ketika user kembali ke tab
-                const token = localStorage.getItem('token');
-                if (token) {
-                    try {
-                        const payload = JSON.parse(atob(token.split('.')[1]));
-                        const currentTime = Date.now() / 1000;
-                        
-                        if (payload.exp < currentTime) {
-                            alert('Sesi Anda telah berakhir. Silakan login kembali.');
-                            redirectToLogin();
-                        }
-                    } catch (error) {
-                        console.error('Error checking token validity:', error);
-                        redirectToLogin();
-                    }
+        
+        // Staff Dashboard Specific Functions
+        function showSection(section) {
+            // Simulate navigation to different sections
+            alert(`Navigating to ${section} management section...`);
+            // In actual implementation, this would route to the appropriate page
+        }
+        
+        function processOrder(orderId) {
+            alert(`Processing order ${orderId}...`);
+            // In actual implementation, this would open order processing modal/page
+        }
+        
+        function restockItem(itemId) {
+            alert(`Initiating restock for item ${itemId}...`);
+            // In actual implementation, this would open restock form/modal
+        }
+        
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Simulate loading dashboard statistics
+                // In actual implementation, this would fetch from API
+                const stats = {
+                    totalOrders: 142,
+                    lowStock: 8,
+                    pendingShipment: 23,
+                    qcPending: 5
+                };
+                
+                // Update statistics
+                document.getElementById('totalOrders').textContent = stats.totalOrders;
+                document.getElementById('lowStock').textContent = stats.lowStock;
+                document.getElementById('pendingShipment').textContent = stats.pendingShipment;
+                document.getElementById('qcPending').textContent = stats.qcPending;
+                
+                // Load urgent orders and inventory alerts would be here
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+        
+        // Load user info from token
+        async function loadUserInfo() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            
+            if (!token) {
+                window.location.href = '../login.html';
+                return;
+            }
+            
+            try {
+                // Parse JWT token to get user_id
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const userId = payload.user_id;
+                
+                // Fetch complete user data from GraphQL
+                const response = await fetch('http://127.0.0.1:5003/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        query: `
+                            query GetUser($id: Int!) {
+                                user(id: $id) {
+                                    id
+                                    nama
+                                    username
+                                    email
+                                    companyName
+                                    role
+                                }
+                            }
+                        `,
+                        variables: { id: userId }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.data && result.data.user) {
+                    const user = result.data.user;
+                    const displayName = user.companyName || user.nama ;
+                    
+                    // Update all display elements with company name
+                    document.getElementById('userName').textContent = displayName;
+                    document.getElementById('profileName').textContent = displayName;
+                    document.getElementById('welcomeName').textContent = displayName;
+                    
+                    // Store user data for other pages
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                } else {
+                    console.error('Failed to fetch user data:', result.errors);
+                    // Fallback to token data
+                    const displayName = payload.companyName || payload.nama ;
+                    document.getElementById('userName').textContent = displayName;
+                    document.getElementById('profileName').textContent = displayName;
+                    document.getElementById('welcomeName').textContent = displayName;
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+                // Fallback: try to use token data
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const displayName = payload.companyName || payload.nama ;
+                    document.getElementById('userName').textContent = displayName;
+                    document.getElementById('profileName').textContent = displayName;
+                    document.getElementById('welcomeName').textContent = displayName;
+                } catch (tokenError) {
+                    console.error('Error parsing token:', tokenError);
+                    window.location.href = '../login.html';
                 }
             }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserInfo();
+            loadDashboardData();
         });
     </script>
 </body>
