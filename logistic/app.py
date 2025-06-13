@@ -135,7 +135,6 @@ def generate_tracking_number():
     return f"TRK-{uuid.uuid4().hex[:8].upper()}"
 
 @app.route('/api/shipments', methods=['GET'])
-@jwt_required()
 def get_shipments():
     status = request.args.get('status')
     query = Shipment.query
@@ -147,13 +146,11 @@ def get_shipments():
     return jsonify([shipment.to_dict() for shipment in shipments])
 
 @app.route('/api/shipments/<int:shipment_id>', methods=['GET'])
-@jwt_required()
 def get_shipment(shipment_id):
     shipment = Shipment.query.get_or_404(shipment_id)
     return jsonify(shipment.to_dict())
 
 @app.route('/api/shipments', methods=['POST'])
-@jwt_required()
 def create_shipment():
     data = request.get_json()
     
@@ -178,7 +175,6 @@ def create_shipment():
     return jsonify(shipment.to_dict()), 201
 
 @app.route('/api/shipments/<int:shipment_id>/ship', methods=['POST'])
-@jwt_required()
 def ship_order(shipment_id):
     shipment = Shipment.query.get_or_404(shipment_id)
     
@@ -193,7 +189,6 @@ def ship_order(shipment_id):
     return jsonify(shipment.to_dict())
 
 @app.route('/api/shipments/<int:shipment_id>/deliver', methods=['POST'])
-@jwt_required()
 def mark_as_delivered(shipment_id):
     shipment = Shipment.query.get_or_404(shipment_id)
     
@@ -206,7 +201,6 @@ def mark_as_delivered(shipment_id):
     return jsonify(shipment.to_dict())
 
 @app.route('/api/shipments/<int:shipment_id>/receipt', methods=['GET'])
-@jwt_required()
 def get_shipping_receipt(shipment_id):
     shipment = Shipment.query.get_or_404(shipment_id)
     
@@ -233,6 +227,11 @@ def get_shipping_receipt(shipment_id):
 @app.route('/')
 def index():
     return "Shipment Service is running! Use /graphql for GraphQL interface or /api/shipments for API endpoints."
+
+@app.route('/public/shipments', methods=['GET'])
+def public_shipments():
+    shipments = Shipment.query.all()
+    return jsonify([shipment.to_dict() for shipment in shipments])
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5002, debug=True)
