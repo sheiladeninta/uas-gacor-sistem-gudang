@@ -499,7 +499,6 @@
             </button>
         </div>
     </header>
-
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-content">
@@ -529,19 +528,19 @@
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#" class="menu-link">
+                        <a href="../inventory/manage-inventory.html" class="menu-link">
                             <i class="menu-icon bi-boxes"></i>
                             <span class="menu-text">Manajemen Inventory</span>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#" class="menu-link active">
+                        <a href="../qc/manage-qc.html" class="menu-link active">
                             <i class="menu-icon bi-shield-check"></i>
                             <span class="menu-text">Quality Control</span>
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="#" class="menu-link">
+                        <a href="../logistic/manage-logistic2.html" class="menu-link">
                             <i class="menu-icon bi-truck"></i>
                             <span class="menu-text">Logistic</span>
                         </a>
@@ -571,7 +570,6 @@
             </ul>
         </div>
     </nav>
-
     <!-- Main Content -->
     <main class="main-content">
         <!-- Welcome Section -->
@@ -579,7 +577,6 @@
             <h2>Quality Control, <span id="welcomeName"></span>!</h2>
             <p>Kelola dan review kualitas item yang masuk, serta pantau statistik QC dengan mudah.</p>
         </div>
-
         <!-- Stats Cards -->
         <div class="row mb-4">
             <div class="col-md-3">
@@ -635,7 +632,80 @@
                 </div>
             </div>
         </div>
-
+        
+        <!-- QC Form -->
+        <div class="content-card">
+            <h3 class="card-title">
+                <i class="bi bi-clipboard-check"></i>
+                Form QC
+            </h3>
+            <form id="qcForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">ID Item</label>
+                        <input type="text" class="form-control" name="itemId" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Nama Item</label>
+                        <input type="text" class="form-control" name="itemName" required>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status" required>
+                            <option value="">Pilih Status</option>
+                            <option value="layak">Layak</option>
+                            <option value="tidak_layak">Tidak Layak</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Catatan</label>
+                        <textarea class="form-control" name="notes" rows="3" placeholder="Masukkan catatan"></textarea>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Submit QC
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Barang Pending Table -->
+        <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="card-title">
+                    <i class="bi bi-clock"></i>
+                    Barang Pending
+                </h3>
+                <button class="btn btn-success" onclick="refreshPendingItems()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+            
+            <div class="table-container">
+                <table class="table table-hover" id="pendingTable">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>ID</th>
+                            <th>Nama</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingTableBody">
+                        <!-- Data akan dimuat dari JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
         <!-- Filter Section -->
         <div class="content-card">
             <h3 class="card-title">
@@ -676,7 +746,7 @@
                 </div>
             </div>
         </div>
-
+        
         <!-- QC Items Table -->
         <div class="content-card">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -700,11 +770,10 @@
                 <table class="table table-hover" id="qcItemsTable">
                     <thead>
                         <tr>
-                            <th>Kode Item</th>
-                            <th>Nama Item</th>
-                            <th>Status QC</th>
-                            <th>Tanggal Cek</th>
-                            <th>Catatan</th>
+                            <th>Tanggal</th>
+                            <th>ID</th>
+                            <th>Nama</th>
+                            <th>Status</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -715,7 +784,25 @@
             </div>
         </div>
     </main>
-
+    
+    <!-- Detail Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detailModalBody">
+                    <!-- Detail akan dimuat dari JavaScript -->
+                </div>
+                <div class="modal-footer" id="detailModalFooter">
+                    <!-- Footer akan dimuat dari JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- QC Submit Modal -->
     <div class="modal fade" id="qcSubmitModal" tabindex="-1">
         <div class="modal-dialog">
@@ -754,7 +841,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Toast Notifications -->
     <div class="toast-container position-fixed top-0 end-0 p-3">
         <div id="successToast" class="toast" role="alert">
@@ -779,13 +866,37 @@
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Global variables
         let currentQCItems = [];
         const QC_SERVICE_URL = 'http://127.0.0.1:5003';
-
+        const API_URL = 'http://localhost:5004';
+        const INVENTORY_URL = 'http://localhost:5000';
+        const LOGISTICS_URL = 'http://localhost:5001';
+        
+        // Dummy Data
+        const DUMMY_DATA = {
+            pending: [
+                { id: 'INV001', tanggal: '2024-01-15T08:30:00', nama: 'Daging Sapi' },
+                { id: 'INV002', tanggal: '2024-01-15T09:15:00', nama: 'Ayam Potong' },
+                { id: 'INV003', tanggal: '2024-01-15T10:00:00', nama: 'Ikan Salmon' }
+            ],
+            results: [
+                { id: 'INV004', tanggal: '2024-01-14T14:30:00', nama: 'Udang Segar', status: 'layak', processed: false },
+                { id: 'INV005', tanggal: '2024-01-14T15:45:00', nama: 'Tomat Cherry', status: 'tidak_layak', processed: false },
+                { id: 'INV006', tanggal: '2024-01-14T16:20:00', nama: 'Telur Ayam', status: 'layak', processed: true }
+            ],
+            details: {
+                'INV001': { id: 'INV001', tanggal: '2024-01-15T08:30:00', nama: 'Daging Sapi', jumlah: 50, supplier: 'PT Sapi Sehat' },
+                'INV002': { id: 'INV002', tanggal: '2024-01-15T09:15:00', nama: 'Ayam Potong', jumlah: 30, supplier: 'PT Ayam Segar' },
+                'INV003': { id: 'INV003', tanggal: '2024-01-15T10:00:00', nama: 'Ikan Salmon', jumlah: 15, supplier: 'PT Ikan Prima' },
+                'INV004': { id: 'INV004', tanggal: '2024-01-14T14:30:00', nama: 'Udang Segar', status: 'layak', catatan: 'Kondisi segar', processed: false },
+                'INV005': { id: 'INV005', tanggal: '2024-01-14T15:45:00', nama: 'Tomat Cherry', status: 'tidak_layak', catatan: 'Ada bintik hitam', processed: false },
+                'INV006': { id: 'INV006', tanggal: '2024-01-14T16:20:00', nama: 'Telur Ayam', status: 'layak', catatan: 'Kualitas baik', processed: true }
+            }
+        };
+        
         // Authentication check
         function checkAuthentication() {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -823,7 +934,7 @@
                 return false;
             }
         }
-
+        
         // Load user info
         async function loadUserInfo() {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -906,7 +1017,7 @@
                 }
             }
         }
-
+        
         // Logout function
         function logout() {
             if (confirm('Apakah Anda yakin ingin logout?')) {
@@ -919,7 +1030,7 @@
                 window.location.href = '../../user/login.html';
             }
         }
-
+        
         // Toggle sidebar
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -927,7 +1038,7 @@
                 sidebar.classList.toggle('collapsed');
             }
         }
-
+        
         // Toast functions
         function showSuccessToast(message) {
             const toastBody = document.getElementById('successToastBody');
@@ -940,7 +1051,7 @@
                 }
             }
         }
-
+        
         function showErrorToast(message) {
             const toastBody = document.getElementById('errorToastBody');
             if (toastBody) {
@@ -952,7 +1063,16 @@
                 }
             }
         }
-
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            if (type === 'success') {
+                showSuccessToast(message);
+            } else if (type === 'error') {
+                showErrorToast(message);
+            }
+        }
+        
         // Load dashboard stats
         async function loadDashboardStats() {
             try {
@@ -971,27 +1091,43 @@
                 console.error('Error loading dashboard stats:', error);
             }
         }
-
+        
+        // Update pending table
+        async function updatePendingTable() {
+            try {
+                const data = DUMMY_DATA.pending;
+                const tbody = document.getElementById('pendingTableBody');
+                
+                if (!tbody) {
+                    console.error('Pending table body not found');
+                    return;
+                }
+                
+                tbody.innerHTML = data.map(i => `
+                    <tr>
+                        <td>${formatDate(i.tanggal)}</td>
+                        <td>${i.id}</td>
+                        <td>${i.nama}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="showDetail('${i.id}')">
+                                <i class="bi bi-clipboard-check"></i> Periksa
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error updating pending table:', error);
+            }
+        }
+        
         // Load QC items
         async function loadQCItems(filters = {}) {
             try {
                 showLoading(true);
                 
-                const params = new URLSearchParams();
-                if (filters.status) params.append('status', filters.status);
-                if (filters.start_date) params.append('start_date', filters.start_date);
-                if (filters.end_date) params.append('end_date', filters.end_date);
-                if (filters.search) params.append('search', filters.search);
-                
-                const response = await fetch(`${QC_SERVICE_URL}/api/qc/items?${params}`);
-                const items = await response.json();
-                
-                if (response.ok) {
-                    currentQCItems = items;
-                    displayQCItems(items);
-                } else {
-                    throw new Error(items.error || 'Failed to load QC items');
-                }
+                const data = DUMMY_DATA.results;
+                currentQCItems = data;
+                displayQCItems(data);
             } catch (error) {
                 console.error('Error loading QC items:', error);
                 showErrorToast('Gagal memuat data QC: ' + error.message);
@@ -1000,7 +1136,7 @@
                 showLoading(false);
             }
         }
-
+        
         // Display QC items in table
         function displayQCItems(items) {
             const tbody = document.getElementById('qcItemsTableBody');
@@ -1013,115 +1149,177 @@
             if (items.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="text-center">Tidak ada data QC</td>
+                        <td colspan="5" class="text-center">Tidak ada data QC</td>
                     </tr>
                 `;
                 return;
             }
             
-            tbody.innerHTML = items.map(item => `
-                <tr>
-                    <td><strong>${item.item_code}</strong></td>
-                    <td>${item.name}</td>
-                    <td>${getStatusBadge(item.status_text)}</td>
-                    <td>${item.tanggal_masuk || '-'}</td>
-                    <td>${item.notes || '-'}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary" 
-                                onclick="openQCModal('${item.item_code}', '${item.name}', ${item.inventory_log_id})" 
-                                title="Edit QC">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        // Get status badge
-        function getStatusBadge(status) {
-            const statusMap = {
-                'Lulus': 'success',
-                'Gagal': 'danger',
-                'Pending': 'warning'
-            };
-            
-            const color = statusMap[status] || 'secondary';
-            return `<span class="badge bg-${color}">${status}</span>`;
+            tbody.innerHTML = items.map(item => {
+                const statusClass = item.status === 'layak' ? 'success' : 'danger';
+                let actionButton = '';
+                
+                if (!item.processed) {
+                    actionButton = `<button class="btn btn-sm btn-primary" onclick="showDetail('${item.id}')">
+                        <i class="bi bi-gear"></i> Proses
+                    </button>`;
+                } else {
+                    actionButton = `<button class="btn btn-sm btn-secondary" onclick="showDetail('${item.id}')">
+                        <i class="bi bi-info-circle"></i> Detail
+                    </button>`;
+                }
+                
+                return `
+                    <tr>
+                        <td>${formatDate(item.tanggal)}</td>
+                        <td><strong>${item.id}</strong></td>
+                        <td>${item.nama}</td>
+                        <td><span class="badge bg-${statusClass}">${item.status}</span></td>
+                        <td>${actionButton}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // Show loading indicator
         function showLoading(show) {
             const loadingIndicator = document.getElementById('loadingIndicator');
-            const qcItemsTable = document.getElementById('qcItemsTable');
-            
-            if (loadingIndicator && qcItemsTable) {
-                if (show) {
-                    loadingIndicator.style.display = 'block';
-                    qcItemsTable.style.display = 'none';
-                } else {
-                    loadingIndicator.style.display = 'none';
-                    qcItemsTable.style.display = 'table';
-                }
+            if (loadingIndicator) {
+                loadingIndicator.style.display = show ? 'block' : 'none';
             }
         }
-
-        // Filter QC items
-        function filterQCItems() {
-            const filters = {
-                status: document.getElementById('statusFilter').value,
-                start_date: document.getElementById('startDateFilter').value,
-                end_date: document.getElementById('endDateFilter').value,
-                search: document.getElementById('searchFilter').value
-            };
-            
-            loadQCItems(filters);
+        
+        // Format date helper
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
-
-        // Reset filters
-        function resetFilters() {
-            document.getElementById('statusFilter').value = '';
-            document.getElementById('startDateFilter').value = '';
-            document.getElementById('endDateFilter').value = '';
-            document.getElementById('searchFilter').value = '';
-            
-            loadQCItems();
+        
+        // Show item detail - completion of the cut-off function
+        async function showDetail(id) {
+            try {
+                const item = DUMMY_DATA.details[id];
+                if (!item) return;
+                
+                const modalBody = document.getElementById('detailModalBody');
+                const modalFooter = document.getElementById('detailModalFooter');
+                
+                let actionButton = '';
+                if (item.status) {
+                    if (!item.processed) {
+                        actionButton = item.status === 'layak' 
+                            ? `<button class="btn btn-success" onclick="sendToLogistics('${item.id}')">
+                                 <i class="bi bi-truck"></i> Kirim ke Logistik
+                               </button>`
+                            : `<button class="btn btn-warning" onclick="returnToInventory('${item.id}')">
+                                 <i class="bi bi-arrow-clockwise"></i> Kembalikan ke Inventory
+                               </button>`;
+                    } else {
+                        actionButton = '<span class="badge bg-success">Sudah Diproses</span>';
+                    }
+                } else {
+                    actionButton = `<button class="btn btn-primary" onclick="openQCModal('${item.id}')">
+                        <i class="bi bi-clipboard-check"></i> Lakukan QC
+                    </button>`;
+                }
+                
+                modalBody.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>ID Item:</strong>
+                            <p>${item.id}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Nama Item:</strong>
+                            <p>${item.nama}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Tanggal:</strong>
+                            <p>${formatDate(item.tanggal)}</p>
+                        </div>
+                        ${item.jumlah ? `
+                        <div class="col-md-6">
+                            <strong>Jumlah:</strong>
+                            <p>${item.jumlah}</p>
+                        </div>` : ''}
+                    </div>
+                    ${item.supplier ? `
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong>Supplier:</strong>
+                            <p>${item.supplier}</p>
+                        </div>
+                    </div>` : ''}
+                    ${item.status ? `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Status QC:</strong>
+                            <p><span class="badge ${item.status === 'layak' ? 'bg-success' : 'bg-danger'}">${item.status}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Status Proses:</strong>
+                            <p><span class="badge ${item.processed ? 'bg-success' : 'bg-warning'}">${item.processed ? 'Sudah Diproses' : 'Belum Diproses'}</span></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong>Catatan:</strong>
+                            <p>${item.catatan || 'Tidak ada catatan'}</p>
+                        </div>
+                    </div>` : ''}
+                `;
+                
+                modalFooter.innerHTML = `
+                    ${actionButton}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x"></i> Tutup
+                    </button>
+                `;
+                
+                const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+                modal.show();
+                
+            } catch (error) {
+                console.error('Error showing detail:', error);
+                showErrorToast('Gagal menampilkan detail item');
+            }
         }
-
-        // Refresh QC items
-        function refreshQCItems() {
-            const filters = {
-                status: document.getElementById('statusFilter').value,
-                start_date: document.getElementById('startDateFilter').value,
-                end_date: document.getElementById('endDateFilter').value,
-                search: document.getElementById('searchFilter').value
-            };
+        
+        // Open QC modal for pending items
+        function openQCModal(itemId) {
+            const item = DUMMY_DATA.details[itemId];
+            if (!item) return;
             
-            loadQCItems(filters);
-            loadDashboardStats();
-        }
-
-        // Open QC modal
-        function openQCModal(itemCode, itemName, inventoryLogId) {
-            document.getElementById('qcItemCode').value = itemCode;
-            document.getElementById('qcItemName').value = itemName;
-            document.getElementById('qcInventoryLogId').value = inventoryLogId;
+            document.getElementById('qcItemCode').value = item.id;
+            document.getElementById('qcItemName').value = item.nama;
+            document.getElementById('qcInventoryLogId').value = itemId;
             document.getElementById('qcStatus').value = '';
             document.getElementById('qcNotes').value = '';
             
-            const modalEl = document.getElementById('qcSubmitModal');
-            if (modalEl) {
-                const modal = new bootstrap.Modal(modalEl);
-                modal.show();
+            // Close detail modal first
+            const detailModal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
+            if (detailModal) {
+                detailModal.hide();
             }
+            
+            // Show QC modal
+            const qcModal = new bootstrap.Modal(document.getElementById('qcSubmitModal'));
+            qcModal.show();
         }
-
+        
         // Submit QC result
         async function submitQCResult() {
-            const itemCode = document.getElementById('qcItemCode').value;
-            const itemName = document.getElementById('qcItemName').value;
+            const itemId = document.getElementById('qcInventoryLogId').value;
             const status = document.getElementById('qcStatus').value;
             const notes = document.getElementById('qcNotes').value;
-            const inventoryLogId = document.getElementById('qcInventoryLogId').value;
             
             if (!status) {
                 showErrorToast('Status QC harus dipilih');
@@ -1134,54 +1332,258 @@
             }
             
             try {
-                const response = await fetch(`${QC_SERVICE_URL}/api/qc/submit`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        inventory_log_id: parseInt(inventoryLogId),
-                        item_code: itemCode,
-                        name: itemName,
-                        status: status,
-                        notes: notes
-                    })
+                const item = DUMMY_DATA.details[itemId];
+                if (!item) {
+                    showErrorToast('Item tidak ditemukan');
+                    return;
+                }
+                
+                // Update item status
+                item.status = status === 'lulus' ? 'layak' : 'tidak_layak';
+                item.catatan = notes;
+                item.processed = false;
+                
+                // Remove from pending
+                DUMMY_DATA.pending = DUMMY_DATA.pending.filter(i => i.id !== itemId);
+                
+                // Add to results
+                DUMMY_DATA.results.unshift({
+                    id: itemId,
+                    tanggal: item.tanggal,
+                    nama: item.nama,
+                    status: item.status,
+                    processed: false
                 });
                 
-                const result = await response.json();
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('qcSubmitModal'));
+                modal.hide();
                 
-                if (response.ok) {
-                    showSuccessToast(result.message);
-                    
-                    // Close modal
-                    const modalEl = document.getElementById('qcSubmitModal');
-                    if (modalEl) {
-                        const modal = bootstrap.Modal.getInstance(modalEl);
-                        if (modal) modal.hide();
-                    }
-                    
-                    // Refresh data
-                    refreshQCItems();
-                } else {
-                    throw new Error(result.error || 'Failed to submit QC result');
-                }
+                // Refresh tables
+                updatePendingTable();
+                loadQCItems();
+                loadDashboardStats();
+                
+                showSuccessToast('QC berhasil disimpan');
+                
             } catch (error) {
-                console.error('Error submitting QC result:', error);
-                showErrorToast('Gagal submit QC: ' + error.message);
+                console.error('Error submitting QC:', error);
+                showErrorToast('Gagal menyimpan QC');
             }
         }
-
-        // Initialize page
+        
+        // Send item to logistics
+        async function sendToLogistics(id) {
+            try {
+                const item = DUMMY_DATA.details[id];
+                if (!item) return;
+                
+                // Update status processed
+                item.processed = true;
+                const resultItem = DUMMY_DATA.results.find(i => i.id === id);
+                if (resultItem) {
+                    resultItem.processed = true;
+                }
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
+                if (modal) {
+                    modal.hide();
+                }
+                
+                // Refresh table
+                loadQCItems();
+                loadDashboardStats();
+                
+                showSuccessToast(`${item.nama} berhasil dikirim ke layanan logistik`);
+                
+            } catch (error) {
+                console.error('Error sending to logistics:', error);
+                showErrorToast('Gagal mengirim ke layanan logistik');
+            }
+        }
+        
+        // Return item to inventory
+        async function returnToInventory(id) {
+            try {
+                const item = DUMMY_DATA.details[id];
+                if (!item) return;
+                
+                // Update status processed
+                item.processed = true;
+                const resultItem = DUMMY_DATA.results.find(i => i.id === id);
+                if (resultItem) {
+                    resultItem.processed = true;
+                }
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
+                if (modal) {
+                    modal.hide();
+                }
+                
+                // Refresh table
+                loadQCItems();
+                loadDashboardStats();
+                
+                showSuccessToast(`${item.nama} berhasil dikembalikan ke inventory`);
+                
+            } catch (error) {
+                console.error('Error returning to inventory:', error);
+                showErrorToast('Gagal mengembalikan ke inventory');
+            }
+        }
+        
+        // Filter QC items
+        function filterQCItems() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const startDate = document.getElementById('startDateFilter').value;
+            const endDate = document.getElementById('endDateFilter').value;
+            const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
+            
+            let filteredItems = [...DUMMY_DATA.results];
+            
+            // Filter by status
+            if (statusFilter) {
+                if (statusFilter === 'lulus') {
+                    filteredItems = filteredItems.filter(item => item.status === 'layak');
+                } else if (statusFilter === 'gagal') {
+                    filteredItems = filteredItems.filter(item => item.status === 'tidak_layak');
+                } else if (statusFilter === 'pending') {
+                    filteredItems = filteredItems.filter(item => !item.processed);
+                }
+            }
+            
+            // Filter by date range
+            if (startDate) {
+                filteredItems = filteredItems.filter(item => {
+                    const itemDate = new Date(item.tanggal).toISOString().split('T')[0];
+                    return itemDate >= startDate;
+                });
+            }
+            
+            if (endDate) {
+                filteredItems = filteredItems.filter(item => {
+                    const itemDate = new Date(item.tanggal).toISOString().split('T')[0];
+                    return itemDate <= endDate;
+                });
+            }
+            
+            // Filter by search term
+            if (searchTerm) {
+                filteredItems = filteredItems.filter(item => 
+                    item.id.toLowerCase().includes(searchTerm) ||
+                    item.nama.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            displayQCItems(filteredItems);
+        }
+        
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('startDateFilter').value = '';
+            document.getElementById('endDateFilter').value = '';
+            document.getElementById('searchFilter').value = '';
+            
+            loadQCItems();
+        }
+        
+        // Refresh functions
+        function refreshPendingItems() {
+            updatePendingTable();
+            showSuccessToast('Data barang pending berhasil diperbarui');
+        }
+        
+        function refreshQCItems() {
+            loadQCItems();
+            showSuccessToast('Data QC berhasil diperbarui');
+        }
+        
+        // QC Form submission
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded - Starting authentication check');
+            // Check authentication
             if (!checkAuthentication()) {
-                console.log('Authentication failed, stopping execution');
                 return;
             }
             
+            // Load initial data
             loadUserInfo();
             loadDashboardStats();
+            updatePendingTable();
             loadQCItems();
+            
+            // QC Form submission
+            const qcForm = document.getElementById('qcForm');
+            if (qcForm) {
+                qcForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(qcForm);
+                    const data = {
+                        itemId: formData.get('itemId'),
+                        itemName: formData.get('itemName'),
+                        status: formData.get('status'),
+                        notes: formData.get('notes')
+                    };
+                    
+                    if (!data.itemId || !data.itemName || !data.status) {
+                        showErrorToast('Semua field wajib diisi');
+                        return;
+                    }
+                    
+                    try {
+                        // Check if item exists in pending
+                        const pendingItem = DUMMY_DATA.pending.find(item => item.id === data.itemId);
+                        if (!pendingItem) {
+                            showErrorToast('Item tidak ditemukan dalam daftar pending');
+                            return;
+                        }
+                        
+                        // Update item detail
+                        const item = DUMMY_DATA.details[data.itemId];
+                        if (item) {
+                            item.status = data.status;
+                            item.catatan = data.notes;
+                            item.processed = false;
+                        }
+                        
+                        // Remove from pending
+                        DUMMY_DATA.pending = DUMMY_DATA.pending.filter(i => i.id !== data.itemId);
+                        
+                        // Add to results
+                        DUMMY_DATA.results.unshift({
+                            id: data.itemId,
+                            tanggal: item.tanggal,
+                            nama: data.itemName,
+                            status: data.status,
+                            processed: false
+                        });
+                        
+                        // Reset form
+                        qcForm.reset();
+                        
+                        // Refresh tables
+                        updatePendingTable();
+                        loadQCItems();
+                        loadDashboardStats();
+                        
+                        showSuccessToast('QC berhasil disimpan');
+                        
+                    } catch (error) {
+                        console.error('Error submitting QC:', error);
+                        showErrorToast('Gagal menyimpan QC');
+                    }
+                });
+            }
+            
+            // Auto-refresh every 30 seconds
+            setInterval(() => {
+                loadDashboardStats();
+                updatePendingTable();
+                loadQCItems();
+            }, 30000);
         });
     </script>
 </body>
