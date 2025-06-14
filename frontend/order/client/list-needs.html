@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Daftar Kebutuhan</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center;">Daftar Kebutuhan dari API</h2>
+    
+    {% if procurements %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nama Bahan (ingredient_name)</th>
+                <th>Tanggal Order (order_date)</th>
+                <th>Jumlah (quantity_ordered)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in procurements %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.ingredient_name }}</td>
+                <td>{{ item.order_date }}</td>
+                <td>{{ item.quantity_ordered }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align:center;">Tidak ada data kebutuhan yang tersedia.</p>
+    {% endif %}
+</body>
+</html>
