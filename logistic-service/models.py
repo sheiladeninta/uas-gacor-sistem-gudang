@@ -14,6 +14,7 @@ class Shipment(db.Model):
     shipping_service = db.Column(db.String(50))
     weight = db.Column(db.Float)
     shipping_date = db.Column(db.DateTime)
+    tracking_number = db.Column(db.String(50))  # DITAMBAHKAN
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -27,6 +28,7 @@ class Shipment(db.Model):
             'shipping_service': self.shipping_service,
             'weight': self.weight,
             'shipping_date': self.shipping_date.isoformat() if self.shipping_date else None,
+            'tracking_number': self.tracking_number,  # DITAMBAHKAN
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }

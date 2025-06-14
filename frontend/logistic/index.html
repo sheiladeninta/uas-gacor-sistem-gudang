@@ -1,333 +1,477 @@
-{% extends "/layouts/staff-layout.html" %}
-
-{% block title %}Logistic Management{% endblock %}
-
-{% block content %}
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Logistic Management</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-        <li class="breadcrumb-item active">Logistic</li>
-    </ol>
-
-    <!-- Filter Section -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-filter me-1"></i>
-            Filter Shipments
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistic Management - Sistem Gudang Gacor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 70px;
+            --header-height: 70px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; overflow-x: hidden; }
+        /* Seluruh CSS dari staff-layout.html */
+        /* Header */
+        .header { position: fixed; top: 0; left: 0; right: 0; height: var(--header-height); background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white; z-index: 1030; display: flex; align-items: center; padding: 0 20px; box-shadow: 0 4px 20px rgba(52, 152, 219, 0.3); }
+        .header .toggle-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; margin-right: 15px; padding: 8px; border-radius: 8px; transition: all 0.3s; }
+        .header .toggle-btn:hover { background-color: rgba(255,255,255,0.15); transform: scale(1.05); }
+        .header .logo { font-size: 1.6rem; font-weight: bold; margin-right: auto; display: flex; align-items: center; gap: 10px; }
+        .header .logo i { font-size: 1.8rem; }
+        .header .user-info { display: flex; align-items: center; gap: 15px; }
+        .header .user-avatar { width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; border: 2px solid rgba(255,255,255,0.3); }
+        .header .logout-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 8px; border-radius: 8px; transition: all 0.3s; }
+        .header .logout-btn:hover { background-color: var(--accent-color); transform: scale(1.05); }
+        /* Sidebar */
+        .sidebar { position: fixed; top: var(--header-height); left: 0; width: var(--sidebar-width); height: calc(100vh - var(--header-height)); background: white; box-shadow: 4px 0 20px rgba(0,0,0,0.1); transition: all 0.3s ease; z-index: 1020; overflow: hidden; }
+        .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+        .sidebar-content { padding: 20px 0; height: 100%; overflow-y: auto; overflow-x: hidden; }
+        .user-profile { padding: 0 20px 25px; border-bottom: 2px solid #f0f0f0; margin-bottom: 25px; text-align: center; transition: all 0.3s; }
+        .sidebar.collapsed .user-profile { padding: 0 10px 25px; }
+        .user-profile .avatar { width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.8rem; margin: 0 auto 15px; transition: all 0.3s; border: 3px solid #f0f0f0; }
+        .sidebar.collapsed .user-profile .avatar { width: 45px; height: 45px; font-size: 1.3rem; }
+        .user-profile .name { font-weight: bold; color: var(--dark-color); margin-bottom: 8px; font-size: 1.1rem; white-space: nowrap; overflow: hidden; transition: opacity 0.3s; }
+        .user-profile .role { font-size: 0.85rem; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; background: rgba(52, 152, 219, 0.1); padding: 4px 12px; border-radius: 15px; display: inline-block; transition: opacity 0.3s; }
+        .sidebar.collapsed .user-profile .name, .sidebar.collapsed .user-profile .role { opacity: 0; }
+        /* Menu */
+        .menu { list-style: none; padding: 0; }
+        .menu-section { margin-bottom: 20px; }
+        .menu-section-title { font-size: 0.75rem; color: #999; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; padding: 0 20px 10px; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; transition: opacity 0.3s; }
+        .sidebar.collapsed .menu-section-title { opacity: 0; }
+        .menu-item { margin-bottom: 3px; }
+        .menu-link { display: flex; align-items: center; padding: 15px 20px; color: #666; text-decoration: none; transition: all 0.3s; position: relative; border-radius: 0 30px 30px 0; margin-right: 15px; }
+        .sidebar.collapsed .menu-link { padding: 15px 0; justify-content: center; margin-right: 0; border-radius: 0; }
+        .menu-link:hover { background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%); color: var(--primary-color); transform: translateX(8px); }
+        .sidebar.collapsed .menu-link:hover { transform: none; background: rgba(52, 152, 219, 0.1); }
+        .menu-link.active { background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3); }
+        .menu-link.active::after { content: ''; position: absolute; right: -15px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border: 12px solid transparent; border-left-color: var(--secondary-color); }
+        .sidebar.collapsed .menu-link.active::after { display: none; }
+        .menu-icon { font-size: 1.3rem; width: 28px; text-align: center; margin-right: 15px; transition: margin 0.3s; }
+        .sidebar.collapsed .menu-icon { margin-right: 0; }
+        .menu-text { white-space: nowrap; overflow: hidden; transition: opacity 0.3s; font-weight: 500; }
+        .sidebar.collapsed .menu-text { opacity: 0; width: 0; }
+        .badge-notification { background: var(--accent-color); color: white; font-size: 0.7rem; padding: 3px 7px; border-radius: 12px; margin-left: auto; font-weight: 600; transition: opacity 0.3s; }
+        .sidebar.collapsed .badge-notification { opacity: 0; }
+        /* Main Content */
+        .main-content { margin-left: var(--sidebar-width); margin-top: var(--header-height); padding: 30px; transition: margin-left 0.3s ease; min-height: calc(100vh - var(--header-height)); }
+        .sidebar.collapsed + .main-content { margin-left: var(--sidebar-collapsed-width); }
+        /* Content Cards */
+        .content-card { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); margin-bottom: 30px; border: 1px solid rgba(52, 152, 219, 0.1); }
+        .card-title { color: var(--dark-color); font-size: 1.6rem; font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .card-title i { color: var(--primary-color); }
+        /* Stats Cards */
+        .stats-card { background: white; border-radius: 15px; padding: 25px; text-align: center; box-shadow: 0 8px 25px rgba(0,0,0,0.08); border: 1px solid rgba(52, 152, 219, 0.1); transition: transform 0.3s, box-shadow 0.3s; }
+        .stats-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
+        .stats-icon { font-size: 3rem; margin-bottom: 15px; }
+        .stats-value { font-size: 2.2rem; font-weight: bold; margin-bottom: 8px; }
+        .stats-label { color: #666; font-weight: 500; }
+        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); width: var(--sidebar-width); } .sidebar.show { transform: translateX(0); } .main-content { margin-left: 0; } .sidebar.collapsed + .main-content { margin-left: 0; } .header .logo { font-size: 1.3rem; } .header .user-info span { display: none; } }
+        .sidebar-content::-webkit-scrollbar { width: 6px; }
+        .sidebar-content::-webkit-scrollbar-track { background: #f8f9fa; }
+        .sidebar-content::-webkit-scrollbar-thumb { background: rgba(52, 152, 219, 0.3); border-radius: 3px; }
+        .sidebar-content::-webkit-scrollbar-thumb:hover { background: rgba(52, 152, 219, 0.5); }
+        /* Tambahan untuk modal struk agar serasi */
+        .modal-content { border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); border: 1px solid rgba(52, 152, 219, 0.1); }
+        .modal-header { border-bottom: 1px solid #f0f0f0; }
+        .modal-footer { border-top: 1px solid #f0f0f0; }
+        @media print { body * { visibility: hidden !important; } #receiptModal, #receiptModal * { visibility: visible !important; } #receiptModal { position: absolute !important; left: 0; top: 0; width: 100vw !important; height: auto !important; background: white !important; box-shadow: 0 0 8px #888 !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 9999 !important; } #receiptModal .modal-dialog { margin: 0 auto !important; max-width: 500px !important; } #receiptModal .modal-content { border: 1px solid #ccc !important; border-radius: 12px !important; box-shadow: 0 0 8px #888 !important; padding: 24px !important; background: white !important; } #receiptModal .modal-header, #receiptModal .modal-footer, .btn, .btn-close { display: none !important; } }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <button class="toggle-btn" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="logo">
+            <i class="bi bi-boxes"></i>
+            <span>Sistem Gudang Gacor</span>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    <select class="form-select" id="statusFilter">
-                        <option value="">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-primary" onclick="filterShipments()">Apply Filter</button>
-                </div>
+        <div class="user-info">
+            <span id="userName">Admin Staff</span>
+            <div class="user-avatar">
+                <i class="bi bi-person-badge"></i>
             </div>
+            <button class="logout-btn" onclick="logout()" title="Logout">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
         </div>
-    </div>
-
-    <!-- Shipments Table -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-table me-1"></i>
-            Shipments List
+    </header>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="name" id="profileName">Admin Staff</div>
+                <div class="role">STAFF ADMINISTRATOR</div>
+            </div>
+            <ul class="menu">
+                <div class="menu-section">
+                    <div class="menu-section-title">UTAMA</div>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-speedometer2"></i>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                    </li>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">OPERASIONAL</div>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-clipboard-check"></i>
+                            <span class="menu-text">Manajemen Order</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-boxes"></i>
+                            <span class="menu-text">Manajemen Inventory</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-shield-check"></i>
+                            <span class="menu-text">Quality Control</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link active">
+                            <i class="menu-icon bi-truck"></i>
+                            <span class="menu-text">Logistic</span>
+                        </a>
+                    </li>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">SISTEM</div>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-people"></i>
+                            <span class="menu-text">Manajemen User</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-gear"></i>
+                            <span class="menu-text">Pengaturan</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" style="margin-top: 20px; border-top: 1px solid #f0f0f0; padding-top: 15px;">
+                        <a href="#" class="menu-link" onclick="logout()">
+                            <i class="menu-icon bi-box-arrow-right"></i>
+                            <span class="menu-text">Logout</span>
+                        </a>
+                    </li>
+                </div>
+            </ul>
         </div>
-        <div class="card-body">
-            <table id="shipmentsTable" class="table table-striped">
-                <thead>
+    </nav>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-card">
+            <h1 class="mb-4">Daftar QC Approved</h1>
+            <table class="table table-bordered" id="qc-table">
+                <thead class="table-light">
                     <tr>
                         <th>ID</th>
-                        <th>Order ID</th>
-                        <th>QC ID</th>
+                        <th>Inventory Log ID</th>
+                        <th>Item Code</th>
+                        <th>Name</th>
                         <th>Status</th>
-                        <th>Shipping Address</th>
-                        <th>Shipping Service</th>
-                        <th>Weight (kg)</th>
-                        <th>Actions</th>
+                        <th>Notes</th>
+                        <th>Checked At</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
-                <tbody id="shipmentsTableBody">
-                    <!-- Data will be populated by JavaScript -->
+                <tbody>
+                    <!-- Baris data akan dimasukkan lewat JavaScript -->
                 </tbody>
             </table>
+            <div id="loading" class="text-center text-muted">Mengambil data QC...</div>
+            <div id="error" class="text-danger d-none">Gagal mengambil data QC.</div>
         </div>
-    </div>
-
-    <!-- Create Shipment Modal -->
-    <div class="modal fade" id="createShipmentModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create New Shipment</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="createShipmentForm">
-                        <div class="mb-3">
-                            <label class="form-label">QC ID</label>
-                            <input type="number" class="form-control" name="qc_id" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Order ID</label>
-                            <input type="number" class="form-control" name="order_id" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Shipping Address</label>
-                            <textarea class="form-control" name="shipping_address" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Shipping Service</label>
-                            <select class="form-select" name="shipping_service" required>
-                                <option value="JNE">JNE</option>
-                                <option value="SiCepat">SiCepat</option>
-                                <option value="J&T">J&T</option>
-                                <option value="GoSend">GoSend</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Weight (kg)</label>
-                            <input type="number" step="0.01" class="form-control" name="weight" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="createShipment()">Create</button>
-                </div>
+        <div class="content-card mt-4">
+            <!-- Form Pengiriman -->
+            <div id="shipment-form-section" class="d-none">
+                <h2>Form Pengiriman</h2>
+                <form id="shipment-form">
+                    <div class="mb-3">
+                        <label for="shipping_address" class="form-label">Alamat Perusahaan/Restoran</label>
+                        <input type="text" class="form-control" id="shipping_address" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="weight" class="form-label">Berat Barang (kg)</label>
+                        <input type="number" class="form-control" id="weight" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="shipping_service" class="form-label">Jasa Pengiriman</label>
+                        <input type="text" class="form-control" id="shipping_service" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Kirim Barang</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-shipment">Batal</button>
+                </form>
             </div>
         </div>
-    </div>
-
-    <!-- Receipt Modal -->
-    <div class="modal fade" id="receiptModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Shipping Receipt</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="receiptContent">
-                    <!-- Receipt content will be populated by JavaScript -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="printReceipt()">Print</button>
-                </div>
+        <div class="content-card mt-4">
+            <!-- Tabel Daftar Pengiriman -->
+            <h2>Daftar Pengiriman</h2>
+            <div class="mb-2">
+                <label for="filter-status" class="form-label">Filter Status:</label>
+                <select id="filter-status" class="form-select" style="width:auto;display:inline-block">
+                    <option value="">Semua</option>
+                    <option value="pending">Belum Dikirim</option>
+                    <option value="shipped">Sudah Dikirim</option>
+                </select>
             </div>
+            <table class="table table-bordered" id="shipment-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>QC ID</th>
+                        <th>Order ID</th>
+                        <th>Alamat</th>
+                        <th>Jasa Pengiriman</th>
+                        <th>Berat</th>
+                        <th>Status</th>
+                        <th>Tanggal Kirim</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Baris pengiriman -->
+                </tbody>
+            </table>
+            <div id="shipment-loading" class="text-center text-muted">Mengambil data pengiriman...</div>
+            <div id="shipment-error" class="text-danger d-none">Gagal mengambil data pengiriman.</div>
         </div>
     </div>
-</div>
-{% endblock %}
+    <!-- Modal/Section Cetak Struk -->
+    <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="receiptModalLabel">Struk Pengiriman</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="receipt-content">
+            <!-- Isi struk -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <button type="button" class="btn btn-primary" onclick="window.print()">Cetak</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Helper untuk ambil token JWT
+        function getAuthHeaders(isJson = true) {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const headers = {};
+            if (isJson) headers['Content-Type'] = 'application/json';
+            if (token) headers['Authorization'] = 'Bearer ' + token;
+            return headers;
+        }
+        let selectedQcId = null;
+        let selectedOrderId = null;
+        document.addEventListener("DOMContentLoaded", function() {
+            const tableBody = document.querySelector("#qc-table tbody");
+            const loading = document.getElementById("loading");
+            const errorMsg = document.getElementById("error");
+            fetch("http://localhost:5003/api/qc/items?status=approved")
+                .then(response => {
+                    if (!response.ok) throw new Error("Gagal fetch data");
+                    return response.json();
+                })
+                .then(data => {
+                    loading.style.display = "none";
+                    if (data.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="8" class="text-center">Tidak ada QC approved</td></tr>`;
+                        return;
+                    }
+                    data.forEach(qc => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${qc.id}</td>
+                            <td>${qc.inventory_log_id}</td>
+                            <td>${qc.item_code}</td>
+                            <td>${qc.name}</td>
+                            <td>${qc.status}</td>
+                            <td>${qc.notes || ''}</td>
+                            <td>${qc.checked_at ? new Date(qc.checked_at).toLocaleString() : ''}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" onclick="pilihQC(${qc.id}, null)">Pilih</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(err => {
+                    loading.style.display = "none";
+                    errorMsg.classList.remove("d-none");
+                    console.error("Fetch QC error:", err);
+                });
+            // Load shipment table
+            loadShipments();
+            document.getElementById('filter-status').addEventListener('change', loadShipments);
+        });
 
-{% block scripts %}
-<script>
-    // Fetch and display shipments
-    function loadShipments(status = '') {
-        const url = status ? `/api/shipments?status=${status}` : '/api/shipments';
-        fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+        function pilihQC(qcId, orderId) {
+            selectedQcId = qcId;
+            selectedOrderId = orderId;
+            document.getElementById('shipment-form-section').classList.remove('d-none');
+        }
+
+        document.getElementById('cancel-shipment').onclick = function() {
+            document.getElementById('shipment-form-section').classList.add('d-none');
+            selectedQcId = null;
+            selectedOrderId = null;
+        };
+
+        document.getElementById('shipment-form').onsubmit = function(e) {
+            e.preventDefault();
+            const shipping_address = document.getElementById('shipping_address').value.trim();
+            const weight = parseFloat(document.getElementById('weight').value);
+            const shipping_service = document.getElementById('shipping_service').value.trim();
+            if (!selectedQcId) {
+                alert('Pilih QC terlebih dahulu!');
+                return;
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const tbody = document.getElementById('shipmentsTableBody');
-            tbody.innerHTML = '';
-            
-            data.forEach(shipment => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${shipment.id}</td>
-                    <td>${shipment.order_id}</td>
-                    <td>${shipment.qc_id}</td>
-                    <td><span class="badge bg-${getStatusBadgeColor(shipment.status)}">${shipment.status}</span></td>
-                    <td>${shipment.shipping_address}</td>
-                    <td>${shipment.shipping_service}</td>
-                    <td>${shipment.weight}</td>
-                    <td>
-                        ${getActionButtons(shipment)}
-                    </td>
-                `;
-                tbody.appendChild(tr);
+            if (!shipping_address || !shipping_service || isNaN(weight) || weight <= 0) {
+                alert('Semua field harus diisi dengan benar!');
+                return;
+            }
+            // order_id harus integer dan tidak boleh 0
+            const order_id = selectedOrderId && Number.isInteger(selectedOrderId) && selectedOrderId > 0 ? selectedOrderId : 1;
+            const payload = {
+                qc_id: selectedQcId,
+                order_id: order_id,
+                shipping_address: shipping_address,
+                shipping_service: shipping_service,
+                weight: weight
+            };
+            fetch('http://localhost:5001/api/shipments', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            })
+            .then(async res => {
+                let data;
+                try { data = await res.json(); } catch { data = {}; }
+                if (!res.ok) {
+                    alert('Gagal membuat pengiriman: ' + (data.error || res.statusText));
+                    return;
+                }
+                alert('Pengiriman berhasil dibuat!');
+                document.getElementById('shipment-form-section').classList.add('d-none');
+                loadShipments();
+            })
+            .catch(err => alert('Gagal membuat pengiriman: ' + err));
+        };
+
+        function loadShipments() {
+            const status = document.getElementById('filter-status').value;
+            const shipmentBody = document.querySelector('#shipment-table tbody');
+            const loading = document.getElementById('shipment-loading');
+            const errorMsg = document.getElementById('shipment-error');
+            shipmentBody.innerHTML = '';
+            loading.style.display = '';
+            errorMsg.classList.add('d-none');
+            let url = 'http://localhost:5001/api/shipments';
+            if (status) url += '?status=' + status;
+            fetch(url, {
+                headers: getAuthHeaders(false)
+            })
+            .then(res => res.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (!Array.isArray(data) || data.length === 0) {
+                    shipmentBody.innerHTML = `<tr><td colspan="9" class="text-center">Tidak ada data pengiriman</td></tr>`;
+                    return;
+                }
+                data.forEach(shipment => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${shipment.id}</td>
+                        <td>${shipment.qc_id}</td>
+                        <td>${shipment.order_id}</td>
+                        <td>${shipment.shipping_address}</td>
+                        <td>${shipment.shipping_service}</td>
+                        <td>${shipment.weight}</td>
+                        <td>${shipment.status}</td>
+                        <td>${shipment.shipping_date ? new Date(shipment.shipping_date).toLocaleString() : ''}</td>
+                        <td>
+                            ${shipment.status === 'pending' ? `<button class='btn btn-success btn-sm' onclick='kirimBarang(${shipment.id})'>Kirim</button>` : ''}
+                            ${shipment.status === 'shipped' || shipment.status === 'delivered' ? `<button class='btn btn-info btn-sm' onclick='cetakStruk(${shipment.id})'>Cetak Struk</button>` : ''}
+                        </td>
+                    `;
+                    shipmentBody.appendChild(row);
+                });
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                errorMsg.classList.remove('d-none');
+                console.error('Fetch shipment error:', err);
             });
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    // Filter shipments
-    function filterShipments() {
-        const status = document.getElementById('statusFilter').value;
-        loadShipments(status);
-    }
-
-    // Create new shipment
-    function createShipment() {
-        const form = document.getElementById('createShipmentForm');
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-
-        fetch('/api/shipments', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                $('#createShipmentModal').modal('hide');
-                loadShipments();
-                form.reset();
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    // Ship order
-    function shipOrder(id) {
-        fetch(`/api/shipments/${id}/ship`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                loadShipments();
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    // Mark as delivered
-    function markAsDelivered(id) {
-        fetch(`/api/shipments/${id}/deliver`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                loadShipments();
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    // Get receipt
-    function getReceipt(id) {
-        fetch(`/api/shipments/${id}/receipt`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                displayReceipt(data);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    // Display receipt in modal
-    function displayReceipt(data) {
-        const receiptContent = document.getElementById('receiptContent');
-        receiptContent.innerHTML = `
-            <div class="receipt">
-                <h4 class="text-center mb-4">Shipping Receipt</h4>
-                <div class="row mb-3">
-                    <div class="col-6">
-                        <p><strong>Shipping Date:</strong> ${data.shipping_date || 'Not shipped yet'}</p>
-                        <p><strong>Status:</strong> ${data.status}</p>
-                        <p><strong>Shipping Service:</strong> ${data.shipping_service}</p>
-                    </div>
-                    <div class="col-6">
-                        <p><strong>Weight:</strong> ${data.weight} kg</p>
-                        <p><strong>Shipping Address:</strong> ${data.shipping_address}</p>
-                    </div>
-                </div>
-                <div class="order-details mt-4">
-                    <h5>Order Details</h5>
-                    <pre>${JSON.stringify(data.order_details, null, 2)}</pre>
-                </div>
-            </div>
-        `;
-        $('#receiptModal').modal('show');
-    }
-
-    // Print receipt
-    function printReceipt() {
-        const receiptContent = document.getElementById('receiptContent').innerHTML;
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Shipping Receipt</title>
-                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-                </head>
-                <body>
-                    ${receiptContent}
-                    <script>
-                        window.onload = function() {
-                            window.print();
-                            window.onafterprint = function() {
-                                window.close();
-                            };
-                        };
-                    </script>
-                </body>
-            </html>
-        `);
-    }
-
-    // Helper functions
-    function getStatusBadgeColor(status) {
-        switch (status) {
-            case 'pending': return 'warning';
-            case 'shipped': return 'info';
-            case 'delivered': return 'success';
-            default: return 'secondary';
-        }
-    }
-
-    function getActionButtons(shipment) {
-        let buttons = '';
-
-        if (shipment.status === 'pending') {
-            buttons += `<button class="btn btn-sm btn-primary me-1" onclick="shipOrder(${shipment.id})">Ship</button>`;
-        }
-        if (shipment.status === 'shipped') {
-            buttons += `<button class="btn btn-sm btn-success me-1" onclick="markAsDelivered(${shipment.id})">Deliver</button>`;
         }
 
-        buttons += `<button class="btn btn-sm btn-secondary" onclick="getReceipt(${shipment.id})">Receipt</button>`;
-        return buttons;
-    }
+        function kirimBarang(id) {
+            if (!confirm('Kirim barang ini?')) return;
+            fetch(`http://localhost:5001/api/shipments/${id}/ship`, {
+                method: 'POST',
+                headers: getAuthHeaders(false)
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.error) {
+                    alert('Gagal mengirim barang: ' + res.error);
+                } else {
+                    alert('Barang berhasil dikirim!');
+                    loadShipments();
+                }
+            })
+            .catch(err => alert('Gagal mengirim barang: ' + err));
+        }
 
-    // Load shipments on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        loadShipments();
-    });
-</script>
-{% endblock %}
+        function cetakStruk(id) {
+            fetch(`http://localhost:5001/api/shipments/${id}/receipt`, {
+                headers: getAuthHeaders(false)
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.error) {
+                    alert('Gagal mengambil struk: ' + res.error);
+                } else {
+                    // Hanya tampilkan info pengiriman, tanpa detail order
+                    const content = `
+                        <h4 class="mb-3">Struk Pengiriman</h4>
+                        <div style="font-size:1.1em">
+                            <b>No. Resi:</b> ${res.tracking_number || '-'}<br>
+                            <b>Tanggal Kirim:</b> ${res.shipping_date ? new Date(res.shipping_date).toLocaleString() : '-'}<br>
+                            <b>Alamat:</b> ${res.shipping_address}<br>
+                            <b>Jasa Pengiriman:</b> ${res.shipping_service}<br>
+                            <b>Berat:</b> ${res.weight} kg<br>
+                            <b>Status:</b> ${res.status}<br>
+                        </div>
+                    `;
+                    document.getElementById('receipt-content').innerHTML = content;
+                    const modal = new bootstrap.Modal(document.getElementById('receiptModal'));
+                    modal.show();
+                }
+            })
+            .catch(err => alert('Gagal mengambil struk: ' + err));
+        }
+    </script>
+</body>
+</html>
