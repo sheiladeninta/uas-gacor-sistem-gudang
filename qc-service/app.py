@@ -190,5 +190,14 @@ def list_qc_items():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/qc/<int:qc_id>', methods=['GET'])
+def get_qc_by_id(qc_id):
+    """Get QC result by ID"""
+    qc_item = QualityControl.query.get(qc_id)
+    if not qc_item:
+        return jsonify({'error': 'QC item not found'}), 404
+
+    return jsonify(qc_item.to_dict()), 200
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5003, debug=True)
