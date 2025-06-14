@@ -1,755 +1,1643 @@
-{% extends "/layouts/staff-layout.html" %}
-
-{% block title %}Inventory Management{% endblock %}
-
-{% block content %}
-<!-- Main Content -->
-<div class="main-content">
-    <!-- Page Header -->
-    <div class="content-card">
-        <div class="card-title">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Inventory - Staff Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+        <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 70px;
+            --header-height: 70px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+        }
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 4px 20px rgba(52, 152, 219, 0.3);
+        }
+        .header .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 15px;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .header .toggle-btn:hover {
+            background-color: rgba(255,255,255,0.15);
+            transform: scale(1.05);
+        }
+        .header .logo {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-right: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header .logo i {
+            font-size: 1.8rem;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .header .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .header .logout-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .header .logout-btn:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.05);
+        }
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height));
+            background: white;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 1020;
+            overflow: hidden;
+        }
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+        .sidebar-content {
+            padding: 20px 0;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .user-profile {
+            padding: 0 20px 25px;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed .user-profile {
+            padding: 0 10px 25px;
+        }
+        .user-profile .avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            margin: 0 auto 15px;
+            transition: all 0.3s;
+            border: 3px solid #f0f0f0;
+        }
+        .sidebar.collapsed .user-profile .avatar {
+            width: 45px;
+            height: 45px;
+            font-size: 1.3rem;
+        }
+        .user-profile .name {
+            font-weight: bold;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.3s;
+        }
+        .user-profile .role {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            background: rgba(52, 152, 219, 0.1);
+            padding: 4px 12px;
+            border-radius: 15px;
+            display: inline-block;
+            transition: opacity 0.3s;
+        }
+        .sidebar.collapsed .user-profile .name,
+        .sidebar.collapsed .user-profile .role {
+            opacity: 0;
+        }
+        /* Menu */
+        .menu {
+            list-style: none;
+            padding: 0;
+        }
+        .menu-section {
+            margin-bottom: 20px;
+        }
+        .menu-section-title {
+            font-size: 0.75rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 0 20px 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: opacity 0.3s;
+        }
+        .sidebar.collapsed .menu-section-title {
+            opacity: 0;
+        }
+        .menu-item {
+            margin-bottom: 3px;
+        }
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+            border-radius: 0 30px 30px 0;
+            margin-right: 15px;
+        }
+        .sidebar.collapsed .menu-link {
+            padding: 15px 0;
+            justify-content: center;
+            margin-right: 0;
+            border-radius: 0;
+        }
+        .menu-link:hover {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%);
+            color: var(--primary-color);
+            transform: translateX(8px);
+        }
+        .sidebar.collapsed .menu-link:hover {
+            transform: none;
+            background: rgba(52, 152, 219, 0.1);
+        }
+        .menu-link.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        .menu-link.active::after {
+            content: '';
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border: 12px solid transparent;
+            border-left-color: var(--secondary-color);
+        }
+        .sidebar.collapsed .menu-link.active::after {
+            display: none;
+        }
+        .menu-icon {
+            font-size: 1.3rem;
+            width: 28px;
+            text-align: center;
+            margin-right: 15px;
+            transition: margin 0.3s;
+        }
+        .sidebar.collapsed .menu-icon {
+            margin-right: 0;
+        }
+        .menu-text {
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.3s;
+            font-weight: 500;
+        }
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            width: 0;
+        }
+        .badge-notification {
+            background: var(--accent-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 7px;
+            border-radius: 12px;
+            margin-left: auto;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+        .sidebar.collapsed .badge-notification {
+            opacity: 0;
+        }
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+            min-height: calc(100vh - var(--header-height));
+        }
+        .sidebar.collapsed + .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+        /* Content Cards */
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            border: 1px solid rgba(52, 152, 219, 0.1);
+        }
+        .card-title {
+            color: var(--dark-color);
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title i {
+            color: var(--primary-color);
+        }
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(52, 152, 219, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        .stats-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .stats-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .stats-label {
+            color: #666;
+            font-weight: 500;
+        }
+        /* Quick Actions */
+        .quick-action {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(52, 152, 219, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+        }
+        .quick-action:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .quick-action i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        .quick-action h5 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .quick-action p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+        .welcome-section h2 {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .welcome-section p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        /* Recent Orders Table */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .table {
+            margin: 0;
+        }
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 15px;
+        }
+        .table tbody td {
+            padding: 15px;
+            border-color: #f0f0f0;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-processing {
+            background-color: #cff4fc;
+            color: #087990;
+        }
+        .status-shipped {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: var(--sidebar-width);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .sidebar.collapsed + .main-content {
+                margin-left: 0;
+            }
+            .header .logo {
+                font-size: 1.3rem;
+            }
+            .header .user-info span {
+                display: none;
+            }
+            .stats-card {
+                margin-bottom: 20px;
+            }
+            .quick-action {
+                margin-bottom: 20px;
+            }
+        }
+        /* Custom Scrollbar */
+        .sidebar-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar-content::-webkit-scrollbar-track {
+            background: #f8f9fa;
+        }
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: rgba(52, 152, 219, 0.3);
+            border-radius: 3px;
+        }
+        .sidebar-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(52, 152, 219, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <button class="toggle-btn" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="logo">
             <i class="bi bi-boxes"></i>
-            Manajemen Inventory
+            <span>Sistem Gudang Gacor</span>
         </div>
-        <p class="text-muted">Kelola data barang dan stok inventory Anda</p>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="content-card">
-        <div class="d-flex gap-3 mb-3">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
-                <i class="bi bi-plus-circle"></i> Tambah Item Baru
-            </button>
-            <button class="btn btn-info" onclick="refreshItems()">
-                <i class="bi bi-arrow-clockwise"></i> Refresh Data
-            </button>
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#sendToQCModal">
-                <i class="bi bi-send"></i> Kirim ke QC
+        <div class="user-info">
+            <span id="userName"></span>
+            <div class="user-avatar">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <button class="logout-btn" onclick="logout()" title="Logout">
+                <i class="bi bi-box-arrow-right"></i>
             </button>
         </div>
-    </div>
+    </header>
 
-    <!-- Items Table -->
-    <div class="content-card">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="mb-0">Daftar Item Inventory</h5>
-            <div class="d-flex gap-2">
-                <input type="text" class="form-control" id="searchInput" placeholder="Cari item..." style="width: 250px;">
-                <select class="form-select" id="categoryFilter" style="width: 150px;">
-                    <option value="">Semua Kategori</option>
-                </select>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="name" id="profileName">Admin Staff</div>
+                <div class="role">STAFF ADMINISTRATOR</div>
+            </div>
+            <ul class="menu">
+                <div class="menu-section">
+                    <div class="menu-section-title">UTAMA</div>
+                    <li class="menu-item">
+                        <a href="../../user/staff/dashboard.html" class="menu-link">
+                            <i class="menu-icon bi-speedometer2"></i>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                    </li>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">OPERASIONAL</div>
+                    <li class="menu-item">
+                        <a href="../../order/staff/manage-order.html" class="menu-link">
+                            <i class="menu-icon bi-clipboard-check"></i>
+                            <span class="menu-text">Manajemen Order</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="../inventory/manage-inventory.html" class="menu-link active">
+                            <i class="menu-icon bi-boxes"></i>
+                            <span class="menu-text">Manajemen Inventory</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-shield-check"></i>
+                            <span class="menu-text">Quality Control</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-truck"></i>
+                            <span class="menu-text">Logistic</span>
+                        </a>
+                    </li>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">SISTEM</div>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-people"></i>
+                            <span class="menu-text">Manajemen User</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-gear"></i>
+                            <span class="menu-text">Pengaturan</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" style="margin-top: 20px; border-top: 1px solid #f0f0f0; padding-top: 15px;">
+                        <a href="#" class="menu-link" onclick="logout()">
+                            <i class="menu-icon bi-box-array-right"></i>
+                            <span class="menu-text">Logout</span>
+                        </a>
+                    </li>
+                </div>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h2>Manajemen Inventory, <span id="welcomeName"></span>!</h2>
+            <p>Kelola stok barang, tambah item baru, dan update informasi inventory dengan mudah.</p>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="content-card">
+            <h3 class="card-title">
+                <i class="bi bi-funnel"></i>
+                Filter Inventory
+            </h3>
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">Kategori</label>
+                    <select class="form-select" id="categoryFilter">
+                        <option value="">Semua Kategori</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Kode Item</label>
+                    <input type="text" class="form-control" id="itemCodeFilter" placeholder="Masukkan kode item">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Nama Item</label>
+                    <input type="text" class="form-control" id="itemNameFilter" placeholder="Masukkan nama item">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" onclick="filterItems()">
+                            <i class="bi bi-search"></i> Filter
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetFilters()">
+                            <i class="bi bi-arrow-clockwise"></i> Reset
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead class="table-primary">
-                    <tr>
-                        <th>Kode Item</th>
-                        <th>Nama Item</th>
-                        <th>Kategori</th>
-                        <th>Unit</th>
-                        <th>Harga Unit</th>
-                        <th>Stok</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="itemsTableBody">
-                    <tr>
-                        <td colspan="8" class="text-center">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
 
-    <!-- QC Logs -->
-    <div class="content-card">
-        <h5 class="mb-4">Log Pengiriman ke QC</h5>
-        <div class="table-responsive">
-            <table class="table table-sm">
-                <thead class="table-info">
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Kode Item</th>
-                        <th>Nama Item</th>
-                        <th>Jumlah</th>
-                        <th>Waktu Kirim</th>
-                    </tr>
-                </thead>
-                <tbody id="qcLogsTableBody">
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">Belum ada data</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Add Item Modal -->
-<div class="modal fade" id="addItemModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Tambah Item Baru</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <!-- Inventory Table -->
+        <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="card-title">
+                    <i class="bi bi-boxes"></i>
+                    Daftar Inventory
+                </h3>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-success" onclick="openAddItemModal()">
+                        <i class="bi bi-plus-circle"></i> Tambah Item
+                    </button>
+                    <button class="btn btn-info" onclick="refreshItems()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </div>
             </div>
-            <div class="modal-body">
-                <form id="addItemForm">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Kode Item *</label>
-                                <input type="text" class="form-control" id="itemCode" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Nama Item *</label>
-                                <input type="text" class="form-control" id="itemName" required>
-                            </div>
-                        </div>
+            
+            <div class="table-container">
+                <div id="loadingIndicator" class="text-center p-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">Kategori</label>
-                                <input type="text" class="form-control" id="itemCategory" placeholder="Contoh: Electronics">
+                    <p class="mt-2">Memuat data inventory...</p>
+                </div>
+                
+                <table class="table table-hover" id="inventoryTable">
+                    <thead>
+                        <tr>
+                            <th>Kode Item</th>
+                            <th>Nama Item</th>
+                            <th>Kategori</th>
+                            <th>Stok</th>
+                            <th>Unit</th>
+                            <th>Harga</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                        <!-- Data akan dimuat dari JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Item Modal -->
+    <div class="modal fade" id="itemModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="itemModalTitle">Tambah Item Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="itemForm">
+                        <div class="mb-3">
+                            <label class="form-label">Kode Item</label>
+                            <input type="text" class="form-control" id="itemCode" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nama Item</label>
+                            <input type="text" class="form-control" id="itemName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kategori</label>
+                            <input type="text" class="form-control" id="itemCategory">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Deskripsi</label>
+                            <textarea class="form-control" id="itemDescription" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Stok Awal</label>
+                                    <input type="number" class="form-control" id="itemStock" min="0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Unit</label>
+                                    <input type="text" class="form-control" id="itemUnit" placeholder="pcs, kg, liter, dll">
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">Unit</label>
-                                <select class="form-select" id="itemUnit">
-                                    <option value="pcs">Pcs</option>
-                                    <option value="kg">Kg</option>
-                                    <option value="liter">Liter</option>
-                                    <option value="meter">Meter</option>
-                                    <option value="box">Box</option>
-                                </select>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Harga Satuan</label>
+                            <input type="number" class="form-control" id="itemPrice" step="0.01" min="0">
                         </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">Harga Unit</label>
-                                <input type="number" class="form-control" id="itemPrice" step="0.01" min="0">
-                            </div>
-                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveItem()">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Item Detail Modal -->
+    <div class="modal fade" id="itemDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="itemDetailContent">
+                        <!-- Content akan dimuat dari JavaScript -->
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Stok Awal *</label>
-                                <input type="number" class="form-control" id="itemStock" required min="0">
-                            </div>
-                        </div>
-                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send to QC Modal -->
+    <div class="modal fade" id="sendToQCModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Kirim ke Quality Control</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Deskripsi</label>
-                        <textarea class="form-control" id="itemDescription" rows="3"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" onclick="addItem()">Simpan Item</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Update Item Modal -->
-<div class="modal fade" id="updateItemModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Update Item</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="updateItemForm">
-                    <input type="hidden" id="updateItemCode">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Kode Item</label>
-                                <input type="text" class="form-control" id="updateItemCodeDisplay" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Nama Item</label>
-                                <input type="text" class="form-control" id="updateItemName">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">Kategori</label>
-                                <input type="text" class="form-control" id="updateItemCategory">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">Unit</label>
-                                <select class="form-select" id="updateItemUnit">
-                                    <option value="pcs">Pcs</option>
-                                    <option value="kg">Kg</option>
-                                    <option value="liter">Liter</option>
-                                    <option value="meter">Meter</option>
-                                    <option value="box">Box</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">Harga Unit</label>
-                                <input type="number" class="form-control" id="updateItemPrice" step="0.01" min="0">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Stok</label>
-                                <input type="number" class="form-control" id="updateItemStock" min="0">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Deskripsi</label>
-                        <textarea class="form-control" id="updateItemDescription" rows="3"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" onclick="updateItem()">Update Item</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Send to QC Modal -->
-<div class="modal fade" id="sendToQCModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Kirim Item ke QC</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="sendToQCForm">
-                    <div class="mb-3">
-                        <label class="form-label">Order ID *</label>
+                        <label class="form-label">Order ID</label>
                         <input type="number" class="form-control" id="qcOrderId" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Item *</label>
-                        <select class="form-select" id="qcItemSelect" required>
-                            <option value="">Pilih Item...</option>
-                        </select>
+                        <label class="form-label">Kode Item</label>
+                        <input type="text" class="form-control" id="qcItemCode" readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Jumlah *</label>
-                        <input type="number" class="form-control" id="qcQuantity" required min="1">
-                        <div class="form-text">Stok tersedia: <span id="availableStock">0</span></div>
+                        <label class="form-label">Nama Item</label>
+                        <input type="text" class="form-control" id="qcItemName" readonly>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-success" onclick="sendToQC()">Kirim ke QC</button>
+                    <div class="mb-3">
+                        <label class="form-label">Jumlah</label>
+                        <input type="number" class="form-control" id="qcQuantity" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Stok Tersedia</label>
+                        <input type="number" class="form-control" id="qcAvailableStock" readonly>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="sendToQC()">Kirim ke QC</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-const GRAPHQL_ENDPOINT = 'http://localhost:5000/graphql';
+    <!-- Toast Notifications -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                <strong class="me-auto">Berhasil</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="successToastBody">
+                <!-- Success message -->
+            </div>
+        </div>
+        
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="bi bi-exclamation-circle-fill text-danger me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorToastBody">
+                <!-- Error message -->
+            </div>
+        </div>
+    </div>
 
-let allItems = [];
-let allCategories = [];
-
-// Load data when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    loadItems();
-    loadQCLogs();
-});
-
-// GraphQL Query untuk mengambil items
-async function loadItems() {
-    const query = `
-        query {
-            items {
-                id
-                itemCode
-                name
-                description
-                category
-                unit
-                unitPrice
-                stockQuantity
-                createdAt
-                updatedAt
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentItems = [];
+        let currentItemForEdit = null;
+        let isEditMode = false;
+        const INVENTORY_SERVICE_URL = 'http://127.0.0.1:5000'; // Backend inventory service URL
+        
+        // Authentication check
+        function checkAuthentication() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            
+            if (!token) {
+                console.log('No token found, redirecting to login');
+                window.location.href = '../../user/login.html';
+                return false;
+            }
+            
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                
+                if (payload.exp && payload.exp < Date.now() / 1000) {
+                    console.log('Token expired, redirecting to login');
+                    localStorage.removeItem('token');
+                    sessionStorage.removeItem('token');
+                    window.location.href = '../../user/login.html';
+                    return false;
+                }
+                
+                if (payload.role && payload.role !== 'staff' && payload.role !== 'admin') {
+                    alert('Anda tidak memiliki akses ke halaman ini');
+                    window.location.href = '../../user/login.html';
+                    return false;
+                }
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Error parsing token:', error);
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
+                window.location.href = '../../user/login.html';
+                return false;
             }
         }
-    `;
-    
-    try {
-        const response = await fetch(GRAPHQL_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ query })
-        });
-        
-        const data = await response.json();
-        
-        if (data.errors) {
-            console.error('GraphQL errors:', data.errors);
-            showAlert('Error loading items: ' + data.errors[0].message, 'danger');
-            return;
-        }
-        
-        allItems = data.data.items;
-        displayItems(allItems);
-        updateCategoryFilter();
-        updateQCItemSelect();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showAlert('Error connecting to server', 'danger');
-    }
-}
 
-// GraphQL Query untuk mengambil QC logs
-async function loadQCLogs() {
-    const query = `
-        query {
-            qcLogs {
-                id
-                orderId
-                itemCode
-                itemName
-                quantity
-                sentToQcAt
+        // Load user info
+        async function loadUserInfo() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            
+            if (!token) {
+                window.location.href = '../../user/login.html';
+                return;
             }
-        }
-    `;
-    
-    try {
-        const response = await fetch(GRAPHQL_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ query })
-        });
-        
-        const data = await response.json();
-        
-        if (data.errors) {
-            console.error('GraphQL errors:', data.errors);
-            return;
-        }
-        
-        displayQCLogs(data.data.qcLogs);
-        
-    } catch (error) {
-        console.error('Error loading QC logs:', error);
-    }
-}
-
-// Display items in table
-function displayItems(items) {
-    const tbody = document.getElementById('itemsTableBody');
-    
-    if (items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Tidak ada data item</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = items.map(item => `
-        <tr>
-            <td><strong>${item.itemCode}</strong></td>
-            <td>${item.name}</td>
-            <td><span class="badge bg-info">${item.category || 'Uncategorized'}</span></td>
-            <td>${item.unit}</td>
-            <td>Rp ${parseFloat(item.unitPrice).toLocaleString('id-ID')}</td>
-            <td>
-                <span class="badge ${item.stockQuantity > 10 ? 'bg-success' : item.stockQuantity > 0 ? 'bg-warning' : 'bg-danger'}">
-                    ${item.stockQuantity}
-                </span>
-            </td>
-            <td>
-                ${item.stockQuantity > 10 ? '<span class="badge bg-success">Stock Aman</span>' : 
-                  item.stockQuantity > 0 ? '<span class="badge bg-warning">Stock Rendah</span>' : 
-                  '<span class="badge bg-danger">Stock Habis</span>'}
-            </td>
-            <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="editItem('${item.itemCode}')" title="Edit">
-                    <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteItem(${item.id})" title="Delete">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-// Display QC logs
-function displayQCLogs(logs) {
-    const tbody = document.getElementById('qcLogsTableBody');
-    
-    if (logs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada pengiriman ke QC</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = logs.map(log => `
-        <tr>
-            <td>${log.orderId}</td>
-            <td><strong>${log.itemCode}</strong></td>
-            <td>${log.itemName}</td>
-            <td><span class="badge bg-primary">${log.quantity}</span></td>
-            <td>${new Date(log.sentToQcAt).toLocaleString('id-ID')}</td>
-        </tr>
-    `).join('');
-}
-
-// Update category filter
-function updateCategoryFilter() {
-    const categories = [...new Set(allItems.map(item => item.category).filter(cat => cat))];
-    const select = document.getElementById('categoryFilter');
-    
-    select.innerHTML = '<option value="">Semua Kategori</option>';
-    categories.forEach(category => {
-        select.innerHTML += `<option value="${category}">${category}</option>`;
-    });
-}
-
-// Update QC item select
-function updateQCItemSelect() {
-    const select = document.getElementById('qcItemSelect');
-    select.innerHTML = '<option value="">Pilih Item...</option>';
-    
-    allItems.forEach(item => {
-        select.innerHTML += `<option value="${item.itemCode}" data-stock="${item.stockQuantity}" data-name="${item.name}">${item.itemCode} - ${item.name}</option>`;
-    });
-}
-
-// Add new item
-async function addItem() {
-    const itemCode = document.getElementById('itemCode').value;
-    const name = document.getElementById('itemName').value;
-    const category = document.getElementById('itemCategory').value || 'Uncategorized';
-    const unit = document.getElementById('itemUnit').value;
-    const unitPrice = parseFloat(document.getElementById('itemPrice').value) || 0;
-    const stockQuantity = parseInt(document.getElementById('itemStock').value);
-    const description = document.getElementById('itemDescription').value;
-    
-    if (!itemCode || !name || stockQuantity < 0) {
-        showAlert('Please fill all required fields', 'warning');
-        return;
-    }
-    
-    const mutation = `
-        mutation {
-            createItem(
-                itemCode: "${itemCode}"
-                name: "${name}"
-                category: "${category}"
-                unit: "${unit}"
-                unitPrice: ${unitPrice}
-                stockQuantity: ${stockQuantity}
-                description: "${description}"
-            ) {
-                item {
-                    id
-                    itemCode
-                    name
+            
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const userId = payload.user_id;
+                
+                const response = await fetch('http://127.0.0.1:5003/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        query: `
+                            query GetUser($id: Int!) {
+                                user(id: $id) {
+                                    id
+                                    nama
+                                    username
+                                    email
+                                    companyName
+                                    role
+                                }
+                            }
+                        `,
+                        variables: { id: userId }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.data && result.data.user) {
+                    const user = result.data.user;
+                    const displayName = user.companyName || user.nama;
+                    
+                    const userNameEl = document.getElementById('userName');
+                    const profileNameEl = document.getElementById('profileName');
+                    const welcomeNameEl = document.getElementById('welcomeName');
+                    
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (profileNameEl) profileNameEl.textContent = displayName;
+                    if (welcomeNameEl) welcomeNameEl.textContent = displayName;
+                    
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                } else {
+                    console.error('Failed to fetch user data:', result.errors);
+                    const displayName = payload.companyName || payload.nama;
+                    
+                    const userNameEl = document.getElementById('userName');
+                    const profileNameEl = document.getElementById('profileName');
+                    const welcomeNameEl = document.getElementById('welcomeName');
+                    
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (profileNameEl) profileNameEl.textContent = displayName;
+                    if (welcomeNameEl) welcomeNameEl.textContent = displayName;
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const displayName = payload.companyName || payload.nama;
+                    
+                    const userNameEl = document.getElementById('userName');
+                    const profileNameEl = document.getElementById('profileName'); 
+                    const welcomeNameEl = document.getElementById('welcomeName');
+                    
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (profileNameEl) profileNameEl.textContent = displayName;
+                    if (welcomeNameEl) welcomeNameEl.textContent = displayName;
+                } catch (tokenError) {
+                    console.error('Error parsing token:', tokenError);
+                    window.location.href = '../../user/login.html';
                 }
             }
         }
-    `;
-    
-    try {
-        const response = await fetch(GRAPHQL_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ query: mutation })
-        });
-        
-        const data = await response.json();
-        
-        if (data.errors) {
-            showAlert('Error: ' + data.errors[0].message, 'danger');
-            return;
+
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('userRole');
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('user');
+                sessionStorage.removeItem('userRole');
+                window.location.href = '../../user/login.html';
+            }
         }
-        
-        showAlert('Item berhasil ditambahkan!', 'success');
-        document.getElementById('addItemForm').reset();
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
-        modal.hide();
-        loadItems();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showAlert('Error connecting to server', 'danger');
-    }
-}
 
-// Edit item
-function editItem(itemCode) {
-    const item = allItems.find(i => i.itemCode === itemCode);
-    if (!item) return;
-    
-    document.getElementById('updateItemCode').value = item.itemCode;
-    document.getElementById('updateItemCodeDisplay').value = item.itemCode;
-    document.getElementById('updateItemName').value = item.name;
-    document.getElementById('updateItemCategory').value = item.category || '';
-    document.getElementById('updateItemUnit').value = item.unit;
-    document.getElementById('updateItemPrice').value = item.unitPrice;
-    document.getElementById('updateItemStock').value = item.stockQuantity;
-    document.getElementById('updateItemDescription').value = item.description || '';
-    
-    const modal = new bootstrap.Modal(document.getElementById('updateItemModal'));
-    modal.show();
-}
-
-// Update item
-async function updateItem() {
-    const itemCode = document.getElementById('updateItemCode').value;
-    const name = document.getElementById('updateItemName').value;
-    const category = document.getElementById('updateItemCategory').value;
-    const unit = document.getElementById('updateItemUnit').value;
-    const unitPrice = parseFloat(document.getElementById('updateItemPrice').value);
-    const stockQuantity = parseInt(document.getElementById('updateItemStock').value);
-    const description = document.getElementById('updateItemDescription').value;
-    
-    const mutation = `
-        mutation {
-            updateItem(
-                itemCode: "${itemCode}"
-                name: "${name}"
-                category: "${category}"
-                unit: "${unit}"
-                unitPrice: ${unitPrice}
-                stockQuantity: ${stockQuantity}
-                description: "${description}"
-            ) {
-                item {
-                    id
-                    itemCode
-                    name
+        // Toast functions
+        function showSuccessToast(message) {
+            const toastBody = document.getElementById('successToastBody');
+            if (toastBody) {
+                toastBody.textContent = message;
+                const toastEl = document.getElementById('successToast');
+                if (toastEl) {
+                    const toast = new bootstrap.Toast(toastEl);
+                    toast.show();
                 }
             }
         }
-    `;
-    
-    try {
-        const response = await fetch(GRAPHQL_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ query: mutation })
-        });
-        
-        const data = await response.json();
-        
-        if (data.errors) {
-            showAlert('Error: ' + data.errors[0].message, 'danger');
-            return;
-        }
-        
-        showAlert('Item berhasil diupdate!', 'success');
-        const modal = bootstrap.Modal.getInstance(document.getElementById('updateItemModal'));
-        modal.hide();
-        loadItems();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showAlert('Error connecting to server', 'danger');
-    }
-}
 
-// Delete item
-async function deleteItem(itemId) {
-    if (!confirm('Apakah Anda yakin ingin menghapus item ini?')) {
-        return;
-    }
-    
-    const mutation = `
-        mutation {
-            deleteItem(id: ${itemId}) {
-                success
+        function showErrorToast(message) {
+            const toastBody = document.getElementById('errorToastBody');
+            if (toastBody) {
+                toastBody.textContent = message;
+                const toastEl = document.getElementById('errorToast');
+                if (toastEl) {
+                    const toast = new bootstrap.Toast(toastEl);
+                    toast.show();
+                }
             }
         }
-    `;
-    
-    try {
-        const response = await fetch(GRAPHQL_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ query: mutation })
-        });
-        
-        const data = await response.json();
-        
-        if (data.errors) {
-            showAlert('Error: ' + data.errors[0].message, 'danger');
-            return;
-        }
-        
-        showAlert('Item berhasil dihapus!', 'success');
-        loadItems();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showAlert('Error connecting to server', 'danger');
-    }
-}
 
-// Send to QC
-async function sendToQC() {
-    const orderId = parseInt(document.getElementById('qcOrderId').value);
-    const itemSelect = document.getElementById('qcItemSelect');
-    const itemCode = itemSelect.value;
-    const itemName = itemSelect.options[itemSelect.selectedIndex].getAttribute('data-name');
-    const quantity = parseInt(document.getElementById('qcQuantity').value);
-    
-    if (!orderId || !itemCode || !quantity) {
-        showAlert('Please fill all fields', 'warning');
-        return;
-    }
-    
-    const mutation = `
-        mutation {
-            sendToQc(
-                orderId: ${orderId}
-                itemCode: "${itemCode}"
-                itemName: "${itemName}"
-                quantity: ${quantity}
-            ) {
-                success
-                message
+        // Load items from backend
+        async function loadItems(filters = {}) {
+            try {
+                showLoading(true);
+                
+                const query = `
+                    query GetItems {
+                        items {
+                            id
+                            itemCode
+                            name
+                            description
+                            category
+                            unit
+                            unitPrice
+                            stockQuantity
+                            createdAt
+                            updatedAt
+                        }
+                    }
+                `;
+                
+                const response = await fetch(`${INVENTORY_SERVICE_URL}/graphql`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.errors) {
+                    throw new Error(result.errors[0].message);
+                }
+                
+                currentItems = result.data.items || [];
+                
+                // Apply filters
+                if (filters.category) {
+                    currentItems = currentItems.filter(item => 
+                        item.category && item.category.toLowerCase().includes(filters.category.toLowerCase())
+                    );
+                }
+                if (filters.itemCode) {
+                    currentItems = currentItems.filter(item => 
+                        item.itemCode.toLowerCase().includes(filters.itemCode.toLowerCase())
+                    );
+                }
+                if (filters.itemName) {
+                    currentItems = currentItems.filter(item => 
+                        item.name.toLowerCase().includes(filters.itemName.toLowerCase())
+                    );
+                }
+                
+                displayItems(currentItems);
+                loadCategoryFilter();
+                
+            } catch (error) {
+                console.error('Error loading items:', error);
+                showErrorToast('Gagal memuat data inventory: ' + error.message);
+                displayItems([]);
+            } finally {
+                showLoading(false);
             }
         }
-    `;
-    
-    try {
-        const response = await fetch(GRAPHQL_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ query: mutation })
-        });
-        
-        const data = await response.json();
-        
-        if (data.errors) {
-            showAlert('Error: ' + data.errors[0].message, 'danger');
-            return;
+
+        // Display items in table
+        function displayItems(items) {
+            const tbody = document.getElementById('inventoryTableBody');
+            
+            if (!tbody) {
+                console.error('Table body not found');
+                return;
+            }
+            
+            if (items.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center">Tidak ada data inventory</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = items.map(item => `
+                <tr>
+                    <td><strong>${item.itemCode}</strong></td>
+                    <td>${item.name}</td>
+                    <td>${item.category || '-'}</td>
+                    <td>
+                        <span class="badge ${item.stockQuantity > 10 ? 'bg-success' : item.stockQuantity > 0 ? 'bg-warning' : 'bg-danger'}">
+                            ${item.stockQuantity}
+                        </span>
+                    </td>
+                    <td>${item.unit}</td>
+                    <td>Rp ${parseFloat(item.unitPrice || 0).toLocaleString('id-ID')}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-primary view-detail-btn" 
+                                    data-item-id="${item.id}" 
+                                    title="Lihat Detail">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-success edit-item-btn" 
+                                    data-item-id="${item.id}" 
+                                    title="Edit Item">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info send-qc-btn" 
+                                    data-item-id="${item.id}" 
+                                    title="Kirim ke QC">
+                                <i class="bi bi-send"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-item-btn" 
+                                    data-item-id="${item.id}" 
+                                    title="Hapus Item">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            
+            attachItemActionListeners();
         }
-        
-        if (data.data.sendToQc.success) {
-            showAlert(data.data.sendToQc.message, 'success');
-            document.getElementById('sendToQCForm').reset();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('sendToQCModal'));
-            modal.hide();
+
+        // Load category filter options
+        function loadCategoryFilter() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            if (!categoryFilter) return;
+            
+            const categories = [...new Set(currentItems.map(item => item.category).filter(cat => cat))];
+            
+            categoryFilter.innerHTML = '<option value="">Semua Kategori</option>';
+            categories.forEach(category => {
+                categoryFilter.innerHTML += `<option value="${category}">${category}</option>`;
+            });
+        }
+
+        // Attach event listeners to item action buttons
+        function attachItemActionListeners() {
+            document.querySelectorAll('.view-detail-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const itemId = parseInt(this.dataset.itemId);
+                    viewItemDetail(itemId);
+                });
+            });
+            
+            document.querySelectorAll('.edit-item-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const itemId = parseInt(this.dataset.itemId);
+                    editItem(itemId);
+                });
+            });
+            
+            document.querySelectorAll('.send-qc-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const itemId = parseInt(this.dataset.itemId);
+                    openSendToQCModal(itemId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-item-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const itemId = parseInt(this.dataset.itemId);
+                    deleteItem(itemId);
+                });
+            });
+        }
+
+        // Show loading indicator
+        function showLoading(show) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const inventoryTable = document.getElementById('inventoryTable');
+            
+            if (loadingIndicator && inventoryTable) {
+                if (show) {
+                    loadingIndicator.style.display = 'block';
+                    inventoryTable.style.display = 'none';
+                } else {
+                    loadingIndicator.style.display = 'none';
+                    inventoryTable.style.display = 'table';
+                }
+            }
+        }
+
+        // Filter items
+        function filterItems() {
+            const filters = {
+                category: document.getElementById('categoryFilter')?.value || '',
+                itemCode: document.getElementById('itemCodeFilter')?.value || '',
+                itemName: document.getElementById('itemNameFilter')?.value || ''
+            };
+            
+            loadItems(filters);
+        }
+
+        // Reset filters
+        function resetFilters() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            const itemCodeFilter = document.getElementById('itemCodeFilter');
+            const itemNameFilter = document.getElementById('itemNameFilter');
+            
+            if (categoryFilter) categoryFilter.value = '';
+            if (itemCodeFilter) itemCodeFilter.value = '';
+            if (itemNameFilter) itemNameFilter.value = '';
+            
             loadItems();
-            loadQCLogs();
-        } else {
-            showAlert(data.data.sendToQc.message, 'danger');
+        }
+
+        // Refresh items
+        function refreshItems() {
+            const filters = {
+                category: document.getElementById('categoryFilter')?.value || '',
+                itemCode: document.getElementById('itemCodeFilter')?.value || '',
+                itemName: document.getElementById('itemNameFilter')?.value || ''
+            };
+            
+            loadItems(filters);
+        }
+
+        // Open add item modal
+        function openAddItemModal() {
+            isEditMode = false;
+            currentItemForEdit = null;
+            
+            document.getElementById('itemModalTitle').textContent = 'Tambah Item Baru';
+            document.getElementById('itemForm').reset();
+            document.getElementById('itemCode').readOnly = false;
+            
+            const modalEl = document.getElementById('itemModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        }
+
+        // Edit item
+        function editItem(itemId) {
+            const item = currentItems.find(i => i.id === itemId);
+            if (!item) {
+                console.error('Item not found:', itemId);
+                return;
+            }
+            
+            isEditMode = true;
+            currentItemForEdit = item;
+            
+            document.getElementById('itemModalTitle').textContent = 'Edit Item';
+            document.getElementById('itemCode').value = item.itemCode;
+            document.getElementById('itemCode').readOnly = true;
+            document.getElementById('itemName').value = item.name;
+            document.getElementById('itemCategory').value = item.category || '';
+            document.getElementById('itemDescription').value = item.description || '';
+            document.getElementById('itemStock').value = item.stockQuantity;
+            document.getElementById('itemUnit').value = item.unit;
+            document.getElementById('itemPrice').value = item.unitPrice || 0;
+            
+            const modalEl = document.getElementById('itemModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        }
+        async function saveItem() {
+            try {
+                const itemCode = document.getElementById('itemCode').value;
+                const itemName = document.getElementById('itemName').value;
+                const itemCategory = document.getElementById('itemCategory').value;
+                const itemDescription = document.getElementById('itemDescription').value;
+                const itemStock = parseInt(document.getElementById('itemStock').value);
+                const itemUnit = document.getElementById('itemUnit').value || 'pcs';
+                const itemPrice = parseFloat(document.getElementById('itemPrice').value) || 0;
+                
+                if (!itemCode || !itemName || isNaN(itemStock)) {
+                    showErrorToast('Mohon lengkapi semua field yang diperlukan');
+                    return;
+                }
+                
+                let mutation, variables;
+                
+                if (isEditMode && currentItemForEdit) {
+                    // Update existing item
+                    mutation = `
+                        mutation UpdateItem($itemCode: String!, $name: String, $stockQuantity: Int, $description: String, $unit: String, $category: String, $unitPrice: Float) {
+                            updateItem(itemCode: $itemCode, name: $name, stockQuantity: $stockQuantity, description: $description, unit: $unit, category: $category, unitPrice: $unitPrice) {
+                                item {
+                                    id
+                                    itemCode
+                                    name
+                                    description
+                                    category
+                                    unit
+                                    unitPrice
+                                    stockQuantity
+                                }
+                            }
+                        }
+                    `;
+                    variables = {
+                        itemCode: itemCode,
+                        name: itemName,
+                        stockQuantity: itemStock,
+                        description: itemDescription,
+                        unit: itemUnit,
+                        category: itemCategory,
+                        unitPrice: itemPrice
+                    };
+                } else {
+                    // Create new item
+                    mutation = `
+                        mutation CreateItem($itemCode: String!, $name: String!, $stockQuantity: Int!, $description: String, $unit: String, $category: String, $unitPrice: Float) {
+                            createItem(itemCode: $itemCode, name: $name, stockQuantity: $stockQuantity, description: $description, unit: $unit, category: $category, unitPrice: $unitPrice) {
+                                item {
+                                    id
+                                    itemCode
+                                    name
+                                    description
+                                    category
+                                    unit
+                                    unitPrice
+                                    stockQuantity
+                                }
+                            }
+                        }
+                    `;
+                    variables = {
+                        itemCode: itemCode,
+                        name: itemName,
+                        stockQuantity: itemStock,
+                        description: itemDescription,
+                        unit: itemUnit,
+                        category: itemCategory,
+                        unitPrice: itemPrice
+                    };
+                }
+                
+                const response = await fetch(`${INVENTORY_SERVICE_URL}/graphql`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: mutation,
+                        variables: variables
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.errors) {
+                    throw new Error(result.errors[0].message);
+                }
+                
+                const modalEl = document.getElementById('itemModal');
+                if (modalEl) {
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) {
+                        modal.hide();
+                    }
+                }
+                
+                showSuccessToast(isEditMode ? 'Item berhasil diupdate' : 'Item berhasil ditambahkan');
+                loadItems();
+                
+            } catch (error) {
+                console.error('Error saving item:', error);
+                showErrorToast('Gagal menyimpan item: ' + error.message);
+            }
         }
         
-    } catch (error) {
-        console.error('Error:', error);
-        showAlert('Error connecting to server', 'danger');
-    }
-}
-
-// Update available stock when item is selected
-document.getElementById('qcItemSelect').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    const stock = selectedOption.getAttribute('data-stock') || 0;
-    document.getElementById('availableStock').textContent = stock;
-});
-
-// Search functionality
-document.getElementById('searchInput').addEventListener('keyup', function() {
-    const searchTerm = this.value.toLowerCase();
-    const categoryFilter = document.getElementById('categoryFilter').value;
-    
-    let filteredItems = allItems.filter(item => {
-        const matchesSearch = item.itemCode.toLowerCase().includes(searchTerm) || 
-                             item.name.toLowerCase().includes(searchTerm);
-        const matchesCategory = !categoryFilter || item.category === categoryFilter;
-        return matchesSearch && matchesCategory;
-    });
-    
-    displayItems(filteredItems);
-});
-
-// Category filter
-document.getElementById('categoryFilter').addEventListener('change', function() {
-    const categoryFilter = this.value;
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    
-    let filteredItems = allItems.filter(item => {
-        const matchesSearch = item.itemCode.toLowerCase().includes(searchTerm) || 
-                             item.name.toLowerCase().includes(searchTerm);
-        const matchesCategory = !categoryFilter || item.category === categoryFilter;
-        return matchesSearch && matchesCategory;
-    });
-    
-    displayItems(filteredItems);
-});
-
-// Refresh data
-function refreshItems() {
-    loadItems();
-    loadQCLogs();
-    showAlert('Data refreshed!', 'info');
-}
-
-// Show alert
-function showAlert(message, type) {
-    // Create alert element
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    alertDiv.style.top = '90px';
-    alertDiv.style.right = '20px';
-    alertDiv.style.zIndex = '9999';
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(alertDiv);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.parentNode.removeChild(alertDiv);
+        // View item detail
+        function viewItemDetail(itemId) {
+            const item = currentItems.find(i => i.id === itemId);
+            if (!item) {
+                console.error('Item not found:', itemId);
+                return;
+            }
+            
+            const detailContent = document.getElementById('itemDetailContent');
+            if (!detailContent) return;
+            
+            detailContent.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Informasi Dasar</h6>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Kode Item:</strong></td>
+                                <td>${item.itemCode}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Nama Item:</strong></td>
+                                <td>${item.name}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Kategori:</strong></td>
+                                <td>${item.category || '-'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Unit:</strong></td>
+                                <td>${item.unit}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Informasi Stok & Harga</h6>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Stok:</strong></td>
+                                <td>
+                                    <span class="badge ${item.stockQuantity > 10 ? 'bg-success' : item.stockQuantity > 0 ? 'bg-warning' : 'bg-danger'}">
+                                        ${item.stockQuantity} ${item.unit}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Harga Satuan:</strong></td>
+                                <td>Rp ${parseFloat(item.unitPrice || 0).toLocaleString('id-ID')}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Nilai:</strong></td>
+                                <td>Rp ${(parseFloat(item.unitPrice || 0) * item.stockQuantity).toLocaleString('id-ID')}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Deskripsi</h6>
+                        <p class="text-muted">${item.description || 'Tidak ada deskripsi'}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Tanggal Dibuat</h6>
+                        <p>${new Date(item.createdAt).toLocaleString('id-ID')}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Terakhir Diupdate</h6>
+                        <p>${new Date(item.updatedAt).toLocaleString('id-ID')}</p>
+                    </div>
+                </div>
+            `;
+            
+            const modalEl = document.getElementById('itemDetailModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
         }
-    }, 5000);
-}
-</script>
-{% endblock %}
+        
+        // Open send to QC modal
+        function openSendToQCModal(itemId) {
+            const item = currentItems.find(i => i.id === itemId);
+            if (!item) {
+                console.error('Item not found:', itemId);
+                return;
+            }
+            
+            document.getElementById('qcItemCode').value = item.itemCode;
+            document.getElementById('qcItemName').value = item.name;
+            document.getElementById('qcAvailableStock').value = item.stockQuantity;
+            document.getElementById('qcOrderId').value = '';
+            document.getElementById('qcQuantity').value = '';
+            document.getElementById('qcQuantity').max = item.stockQuantity;
+            
+            const modalEl = document.getElementById('sendToQCModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        }
+        
+        // Send to QC
+        async function sendToQC() {
+            try {
+                const orderId = parseInt(document.getElementById('qcOrderId').value);
+                const itemCode = document.getElementById('qcItemCode').value;
+                const itemName = document.getElementById('qcItemName').value;
+                const quantity = parseInt(document.getElementById('qcQuantity').value);
+                const availableStock = parseInt(document.getElementById('qcAvailableStock').value);
+                
+                if (!orderId || !quantity || isNaN(orderId) || isNaN(quantity)) {
+                    showErrorToast('Mohon lengkapi Order ID dan Jumlah');
+                    return;
+                }
+                
+                if (quantity > availableStock) {
+                    showErrorToast('Jumlah tidak boleh melebihi stok yang tersedia');
+                    return;
+                }
+                
+                if (quantity <= 0) {
+                    showErrorToast('Jumlah harus lebih dari 0');
+                    return;
+                }
+                
+                const mutation = `
+                    mutation SendToQC($orderId: Int!, $itemCode: String!, $itemName: String!, $quantity: Int!) {
+                        sendToQc(orderId: $orderId, itemCode: $itemCode, itemName: $itemName, quantity: $quantity) {
+                            success
+                            message
+                        }
+                    }
+                `;
+                
+                const response = await fetch(`${INVENTORY_SERVICE_URL}/graphql`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: mutation,
+                        variables: {
+                            orderId: orderId,
+                            itemCode: itemCode,
+                            itemName: itemName,
+                            quantity: quantity
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.errors) {
+                    throw new Error(result.errors[0].message);
+                }
+                
+                if (result.data.sendToQc.success) {
+                    const modalEl = document.getElementById('sendToQCModal');
+                    if (modalEl) {
+                        const modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) {
+                            modal.hide();
+                        }
+                    }
+                    
+                    showSuccessToast('Item berhasil dikirim ke Quality Control');
+                    loadItems(); // Refresh data untuk update stok
+                } else {
+                    showErrorToast(result.data.sendToQc.message || 'Gagal mengirim ke QC');
+                }
+                
+            } catch (error) {
+                console.error('Error sending to QC:', error);
+                showErrorToast('Gagal mengirim ke QC: ' + error.message);
+            }
+        }
+        
+        // Delete item
+        async function deleteItem(itemId) {
+            const item = currentItems.find(i => i.id === itemId);
+            if (!item) {
+                console.error('Item not found:', itemId);
+                return;
+            }
+            
+            if (!confirm(`Apakah Anda yakin ingin menghapus item "${item.name}" (${item.itemCode})?`)) {
+                return;
+            }
+            
+            try {
+                const mutation = `
+                    mutation DeleteItem($id: Int!) {
+                        deleteItem(id: $id) {
+                            success
+                        }
+                    }
+                `;
+                
+                const response = await fetch(`${INVENTORY_SERVICE_URL}/graphql`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: mutation,
+                        variables: {
+                            id: itemId
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.errors) {
+                    throw new Error(result.errors[0].message);
+                }
+                
+                if (result.data.deleteItem.success) {
+                    showSuccessToast('Item berhasil dihapus');
+                    loadItems(); // Refresh data
+                } else {
+                    showErrorToast('Gagal menghapus item');
+                }
+                
+            } catch (error) {
+                console.error('Error deleting item:', error);
+                showErrorToast('Gagal menghapus item: ' + error.message);
+            }
+        }
+        
+        // Sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('collapsed');
+            }
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication first
+            if (!checkAuthentication()) {
+                return;
+            }
+            
+            // Load user info
+            loadUserInfo();
+            
+            // Load initial data
+            loadItems();
+            
+            // Set up event listeners
+            const itemForm = document.getElementById('itemForm');
+            if (itemForm) {
+                itemForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    saveItem();
+                });
+            }
+            
+            // Set up filter event listeners
+            const categoryFilter = document.getElementById('categoryFilter');
+            const itemCodeFilter = document.getElementById('itemCodeFilter');
+            const itemNameFilter = document.getElementById('itemNameFilter');
+            
+            if (categoryFilter) {
+                categoryFilter.addEventListener('change', filterItems);
+            }
+            
+            if (itemCodeFilter) {
+                itemCodeFilter.addEventListener('keyup', function(e) {
+                    if (e.key === 'Enter') {
+                        filterItems();
+                    }
+                });
+            }
+            
+            if (itemNameFilter) {
+                itemNameFilter.addEventListener('keyup', function(e) {
+                    if (e.key === 'Enter') {
+                        filterItems();
+                    }
+                });
+            }
+            
+            // Set up QC quantity validation
+            const qcQuantityInput = document.getElementById('qcQuantity');
+            if (qcQuantityInput) {
+                qcQuantityInput.addEventListener('input', function() {
+                    const availableStock = parseInt(document.getElementById('qcAvailableStock').value);
+                    const quantity = parseInt(this.value);
+                    
+                    if (quantity > availableStock) {
+                        this.value = availableStock;
+                        showErrorToast('Jumlah tidak boleh melebihi stok yang tersedia');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
