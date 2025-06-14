@@ -58,10 +58,11 @@ class ProcurementService:
         """
         Filter hanya procurement yang statusnya masih dibutuhkan
         """
-        if not procurement_list:
-            return []
+        return procurement_list
+        # if not procurement_list:
+        #     return []
             
-        return [
-            item for item in procurement_list 
-            if item.get('status', '').lower() in ['pending', 'needed', 'requested']
-        ]
+        # return [
+        #     item for item in procurement_list 
+        #     if item.get('status', '').lower() in ['pending', 'needed', 'requested']
+        # ]

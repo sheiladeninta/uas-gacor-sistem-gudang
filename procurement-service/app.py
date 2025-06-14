@@ -1,5 +1,6 @@
 # app.py
 from flask import Flask
+from flask_cors import CORS
 from routes.client_routes import client_bp
 import logging
 import os
@@ -13,6 +14,8 @@ def create_app():
     
     app = Flask(__name__, template_folder=template_folder)
     app.secret_key = 'your-secret-key-here'  # Ganti dengan secret key yang aman
+    
+    CORS(app, origins=['http://localhost:8000'])
     
     # Register blueprints
     app.register_blueprint(client_bp)

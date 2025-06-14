@@ -63,15 +63,9 @@ def get_procurement_needs():
         for need in needs:
             formatted_needs.append({
                 'id': need.get('id'),
-                'item_name': need.get('item_name', 'N/A'),
-                'quantity': need.get('quantity', 0),
-                'unit': need.get('unit', 'pcs'),
-                'priority': need.get('priority', 'normal'),
-                'needed_date': need.get('needed_date', ''),
-                'description': need.get('description', ''),
-                'status': need.get('status', 'pending'),
-                'restaurant_name': need.get('restaurant_name', 'Unknown'),
-                'created_at': need.get('created_at', '')
+                'ingredient_name': need.get('ingredient_name', 'N/A'),
+                'order_date': need.get('order_date', '-'),
+                'quantity_ordered': need.get('quantity_ordered', 0)
             })
             
         return jsonify({
