@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality Control Service</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Quality Control Service</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('pending')">Barang Pending</div>
+            <div class="tab" onclick="switchTab('form')">Form QC</div>
+            <div class="tab" onclick="switchTab('results')">Hasil QC</div>
+        </div>
+
+        <div id="pending" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stats-box">
+                    <div class="stats-value">0</div>
+                    <div class="stats-label">Barang Pending</div>
+                </div>
+                <div class="stats-box">
+                    <div class="stats-value">0</div>
+                    <div class="stats-label">Barang Layak</div>
+                </div>
+                <div class="stats-box">
+                    <div class="stats-value">0</div>
+                    <div class="stats-label">Barang Tidak Layak</div>
+                </div>
+                <div class="stats-box">
+                    <div class="stats-value">0</div>
+                    <div class="stats-label">Total Barang</div>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>TANGGAL</th>
+                        <th>ID BARANG</th>
+                        <th>NAMA BARANG</th>
+                        <th>AKSI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>15 Jan 2024, 09:30</td>
+                        <td>INV011</td>
+                        <td>Daging Sapi</td>
+                        <td>
+                            <button class="btn" onclick="showPendingDetail('INV011')">Periksa</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="form" class="tab-content">
+            <form id="qcForm">
+                <div style="display: grid; gap: 16px; max-width: 600px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px;">ID Barang</label>
+                        <input type="text" required style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px;">Nama Barang</label>
+                        <input type="text" required style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px;">Catatan Pemeriksaan</label>
+                        <textarea rows="4" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px;"></textarea>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px;">Status</label>
+                        <select required style="width: 100%;">
+                            <option value="">Pilih Status</option>
+                            <option value="layak">Layak</option>
+                            <option value="tidak_layak">Tidak Layak</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Submit</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="results" class="tab-content">
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label>Tanggal Mulai</label>
+                    <input type="date">
+                </div>
+                <div class="filter-group">
+                    <label>Tanggal Selesai</label>
+                    <input type="date">
+                </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select>
+                        <option value="">Semua</option>
+                        <option value="layak">Layak</option>
+                        <option value="tidak_layak">Tidak Layak</option>
+                    </select>
+                </div>
+                <button class="btn" style="align-self: flex-end;">Filter</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>TANGGAL</th>
+                        <th>ID BARANG</th>
+                        <th>NAMA BARANG</th>
+                        <th>STATUS</th>
+                        <th>AKSI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>15 Jan 2024, 09:30</td>
+                        <td>INV011</td>
+                        <td>Daging Sapi</td>
+                        <td><span class="status-badge status-layak">Layak</span></td>
+                        <td><button class="btn" onclick="showResultDetail('INV011')">Detail</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="detailModal" class="modal">
+        <div class="modal-content"></div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        }
+
+        function showPendingDetail(id) {
+            alert('Menampilkan detail barang pending: ' + id);
+        }
+
+        function showResultDetail(id) {
+            alert('Menampilkan detail hasil QC: ' + id);
+        }
+
+        document.getElementById('qcForm').onsubmit = function(e) {
+            e.preventDefault();
+            alert('Form submitted');
+        };
+    </script>
+</body>
+</html>

@@ -135,7 +135,7 @@ def generate_tracking_number():
     return f"TRK-{uuid.uuid4().hex[:8].upper()}"
 
 @app.route('/api/shipments', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_shipments():
     status = request.args.get('status')
     query = Shipment.query
@@ -147,38 +147,43 @@ def get_shipments():
     return jsonify([shipment.to_dict() for shipment in shipments])
 
 @app.route('/api/shipments/<int:shipment_id>', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_shipment(shipment_id):
     shipment = Shipment.query.get_or_404(shipment_id)
     return jsonify(shipment.to_dict())
 
 @app.route('/api/shipments', methods=['POST'])
-@jwt_required()
+# @jwt_required()
 def create_shipment():
     data = request.get_json()
-    
-    # Verify QC check exists and is approved
+    print('Menerima data:', data)  # Debug log
+
     qc_response = requests.get(f"{app.config['QC_SERVICE_URL']}/api/qc/{data['qc_id']}")
+    print('QC response:', qc_response.status_code, qc_response.text)  # Debug log
     if qc_response.status_code != 200:
         return jsonify({'error': 'QC check not found or not approved'}), 400
-    
-    # Create new shipment
-    shipment = Shipment(
-        qc_id=data['qc_id'],
-        order_id=data['order_id'],
-        shipping_address=data['shipping_address'],
-        shipping_service=data['shipping_service'],
-        weight=data['weight'],
-        status='pending'
-    )
-    
-    db.session.add(shipment)
-    db.session.commit()
-    
-    return jsonify(shipment.to_dict()), 201
+
+    try:
+        shipment = Shipment(
+            qc_id=data['qc_id'],
+            order_id=data['order_id'],
+            shipping_address=data['shipping_address'],
+            shipping_service=data['shipping_service'],
+            weight=data['weight'],
+            status='pending',
+            tracking_number=generate_tracking_number()  # Tambahkan jika field ini wajib
+        )
+        db.session.add(shipment)
+        db.session.commit()
+        print('Shipment berhasil disimpan:', shipment.to_dict())  # Debug log
+        return jsonify(shipment.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        print('Error saat menyimpan shipment:', str(e))  # Debug log
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/shipments/<int:shipment_id>/ship', methods=['POST'])
-@jwt_required()
+# @jwt_required()
 def ship_order(shipment_id):
     shipment = Shipment.query.get_or_404(shipment_id)
     
@@ -193,7 +198,7 @@ def ship_order(shipment_id):
     return jsonify(shipment.to_dict())
 
 @app.route('/api/shipments/<int:shipment_id>/deliver', methods=['POST'])
-@jwt_required()
+# @jwt_required()
 def mark_as_delivered(shipment_id):
     shipment = Shipment.query.get_or_404(shipment_id)
     
@@ -206,25 +211,16 @@ def mark_as_delivered(shipment_id):
     return jsonify(shipment.to_dict())
 
 @app.route('/api/shipments/<int:shipment_id>/receipt', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_shipping_receipt(shipment_id):
     shipment = Shipment.query.get_or_404(shipment_id)
-    
-    # Get order details from order service
-    order_response = requests.get(f"{app.config['ORDER_SERVICE_URL']}/api/orders/{shipment.order_id}")
-    if order_response.status_code != 200:
-        return jsonify({'error': 'Order details not found'}), 400
-    
-    order_data = order_response.json()
-    
-    # Generate receipt data
+    # Generate receipt data tanpa detail order
     receipt = {
         'tracking_number': shipment.tracking_number,
         'shipping_date': shipment.shipping_date.isoformat() if shipment.shipping_date else None,
         'shipping_address': shipment.shipping_address,
         'shipping_service': shipment.shipping_service,
         'weight': shipment.weight,
-        'order_details': order_data,
         'status': shipment.status
     }
     
@@ -236,4 +232,3 @@ def index():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
-

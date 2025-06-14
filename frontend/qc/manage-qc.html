@@ -1,168 +1,1188 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quality Control Service</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Dashboard Staff - Sistem Gudang Gacor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 70px;
+            --header-height: 70px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+        }
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 4px 20px rgba(52, 152, 219, 0.3);
+        }
+        .header .toggle-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 15px;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .header .toggle-btn:hover {
+            background-color: rgba(255,255,255,0.15);
+            transform: scale(1.05);
+        }
+        .header .logo {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-right: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header .logo i {
+            font-size: 1.8rem;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .header .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .header .logout-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .header .logout-btn:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.05);
+        }
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height));
+            background: white;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 1020;
+            overflow: hidden;
+        }
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+        .sidebar-content {
+            padding: 20px 0;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .user-profile {
+            padding: 0 20px 25px;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed .user-profile {
+            padding: 0 10px 25px;
+        }
+        .user-profile .avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            margin: 0 auto 15px;
+            transition: all 0.3s;
+            border: 3px solid #f0f0f0;
+        }
+        .sidebar.collapsed .user-profile .avatar {
+            width: 45px;
+            height: 45px;
+            font-size: 1.3rem;
+        }
+        .user-profile .name {
+            font-weight: bold;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.3s;
+        }
+        .user-profile .role {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            background: rgba(52, 152, 219, 0.1);
+            padding: 4px 12px;
+            border-radius: 15px;
+            display: inline-block;
+            transition: opacity 0.3s;
+        }
+        .sidebar.collapsed .user-profile .name,
+        .sidebar.collapsed .user-profile .role {
+            opacity: 0;
+        }
+        /* Menu */
+        .menu {
+            list-style: none;
+            padding: 0;
+        }
+        .menu-section {
+            margin-bottom: 20px;
+        }
+        .menu-section-title {
+            font-size: 0.75rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 0 20px 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: opacity 0.3s;
+        }
+        .sidebar.collapsed .menu-section-title {
+            opacity: 0;
+        }
+        .menu-item {
+            margin-bottom: 3px;
+        }
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+            border-radius: 0 30px 30px 0;
+            margin-right: 15px;
+        }
+        .sidebar.collapsed .menu-link {
+            padding: 15px 0;
+            justify-content: center;
+            margin-right: 0;
+            border-radius: 0;
+        }
+        .menu-link:hover {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%);
+            color: var(--primary-color);
+            transform: translateX(8px);
+        }
+        .sidebar.collapsed .menu-link:hover {
+            transform: none;
+            background: rgba(52, 152, 219, 0.1);
+        }
+        .menu-link.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        .menu-link.active::after {
+            content: '';
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border: 12px solid transparent;
+            border-left-color: var(--secondary-color);
+        }
+        .sidebar.collapsed .menu-link.active::after {
+            display: none;
+        }
+        .menu-icon {
+            font-size: 1.3rem;
+            width: 28px;
+            text-align: center;
+            margin-right: 15px;
+            transition: margin 0.3s;
+        }
+        .sidebar.collapsed .menu-icon {
+            margin-right: 0;
+        }
+        .menu-text {
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity 0.3s;
+            font-weight: 500;
+        }
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            width: 0;
+        }
+        .badge-notification {
+            background: var(--accent-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 7px;
+            border-radius: 12px;
+            margin-left: auto;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+        .sidebar.collapsed .badge-notification {
+            opacity: 0;
+        }
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+            min-height: calc(100vh - var(--header-height));
+        }
+        .sidebar.collapsed + .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+        /* Content Cards */
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            border: 1px solid rgba(52, 152, 219, 0.1);
+        }
+        .card-title {
+            color: var(--dark-color);
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title i {
+            color: var(--primary-color);
+        }
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(52, 152, 219, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        .stats-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .stats-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .stats-label {
+            color: #666;
+            font-weight: 500;
+        }
+        /* Quick Actions */
+        .quick-action {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid rgba(52, 152, 219, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+        }
+        .quick-action:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .quick-action i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        .quick-action h5 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .quick-action p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+        .welcome-section h2 {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .welcome-section p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        /* Recent Orders Table */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+        .table {
+            margin: 0;
+        }
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 15px;
+        }
+        .table tbody td {
+            padding: 15px;
+            border-color: #f0f0f0;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-processing {
+            background-color: #cff4fc;
+            color: #087990;
+        }
+        .status-shipped {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: var(--sidebar-width);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .sidebar.collapsed + .main-content {
+                margin-left: 0;
+            }
+            .header .logo {
+                font-size: 1.3rem;
+            }
+            .header .user-info span {
+                display: none;
+            }
+            .stats-card {
+                margin-bottom: 20px;
+            }
+            .quick-action {
+                margin-bottom: 20px;
+            }
+        }
+        /* Custom Scrollbar */
+        .sidebar-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar-content::-webkit-scrollbar-track {
+            background: #f8f9fa;
+        }
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: rgba(52, 152, 219, 0.3);
+            border-radius: 3px;
+        }
+        .sidebar-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(52, 152, 219, 0.5);
+        }
+    </style>
 </head>
 <body>
-    <div class="header">
-        <div class="container">
-            <h1>Quality Control Service</h1>
+    <!-- Header -->
+    <header class="header">
+        <button class="toggle-btn" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="logo">
+            <i class="bi bi-boxes"></i>
+            <span>Sistem Gudang Gacor</span>
         </div>
-    </div>
+        <div class="user-info">
+            <span id="userName"></span>
+            <div class="user-avatar">
+                <i class="bi bi-person-circle"></i>
+            </div>
+            <button class="logout-btn" onclick="logout()" title="Logout">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </div>
+    </header>
 
-    <div class="container">
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('pending')">Barang Pending</div>
-            <div class="tab" onclick="switchTab('form')">Form QC</div>
-            <div class="tab" onclick="switchTab('results')">Hasil QC</div>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="name" id="profileName">Admin Staff</div>
+                <div class="role">STAFF ADMINISTRATOR</div>
+            </div>
+            <ul class="menu">
+                <div class="menu-section">
+                    <div class="menu-section-title">UTAMA</div>
+                    <li class="menu-item">
+                        <a href="../../user/staff/dashboard.html" class="menu-link">
+                            <i class="menu-icon bi-speedometer2"></i>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                    </li>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">OPERASIONAL</div>
+                    <li class="menu-item">
+                        <a href="../../order/staff/manage-order.html" class="menu-link">
+                            <i class="menu-icon bi-clipboard-check"></i>
+                            <span class="menu-text">Manajemen Order</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-boxes"></i>
+                            <span class="menu-text">Manajemen Inventory</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link active">
+                            <i class="menu-icon bi-shield-check"></i>
+                            <span class="menu-text">Quality Control</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-truck"></i>
+                            <span class="menu-text">Logistic</span>
+                        </a>
+                    </li>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">SISTEM</div>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-people"></i>
+                            <span class="menu-text">Manajemen User</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#" class="menu-link">
+                            <i class="menu-icon bi-gear"></i>
+                            <span class="menu-text">Pengaturan</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" style="margin-top: 20px; border-top: 1px solid #f0f0f0; padding-top: 15px;">
+                        <a href="#" class="menu-link" onclick="logout()">
+                            <i class="menu-icon bi-box-array-right"></i>
+                            <span class="menu-text">Logout</span>
+                        </a>
+                    </li>
+                </div>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h2>Quality Control, <span id="welcomeName"></span>!</h2>
+            <p>Kelola dan review kualitas item yang masuk, serta pantau statistik QC dengan mudah.</p>
         </div>
 
-        <div id="pending" class="tab-content active">
-            <div class="stats-grid">
-                <div class="stats-box">
-                    <div class="stats-value">0</div>
-                    <div class="stats-label">Barang Pending</div>
-                </div>
-                <div class="stats-box">
-                    <div class="stats-value">0</div>
-                    <div class="stats-label">Barang Layak</div>
-                </div>
-                <div class="stats-box">
-                    <div class="stats-value">0</div>
-                    <div class="stats-label">Barang Tidak Layak</div>
-                </div>
-                <div class="stats-box">
-                    <div class="stats-value">0</div>
-                    <div class="stats-label">Total Barang</div>
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="content-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-primary text-white rounded-circle me-3">
+                            <i class="bi bi-boxes"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0" id="totalItems">0</h5>
+                            <small class="text-muted">Total Items</small>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>TANGGAL</th>
-                        <th>ID BARANG</th>
-                        <th>NAMA BARANG</th>
-                        <th>AKSI</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>15 Jan 2024, 09:30</td>
-                        <td>INV011</td>
-                        <td>Daging Sapi</td>
-                        <td>
-                            <button class="btn" onclick="showPendingDetail('INV011')">Periksa</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="col-md-3">
+                <div class="content-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-success text-white rounded-circle me-3">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0" id="passedItems">0</h5>
+                            <small class="text-muted">Lulus QC</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="content-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-danger text-white rounded-circle me-3">
+                            <i class="bi bi-x-circle"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0" id="failedItems">0</h5>
+                            <small class="text-muted">Gagal QC</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="content-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-warning text-white rounded-circle me-3">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0" id="pendingItems">0</h5>
+                            <small class="text-muted">Pending QC</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="form" class="tab-content">
-            <form id="qcForm">
-                <div style="display: grid; gap: 16px; max-width: 600px;">
-                    <div>
-                        <label style="display: block; margin-bottom: 8px;">ID Barang</label>
-                        <input type="text" required style="width: 100%;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 8px;">Nama Barang</label>
-                        <input type="text" required style="width: 100%;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 8px;">Catatan Pemeriksaan</label>
-                        <textarea rows="4" style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px;"></textarea>
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 8px;">Status</label>
-                        <select required style="width: 100%;">
-                            <option value="">Pilih Status</option>
-                            <option value="layak">Layak</option>
-                            <option value="tidak_layak">Tidak Layak</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn">Submit</button>
-                </div>
-            </form>
-        </div>
-
-        <div id="results" class="tab-content">
-            <div class="filter-section">
-                <div class="filter-group">
-                    <label>Tanggal Mulai</label>
-                    <input type="date">
-                </div>
-                <div class="filter-group">
-                    <label>Tanggal Selesai</label>
-                    <input type="date">
-                </div>
-                <div class="filter-group">
-                    <label>Status</label>
-                    <select>
-                        <option value="">Semua</option>
-                        <option value="layak">Layak</option>
-                        <option value="tidak_layak">Tidak Layak</option>
+        <!-- Filter Section -->
+        <div class="content-card">
+            <h3 class="card-title">
+                <i class="bi bi-funnel"></i>
+                Filter QC Items
+            </h3>
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Semua Status</option>
+                        <option value="lulus">Lulus</option>
+                        <option value="gagal">Gagal</option>
+                        <option value="pending">Pending</option>
                     </select>
                 </div>
-                <button class="btn" style="align-self: flex-end;">Filter</button>
+                <div class="col-md-3">
+                    <label class="form-label">Tanggal Mulai</label>
+                    <input type="date" class="form-control" id="startDateFilter">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tanggal Akhir</label>
+                    <input type="date" class="form-control" id="endDateFilter">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Cari Item</label>
+                    <input type="text" class="form-control" id="searchFilter" placeholder="Kode atau nama item">
+                </div>
             </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <button class="btn btn-primary" onclick="filterQCItems()">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetFilters()">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>TANGGAL</th>
-                        <th>ID BARANG</th>
-                        <th>NAMA BARANG</th>
-                        <th>STATUS</th>
-                        <th>AKSI</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>15 Jan 2024, 09:30</td>
-                        <td>INV011</td>
-                        <td>Daging Sapi</td>
-                        <td><span class="status-badge status-layak">Layak</span></td>
-                        <td><button class="btn" onclick="showResultDetail('INV011')">Detail</button></td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- QC Items Table -->
+        <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="card-title">
+                    <i class="bi bi-shield-check"></i>
+                    QC Items
+                </h3>
+                <button class="btn btn-success" onclick="refreshQCItems()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+            
+            <div class="table-container">
+                <div id="loadingIndicator" class="text-center p-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Memuat data QC...</p>
+                </div>
+                
+                <table class="table table-hover" id="qcItemsTable">
+                    <thead>
+                        <tr>
+                            <th>Kode Item</th>
+                            <th>Nama Item</th>
+                            <th>Status QC</th>
+                            <th>Tanggal Cek</th>
+                            <th>Catatan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="qcItemsTableBody">
+                        <!-- Data akan dimuat dari JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- QC Submit Modal -->
+    <div class="modal fade" id="qcSubmitModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Submit QC Result</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Kode Item</label>
+                        <input type="text" class="form-control" id="qcItemCode" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nama Item</label>
+                        <input type="text" class="form-control" id="qcItemName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status QC</label>
+                        <select class="form-select" id="qcStatus">
+                            <option value="">Pilih Status</option>
+                            <option value="lulus">Lulus</option>
+                            <option value="gagal">Gagal</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Catatan</label>
+                        <textarea class="form-control" id="qcNotes" rows="3" placeholder="Masukkan catatan (wajib jika gagal)"></textarea>
+                    </div>
+                    <input type="hidden" id="qcInventoryLogId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="submitQCResult()">Submit QC</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="detailModal" class="modal">
-        <div class="modal-content"></div>
+    <!-- Toast Notifications -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                <strong class="me-auto">Berhasil</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="successToastBody">
+                <!-- Success message -->
+            </div>
+        </div>
+        
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="bi bi-exclamation-circle-fill text-danger me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorToastBody">
+                <!-- Error message -->
+            </div>
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.getElementById(tabId).classList.add('active');
-            document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        // Global variables
+        let currentQCItems = [];
+        const QC_SERVICE_URL = 'http://127.0.0.1:5003';
+
+        // Authentication check
+        function checkAuthentication() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            
+            if (!token) {
+                console.log('No token found, redirecting to login');
+                window.location.href = '../../user/login.html';
+                return false;
+            }
+            
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                
+                if (payload.exp && payload.exp < Date.now() / 1000) {
+                    console.log('Token expired, redirecting to login');
+                    localStorage.removeItem('token');
+                    sessionStorage.removeItem('token');
+                    window.location.href = '../../user/login.html';
+                    return false;
+                }
+                
+                if (payload.role && payload.role !== 'staff' && payload.role !== 'admin') {
+                    alert('Anda tidak memiliki akses ke halaman ini');
+                    window.location.href = '../../user/login.html';
+                    return false;
+                }
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Error parsing token:', error);
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
+                window.location.href = '../../user/login.html';
+                return false;
+            }
         }
 
-        function showPendingDetail(id) {
-            alert('Menampilkan detail barang pending: ' + id);
+        // Load user info
+        async function loadUserInfo() {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            
+            if (!token) {
+                window.location.href = '../../user/login.html';
+                return;
+            }
+            
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const userId = payload.user_id;
+                
+                const response = await fetch('http://127.0.0.1:5003/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        query: `
+                            query GetUser($id: Int!) {
+                                user(id: $id) {
+                                    id
+                                    nama
+                                    username
+                                    email
+                                    companyName
+                                    role
+                                }
+                            }
+                        `,
+                        variables: { id: userId }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.data && result.data.user) {
+                    const user = result.data.user;
+                    const displayName = user.companyName || user.nama;
+                    
+                    const userNameEl = document.getElementById('userName');
+                    const profileNameEl = document.getElementById('profileName');
+                    const welcomeNameEl = document.getElementById('welcomeName');
+                    
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (profileNameEl) profileNameEl.textContent = displayName;
+                    if (welcomeNameEl) welcomeNameEl.textContent = displayName;
+                    
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                } else {
+                    console.error('Failed to fetch user data:', result.errors);
+                    const displayName = payload.companyName || payload.nama;
+                    
+                    const userNameEl = document.getElementById('userName');
+                    const profileNameEl = document.getElementById('profileName');
+                    const welcomeNameEl = document.getElementById('welcomeName');
+                    
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (profileNameEl) profileNameEl.textContent = displayName;
+                    if (welcomeNameEl) welcomeNameEl.textContent = displayName;
+                }
+            } catch (error) {
+                console.error('Error loading user info:', error);
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const displayName = payload.companyName || payload.nama;
+                    
+                    const userNameEl = document.getElementById('userName');
+                    const profileNameEl = document.getElementById('profileName'); 
+                    const welcomeNameEl = document.getElementById('welcomeName');
+                    
+                    if (userNameEl) userNameEl.textContent = displayName;
+                    if (profileNameEl) profileNameEl.textContent = displayName;
+                    if (welcomeNameEl) welcomeNameEl.textContent = displayName;
+                } catch (tokenError) {
+                    console.error('Error parsing token:', tokenError);
+                    window.location.href = '../../user/login.html';
+                }
+            }
         }
 
-        function showResultDetail(id) {
-            alert('Menampilkan detail hasil QC: ' + id);
+        // Logout function
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('userRole');
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('user');
+                sessionStorage.removeItem('userRole');
+                window.location.href = '../../user/login.html';
+            }
         }
 
-        document.getElementById('qcForm').onsubmit = function(e) {
-            e.preventDefault();
-            alert('Form submitted');
-        };
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('collapsed');
+            }
+        }
+
+        // Toast functions
+        function showSuccessToast(message) {
+            const toastBody = document.getElementById('successToastBody');
+            if (toastBody) {
+                toastBody.textContent = message;
+                const toastEl = document.getElementById('successToast');
+                if (toastEl) {
+                    const toast = new bootstrap.Toast(toastEl);
+                    toast.show();
+                }
+            }
+        }
+
+        function showErrorToast(message) {
+            const toastBody = document.getElementById('errorToastBody');
+            if (toastBody) {
+                toastBody.textContent = message;
+                const toastEl = document.getElementById('errorToast');
+                if (toastEl) {
+                    const toast = new bootstrap.Toast(toastEl);
+                    toast.show();
+                }
+            }
+        }
+
+        // Load dashboard stats
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch(`${QC_SERVICE_URL}/api/qc/dashboard/stats`);
+                const stats = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('totalItems').textContent = stats.total_items || 0;
+                    document.getElementById('passedItems').textContent = stats.passed_qc || 0;
+                    document.getElementById('failedItems').textContent = stats.failed_qc || 0;
+                    document.getElementById('pendingItems').textContent = stats.pending_qc || 0;
+                } else {
+                    console.error('Error loading stats:', stats.error);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        // Load QC items
+        async function loadQCItems(filters = {}) {
+            try {
+                showLoading(true);
+                
+                const params = new URLSearchParams();
+                if (filters.status) params.append('status', filters.status);
+                if (filters.start_date) params.append('start_date', filters.start_date);
+                if (filters.end_date) params.append('end_date', filters.end_date);
+                if (filters.search) params.append('search', filters.search);
+                
+                const response = await fetch(`${QC_SERVICE_URL}/api/qc/items?${params}`);
+                const items = await response.json();
+                
+                if (response.ok) {
+                    currentQCItems = items;
+                    displayQCItems(items);
+                } else {
+                    throw new Error(items.error || 'Failed to load QC items');
+                }
+            } catch (error) {
+                console.error('Error loading QC items:', error);
+                showErrorToast('Gagal memuat data QC: ' + error.message);
+                displayQCItems([]);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Display QC items in table
+        function displayQCItems(items) {
+            const tbody = document.getElementById('qcItemsTableBody');
+            
+            if (!tbody) {
+                console.error('Table body not found');
+                return;
+            }
+            
+            if (items.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">Tidak ada data QC</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = items.map(item => `
+                <tr>
+                    <td><strong>${item.item_code}</strong></td>
+                    <td>${item.name}</td>
+                    <td>${getStatusBadge(item.status_text)}</td>
+                    <td>${item.tanggal_masuk || '-'}</td>
+                    <td>${item.notes || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" 
+                                onclick="openQCModal('${item.item_code}', '${item.name}', ${item.inventory_log_id})" 
+                                title="Edit QC">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Get status badge
+        function getStatusBadge(status) {
+            const statusMap = {
+                'Lulus': 'success',
+                'Gagal': 'danger',
+                'Pending': 'warning'
+            };
+            
+            const color = statusMap[status] || 'secondary';
+            return `<span class="badge bg-${color}">${status}</span>`;
+        }
+
+        // Show loading indicator
+        function showLoading(show) {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const qcItemsTable = document.getElementById('qcItemsTable');
+            
+            if (loadingIndicator && qcItemsTable) {
+                if (show) {
+                    loadingIndicator.style.display = 'block';
+                    qcItemsTable.style.display = 'none';
+                } else {
+                    loadingIndicator.style.display = 'none';
+                    qcItemsTable.style.display = 'table';
+                }
+            }
+        }
+
+        // Filter QC items
+        function filterQCItems() {
+            const filters = {
+                status: document.getElementById('statusFilter').value,
+                start_date: document.getElementById('startDateFilter').value,
+                end_date: document.getElementById('endDateFilter').value,
+                search: document.getElementById('searchFilter').value
+            };
+            
+            loadQCItems(filters);
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('startDateFilter').value = '';
+            document.getElementById('endDateFilter').value = '';
+            document.getElementById('searchFilter').value = '';
+            
+            loadQCItems();
+        }
+
+        // Refresh QC items
+        function refreshQCItems() {
+            const filters = {
+                status: document.getElementById('statusFilter').value,
+                start_date: document.getElementById('startDateFilter').value,
+                end_date: document.getElementById('endDateFilter').value,
+                search: document.getElementById('searchFilter').value
+            };
+            
+            loadQCItems(filters);
+            loadDashboardStats();
+        }
+
+        // Open QC modal
+        function openQCModal(itemCode, itemName, inventoryLogId) {
+            document.getElementById('qcItemCode').value = itemCode;
+            document.getElementById('qcItemName').value = itemName;
+            document.getElementById('qcInventoryLogId').value = inventoryLogId;
+            document.getElementById('qcStatus').value = '';
+            document.getElementById('qcNotes').value = '';
+            
+            const modalEl = document.getElementById('qcSubmitModal');
+            if (modalEl) {
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        }
+
+        // Submit QC result
+        async function submitQCResult() {
+            const itemCode = document.getElementById('qcItemCode').value;
+            const itemName = document.getElementById('qcItemName').value;
+            const status = document.getElementById('qcStatus').value;
+            const notes = document.getElementById('qcNotes').value;
+            const inventoryLogId = document.getElementById('qcInventoryLogId').value;
+            
+            if (!status) {
+                showErrorToast('Status QC harus dipilih');
+                return;
+            }
+            
+            if (status === 'gagal' && !notes.trim()) {
+                showErrorToast('Catatan wajib diisi jika status gagal');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${QC_SERVICE_URL}/api/qc/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        inventory_log_id: parseInt(inventoryLogId),
+                        item_code: itemCode,
+                        name: itemName,
+                        status: status,
+                        notes: notes
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showSuccessToast(result.message);
+                    
+                    // Close modal
+                    const modalEl = document.getElementById('qcSubmitModal');
+                    if (modalEl) {
+                        const modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                    }
+                    
+                    // Refresh data
+                    refreshQCItems();
+                } else {
+                    throw new Error(result.error || 'Failed to submit QC result');
+                }
+            } catch (error) {
+                console.error('Error submitting QC result:', error);
+                showErrorToast('Gagal submit QC: ' + error.message);
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded - Starting authentication check');
+            if (!checkAuthentication()) {
+                console.log('Authentication failed, stopping execution');
+                return;
+            }
+            
+            loadUserInfo();
+            loadDashboardStats();
+            loadQCItems();
+        });
     </script>
 </body>
 </html>

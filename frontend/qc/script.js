@@ -1,7 +1,7 @@
 // API URLs
-const API_URL = 'http://localhost:5000';
-const INVENTORY_URL = 'http://localhost:5001';
-const LOGISTICS_URL = 'http://localhost:5002';
+const API_URL = 'http://localhost:5004';
+const INVENTORY_URL = 'http://localhost:5000';
+const LOGISTICS_URL = 'http://localhost:5001';
 
 // Dummy Data
 const DUMMY_DATA = {

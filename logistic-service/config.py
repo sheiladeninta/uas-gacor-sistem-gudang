@@ -3,7 +3,7 @@ from datetime import timedelta
 
 class Config:
     # Database
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///logistic.db')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///instance/logistic.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # JWT
@@ -11,9 +11,9 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     
     # Service URLs
-    QC_SERVICE_URL = os.getenv('QC_SERVICE_URL', 'http://qc-service:5000')
-    ORDER_SERVICE_URL = os.getenv('ORDER_SERVICE_URL', 'http://order-service:5000')
+    QC_SERVICE_URL = 'http://localhost:5004'
+    ORDER_SERVICE_URL = os.getenv('ORDER_SERVICE_URL', 'http://order-service:5002')
     
     # Other configurations
     DEBUG = os.getenv('FLASK_DEBUG', 'True').lower() == 'true'
-    PORT = int(os.getenv('PORT', 5002))
+    PORT = int(os.getenv('PORT', 5001))

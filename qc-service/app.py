@@ -58,7 +58,7 @@ def submit_qc():
         # Notify inventory service
         try:
             response = requests.post(
-                f'http://localhost:5001/api/items/{data["item_code"]}/qc-result',
+                f'http://localhost:5000/api/items/{data["item_code"]}/qc-result',
                 json={
                     'status': status,
                     'notes': data.get('notes'),
@@ -114,7 +114,7 @@ def get_dashboard_stats():
         
         # Get pending items count from inventory service
         try:
-            response = requests.get('http://localhost:5001/api/items/pending-qc')
+            response = requests.get('http://localhost:5000/api/items/pending-qc')
             if response.status_code == 200:
                 pending_items = len(response.json())
             else:
@@ -191,4 +191,4 @@ def list_qc_items():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5003, debug=True)
+    app.run(host='0.0.0.0', port=5004, debug=True)

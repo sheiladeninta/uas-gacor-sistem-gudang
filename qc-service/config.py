@@ -20,7 +20,7 @@ class Config:
     INVENTORY_DB_PATH = '../inventory-service/instance/inventory-service.db'
     
     # Inventory Service
-    INVENTORY_SERVICE_URL = 'http://localhost:5001'  # Sesuaikan dengan port inventory service
+    INVENTORY_SERVICE_URL = 'http://localhost:5000'  # Sesuaikan dengan port inventory service
     
     # Ensure instance folder exists
     @staticmethod
