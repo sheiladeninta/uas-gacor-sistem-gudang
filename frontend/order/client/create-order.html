@@ -690,6 +690,7 @@
         let sidebarCollapsed = false;
         let itemCounter = 0;
         let currentUser = null;
+        let inventoryItems = [];
 
         // Common functions from dashboard
         function toggleSidebar() {
@@ -712,7 +713,7 @@
                 sessionStorage.removeItem('token');
                 sessionStorage.removeItem('user');
                 sessionStorage.removeItem('userRole');
-                window.location.href = '../../user/client/login.html';
+                window.location.href = '../../user/login.html';
             }
         }
 
@@ -742,7 +743,7 @@
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             
             if (!token) {
-                window.location.href = '../../user/client/login.html';
+                window.location.href = '../../user/login.html';
                 return;
             }
             
@@ -761,7 +762,6 @@
                         username: payload.username
                     };
                 }
-
                 const displayName = currentUser.companyName || currentUser.nama;
                 
                 // Update display elements
@@ -777,16 +777,78 @@
                 tomorrow.setHours(9, 0, 0, 0);
                 document.getElementById('requestedDate').value = tomorrow.toISOString().slice(0, 16);
                 
+                // Load inventory items first, then add default item
+                await loadInventoryItems();
+                
+                // Add first item after inventory is loaded
+                setTimeout(() => {
+                    addOrderItem();
+                }, 100);
+                
             } catch (error) {
                 console.error('Error loading user info:', error);
-                window.location.href = '../../user/client/login.html';
+                window.location.href = '../../user/login.html';
             }
         }
 
-        // Add order item
+        async function loadInventoryItems() {
+            try {
+                console.log('Loading inventory items...'); // Debug log
+                
+                const response = await fetch('http://127.0.0.1:5002/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: `
+                            query {
+                                inventoryItems {
+                                    id
+                                    itemCode
+                                    name
+                                    description
+                                    category
+                                    unit
+                                    stockQuantity
+                                }
+                            }
+                        `
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('GraphQL Response:', result); // Debug log
+                
+                if (result.data?.inventoryItems) {
+                    inventoryItems = result.data.inventoryItems;
+                    console.log('Inventory items loaded:', inventoryItems.length); // Debug log
+                } else {
+                    console.error('No inventory items found in response');
+                }
+            } catch (error) {
+                console.error('Error loading inventory items:', error);
+            }
+        }
+
         function addOrderItem() {
             itemCounter++;
             const itemsContainer = document.getElementById('orderItems');
+            
+            console.log('Adding item, inventory items available:', inventoryItems.length); // Debug log
+            
+            // Generate options for inventory items
+            let inventoryOptions = '<option value="">Pilih Item dari Inventory</option>';
+            
+            if (inventoryItems && inventoryItems.length > 0) {
+                inventoryOptions += inventoryItems.map(item => 
+                    `<option value="${item.itemCode}" data-name="${item.name}" data-unit="${item.unit}" data-stock="${item.stockQuantity}">
+                        ${item.itemCode} - ${item.name} (Stok: ${item.stockQuantity})
+                    </option>`
+                ).join('');
+            } else {
+                inventoryOptions += '<option value="" disabled>Tidak ada data inventory</option>';
+            }
             
             const itemHTML = `
                 <div class="card mb-3" id="item-${itemCounter}">
@@ -798,13 +860,19 @@
                             </button>
                         </div>
                         <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Pilih Item</label>
+                                <select class="form-select" name="item_select_${itemCounter}" required onchange="updateItemDetails(${itemCounter})">
+                                    ${inventoryOptions}
+                                </select>
+                            </div>
                             <div class="col-md-3">
                                 <label class="form-label">Kode Item</label>
-                                <input type="text" class="form-control" name="item_code_${itemCounter}" required>
+                                <input type="text" class="form-control" name="item_code_${itemCounter}" readonly>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label">Nama Item</label>
-                                <input type="text" class="form-control" name="item_name_${itemCounter}" required>
+                                <input type="text" class="form-control" name="item_name_${itemCounter}" readonly>
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Jumlah</label>
@@ -833,6 +901,40 @@
             `;
             
             itemsContainer.insertAdjacentHTML('beforeend', itemHTML);
+            updateOrderSummary();
+        }
+
+        // Add this function to handle item selection
+        function updateItemDetails(itemCounter) {
+            const selectElement = document.querySelector(`select[name="item_select_${itemCounter}"]`);
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            
+            if (selectedOption.value) {
+                const itemCode = selectedOption.value;
+                const itemName = selectedOption.dataset.name;
+                const itemUnit = selectedOption.dataset.unit;
+                
+                // Update the readonly fields
+                document.querySelector(`input[name="item_code_${itemCounter}"]`).value = itemCode;
+                document.querySelector(`input[name="item_name_${itemCounter}"]`).value = itemName;
+                
+                // Optionally set the unit dropdown to match inventory unit
+                const unitSelect = document.querySelector(`select[name="unit_${itemCounter}"]`);
+                if (unitSelect && itemUnit) {
+                    // Try to match the unit from inventory with dropdown options
+                    const unitOption = Array.from(unitSelect.options).find(option => 
+                        option.value.toLowerCase() === itemUnit.toLowerCase()
+                    );
+                    if (unitOption) {
+                        unitSelect.value = unitOption.value;
+                    }
+                }
+            } else {
+                // Clear fields if no item selected
+                document.querySelector(`input[name="item_code_${itemCounter}"]`).value = '';
+                document.querySelector(`input[name="item_name_${itemCounter}"]`).value = '';
+            }
+            
             updateOrderSummary();
         }
 
@@ -1058,10 +1160,6 @@
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadUserInfo();
-            
-            // Add first item by default
-            addOrderItem();
-            
             // Setup form submission
             document.getElementById('orderForm').addEventListener('submit', submitOrder);
         });

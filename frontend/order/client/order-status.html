@@ -845,7 +845,7 @@
                                     <div>${requestedDate}</div>
                                 </div>
                                 <div class="col-md-2 text-end">
-                                    <button class="btn btn-outline-primary btn-sm" onclick="showOrderDetails(${order.id})">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="showOrderDetails('${order.id}')">
                                         <i class="bi bi-eye"></i>
                                         Detail
                                     </button>
@@ -870,13 +870,13 @@
         // Get status badge
         function getStatusBadge(status) {
             const statusConfig = {
-                'PENDING': { class: 'warning', text: 'Menunggu', icon: 'clock' },
-                'APPROVED': { class: 'success', text: 'Disetujui', icon: 'check-circle' },
-                'PROCESSING': { class: 'info', text: 'Diproses', icon: 'gear' },
-                'SHIPPED': { class: 'primary', text: 'Dikirim', icon: 'truck' },
-                'DELIVERED': { class: 'success', text: 'Diterima', icon: 'check2-circle' },
-                'REJECTED': { class: 'danger', text: 'Ditolak', icon: 'x-circle' },
-                'CANCELLED': { class: 'secondary', text: 'Dibatalkan', icon: 'slash-circle' }
+                'PENDING': { class: 'warning', text: 'PENDING', icon: 'clock' },
+                'APPROVED': { class: 'success', text: 'APPROVED', icon: 'check-circle' },
+                'PROCESSING': { class: 'info', text: 'PROCESSING', icon: 'gear' },
+                'SHIPPED': { class: 'primary', text: 'SHIPED', icon: 'truck' },
+                'DELIVERED': { class: 'success', text: 'DELIVERED', icon: 'check2-circle' },
+                'REJECTED': { class: 'danger', text: 'REJECTED', icon: 'x-circle' },
+                'CANCELLED': { class: 'secondary', text: 'CANCELLED', icon: 'slash-circle' }
             };
 
             const config = statusConfig[status] || statusConfig['PENDING'];

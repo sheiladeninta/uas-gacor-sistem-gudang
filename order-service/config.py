@@ -8,10 +8,10 @@ class Config:
     SQLALCHEMY_RECORD_QUERIES = True
     
     # Service URLs for microservices communication
-    INVENTORY_SERVICE_URL = os.getenv('INVENTORY_SERVICE_URL', 'http://inventory-service:5001')
-    USER_SERVICE_URL = os.getenv('USER_SERVICE_URL', 'http://user-service:5000')
-    ITEM_SERVICE_URL = os.getenv('ITEM_SERVICE_URL', 'http://item-service:5003')
-    QUALITY_CONTROL_SERVICE_URL = os.getenv('QUALITY_CONTROL_SERVICE_URL', 'http://quality-control-service:5004')
+    INVENTORY_SERVICE_URL = os.getenv('INVENTORY_SERVICE_URL', 'http://inventory-service:5000')
+    USER_SERVICE_URL = os.getenv('USER_SERVICE_URL', 'http://user-service:5003')
+    LOGISTIC_SERVICE_URL = os.getenv('LOGISTIC_SERVICE_URL', 'http://logistic-service:5001')
+    QC_SERVICE_URL = os.getenv('QC_SERVICE_URL', 'http://qc-service:5004')
     
     # API Configuration
     API_TITLE = 'Order Service API'

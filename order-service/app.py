@@ -22,7 +22,7 @@ db = SQLAlchemy(app)
 CORS(app)
 
 # Inventory Service URL (untuk komunikasi antar service)
-INVENTORY_SERVICE_URL = os.getenv('INVENTORY_SERVICE_URL', 'http://inventory-service:5001')
+INVENTORY_SERVICE_URL = os.getenv('INVENTORY_SERVICE_URL', 'http://localhost:5000')
 
 # Models
 class OrderStatus(Enum):
@@ -67,16 +67,17 @@ class OrderItem(db.Model):
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# GraphQL Schema
-class OrderType(SQLAlchemyObjectType):
-    class Meta:
-        model = Order
-        load_instance = True
-
-class OrderItemType(SQLAlchemyObjectType):
-    class Meta:
-        model = OrderItem
-        load_instance = True
+# Helper Functions
+def get_inventory_items():
+    """Helper function untuk mengambil list item dari inventory service"""
+    try:
+        response = requests.get(f"{INVENTORY_SERVICE_URL}/api/items", timeout=10)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return []
+    except requests.RequestException:
+        return []
 
 def check_inventory_availability_helper(items):
     """Helper function untuk mengecek ketersediaan inventory"""
@@ -116,6 +117,17 @@ def check_inventory_availability_helper(items):
             'details': []
         }
 
+def get_inventory_stock(item_code):
+    """Helper function untuk mengambil stok item dari inventory service"""
+    try:
+        response = requests.get(f"{INVENTORY_SERVICE_URL}/api/items/{item_code}/stock", timeout=10)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return {'stock_quantity': 0}
+    except requests.RequestException:
+        return {'stock_quantity': 0}
+
 def reserve_inventory_stock(order_id, items):
     """Helper function untuk reserve stock di inventory"""
     try:
@@ -140,6 +152,27 @@ def reserve_inventory_stock(order_id, items):
     except requests.RequestException:
         return False, {'message': 'Failed to reserve stock'}
 
+# GraphQL Schema
+class OrderType(SQLAlchemyObjectType):
+    class Meta:
+        model = Order
+        load_instance = True
+
+class OrderItemType(SQLAlchemyObjectType):
+    class Meta:
+        model = OrderItem
+        load_instance = True
+
+class InventoryItemType(graphene.ObjectType):
+    """Type untuk item dari inventory service"""
+    id = graphene.Int()
+    item_code = graphene.String()
+    name = graphene.String()
+    description = graphene.String()
+    category = graphene.String()
+    unit = graphene.String()
+    unit_price = graphene.Float()
+    stock_quantity = graphene.Int()
 
 class Query(graphene.ObjectType):
     orders = graphene.List(OrderType, 
@@ -147,6 +180,11 @@ class Query(graphene.ObjectType):
                           status=graphene.String())
     order = graphene.Field(OrderType, id=graphene.Int())
     order_by_number = graphene.Field(OrderType, order_number=graphene.String())
+    
+    # New queries for inventory integration
+    inventory_items = graphene.List(InventoryItemType)
+    inventory_item_stock = graphene.Field(graphene.Int, item_code=graphene.String(required=True))
+    approved_orders = graphene.List(OrderType)  # Untuk dropdown di inventory service
     
     def resolve_orders(self, info, restaurant_id=None, status=None):
         query = Order.query
@@ -168,6 +206,32 @@ class Query(graphene.ObjectType):
     
     def resolve_order_by_number(self, info, order_number):
         return Order.query.filter(Order.order_number == order_number).first()
+    
+    def resolve_inventory_items(self, info):
+        """Mengambil list item dari inventory service"""
+        items_data = get_inventory_items()
+        inventory_items = []
+        for item_data in items_data:
+            inventory_items.append(InventoryItemType(
+                id=item_data.get('id'),
+                item_code=item_data.get('item_code'),
+                name=item_data.get('name'),
+                description=item_data.get('description'),
+                category=item_data.get('category'),
+                unit=item_data.get('unit'),
+                unit_price=item_data.get('unit_price'),
+                stock_quantity=item_data.get('stock_quantity')
+            ))
+        return inventory_items
+    
+    def resolve_inventory_item_stock(self, info, item_code):
+        """Mengambil stok item dari inventory service"""
+        stock_data = get_inventory_stock(item_code)
+        return stock_data.get('stock_quantity', 0)
+    
+    def resolve_approved_orders(self, info):
+        """Mengambil orders yang sudah approved untuk dropdown di inventory service"""
+        return Order.query.filter(Order.status == OrderStatus.APPROVED).order_by(Order.approved_date.desc()).all()
 
 class CreateOrder(graphene.Mutation):
     class Arguments:
@@ -505,17 +569,40 @@ def get_order_status(order_number):
         } for item in order.items]
     })
 
+@app.route('/api/orders/approved', methods=['GET'])
+def get_approved_orders():
+    """REST endpoint untuk mengambil orders yang sudah approved (untuk inventory service)"""
+    approved_orders = Order.query.filter(Order.status == OrderStatus.APPROVED).order_by(Order.approved_date.desc()).all()
+    
+    orders_data = []
+    for order in approved_orders:
+        orders_data.append({
+            'id': order.id,
+            'order_number': order.order_number,
+            'restaurant_name': order.restaurant_name,
+            'approved_date': order.approved_date.isoformat() if order.approved_date else None,
+            'items': [{
+                'item_code': item.item_code,
+                'item_name': item.item_name,
+                'approved_quantity': item.approved_quantity
+            } for item in order.items]
+        })
+    
+    return jsonify(orders_data)
+
 @app.route('/health', methods=['GET'])
 def health_check():
     return jsonify({'status': 'healthy', 'service': 'order-service'})
 
-# CORS headers untuk frontend
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     return response
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == '__main__':
     with app.app_context():

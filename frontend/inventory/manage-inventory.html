@@ -1106,7 +1106,7 @@
             document.querySelectorAll('.view-detail-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const itemId = parseInt(this.dataset.itemId);
+                    const itemId = this.dataset.itemId;
                     viewItemDetail(itemId);
                 });
             });
@@ -1114,7 +1114,7 @@
             document.querySelectorAll('.edit-item-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const itemId = parseInt(this.dataset.itemId);
+                    const itemId = this.dataset.itemId;
                     editItem(itemId);
                 });
             });
@@ -1122,7 +1122,7 @@
             document.querySelectorAll('.send-qc-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const itemId = parseInt(this.dataset.itemId);
+                    const itemId = this.dataset.itemId;
                     openSendToQCModal(itemId);
                 });
             });
@@ -1130,7 +1130,7 @@
             document.querySelectorAll('.delete-item-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const itemId = parseInt(this.dataset.itemId);
+                    const itemId = this.dataset.itemId;
                     deleteItem(itemId);
                 });
             });

@@ -815,19 +815,19 @@
             document.addEventListener('click', function(e) {
                 if (e.target.closest('.view-detail-btn')) {
                     e.preventDefault();
-                    const orderId = parseInt(e.target.closest('.view-detail-btn').dataset.orderId);
+                    const orderId = e.target.closest('.view-detail-btn').dataset.orderId;
                     viewOrderDetail(orderId);
                 }
                 
                 if (e.target.closest('.update-status-btn')) {
                     e.preventDefault();
-                    const orderId = parseInt(e.target.closest('.update-status-btn').dataset.orderId);
+                    const orderId = e.target.closest('.update-status-btn').dataset.orderId;
                     openUpdateStatusModal(orderId);
                 }
                 
                 if (e.target.closest('.check-inventory-btn')) {
                     e.preventDefault();
-                    const orderId = parseInt(e.target.closest('.check-inventory-btn').dataset.orderId);
+                    const orderId = e.target.closest('.check-inventory-btn').dataset.orderId;
                     checkInventoryAvailability(orderId);
                 }
             });
@@ -1133,45 +1133,6 @@ window.addEventListener('beforeunload', function() {
                 </tr>
             `).join('');
             
-            // Attach event listeners to newly created buttons
-            attachOrderActionListeners();
-        }
-
-        // Attach event listeners to order action buttons
-        function attachOrderActionListeners() {
-            console.log('Attaching order action listeners...');
-            
-            // View detail buttons
-            document.querySelectorAll('.view-detail-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const orderId = parseInt(this.dataset.orderId);
-                    console.log('View detail clicked for order:', orderId);
-                    viewOrderDetail(orderId);
-                });
-            });
-            
-            // Update status buttons
-            document.querySelectorAll('.update-status-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const orderId = parseInt(this.dataset.orderId);
-                    console.log('Update status clicked for order:', orderId);
-                    openUpdateStatusModal(orderId);
-                });
-            });
-            
-            // Check inventory buttons
-            document.querySelectorAll('.check-inventory-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const orderId = parseInt(this.dataset.orderId);
-                    console.log('Check inventory clicked for order:', orderId);
-                    checkInventoryAvailability(orderId);
-                });
-            });
-            
-            console.log('Order action listeners attached successfully');
         }
 
         // Format date
